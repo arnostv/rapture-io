@@ -1,0 +1,10 @@
+Rapture I/O
+Version 0.6.0 (beta)
+
+To build from source, use
+
+mkdir bin
+scalac -d bin src/*.scala
+jar cf rapture-io.jar -C bin rapture
+
+More details to follow in due course.
