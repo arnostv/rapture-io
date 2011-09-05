@@ -112,15 +112,12 @@ trait Paths { this : Io =>
       def go(from : List[String], to : List[String], up : Int, tail : List[String])
           : Path = (up, tail, from, to) match {
         case (0, Nil, x :: x2 :: xs, y :: ys) if x == y =>
-          println("A: "+(up, tail, from, to)+", "+up)
           go(x2 :: xs, ys, up, tail)
         
         case (_, _, x :: Nil, y :: Nil) if x == y =>
-          println("B: "+(up, tail, from, to)+", "+up)
           new RelativePath(0, Array[String]())
         
         case (_, _, x :: Nil, y :: ys) =>
-          println("C: "+(up, tail, from, to)+", "+up)
           new RelativePath(up, tail.reverse.toArray[String] ++ Array(y) ++ ys)
         
         case (0, _, Nil, ys) =>
@@ -130,15 +127,12 @@ trait Paths { this : Io =>
           new RelativePath(up, tail.reverse.toArray[String] ++ ys.toArray[String])
         
         case (_, _, _ :: x :: xs, Nil) =>
-          println("E: "+(up, tail, from, to)+", "+up)
           go(x :: xs, Nil, up + 1, tail)
         
         case (_, _, x :: Nil, Nil) =>
-          println("F: "+(up, tail, from, to)+", "+up)
           go(Nil, Nil, up, tail)
         
         case (_, _, _ :: x :: xs, y :: ys) =>
-          println("G: "+(up, tail, from, to)+", "+up)
           go(x :: xs, ys, up + 1, y :: tail)
       }
 
