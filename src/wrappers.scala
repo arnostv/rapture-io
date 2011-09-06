@@ -41,6 +41,8 @@ trait Wrappers { this : Io =>
     }
     
     def close() = in.close()
+  
+    override def toString() = "<character input>"
   }
 
   /** Wraps a `java.io.InputStream` as an `Input[Byte]` */
@@ -55,6 +57,8 @@ trait Wrappers { this : Io =>
     }
     
     def close() = in.close()
+  
+    override def toString() = "<byte input>"
   }
   
   /** Wraps a `java.io.OutputStream` into an `Output[Byte]`
@@ -65,6 +69,8 @@ trait Wrappers { this : Io =>
     
     def flush() : Unit = out.flush()
     def close() : Unit = out.close()
+    
+    override def toString() = "<byte output>"
   }
 
   /** Wraps a `java.io.Writer`
@@ -74,6 +80,7 @@ trait Wrappers { this : Io =>
     def write(b : Char) = out.write(b)
     def flush() : Unit = out.flush()
     def close() : Unit = out.close()
+    override def toString() = "<character output>"
   }
 
   /** Wraps a `java.io.BufferedWriter` for providing line-by-line output of `String`s
@@ -88,6 +95,7 @@ trait Wrappers { this : Io =>
 
     def flush() : Unit = out.flush()
     def close() : Unit = out.close()
+    override def toString() = "<string output>"
   }
 
   /** Views an `Input[Byte]` as a `java.io.InputStream` */
