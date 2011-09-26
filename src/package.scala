@@ -22,7 +22,11 @@ License.
 package rapture
 
 import java.net._
-
+/** The I/O package provides a framework for generalised streaming and URL handling.
+  *
+  * @author Jon Pretty
+  * @version 0.6.0
+  */
 package object io extends Io {
 
   type JavaFile = java.io.File
