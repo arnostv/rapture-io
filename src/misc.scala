@@ -40,3 +40,12 @@ trait Lookup[Index] {
   def lookup(idx : Index) : Option[Item] = items.get(idx)
 }
 
+trait Cell[T] {
+  def apply() : T
+  def update(t : T) : Unit
+}
+
+class Counter {
+  private var n = 0
+  def apply() = synchronized { n += 1; n }
+}
