@@ -5,4 +5,4 @@ Bundle-SymbolicName: rapture-io
 Export-Package: rapture.io
 Import-Package: scala,scala.collection,scala.collection.generic,scala.collectio
  n.immutable,scala.collection.mutable,scala.reflect,scala.runtime,scala.util.pa
- rsing.json,scala.xml,scala.xml.factory
+ rsing.json,scala.xml,scala.xml.factory,javax.crypto.spec,scala.math
