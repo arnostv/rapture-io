@@ -110,6 +110,8 @@ object Base64 {
     if(inLen == 0) new Array[Byte](0) else {
       
       val padding = if(in(inLen - 1) == '=') (if(in(inLen - 2) == '=') 2 else 1) else 0
+
+      // FIXME: This doesn't seem to accommodate different kinds of linebreak
       val lineBreaks = if(inLen > 76) (if(in(76) == '\r') inLen/78 else 0) << 1 else 0
       val outLen = ((inLen - lineBreaks) * 6 >> 3) - padding
       val out = new Array[Byte](outLen)
