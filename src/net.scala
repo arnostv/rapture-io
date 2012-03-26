@@ -149,8 +149,8 @@ trait Net { this : Io =>
         val rp = new RelativePath(0, path.split("/"))
         val p = if(port == null) 80 else port.substring(1).toInt
         Some(scheme match {
-          case "http" => Left(Http./(server, p.substring(1).toInt) / rp)
-          case "https" => Right(Https./(server, p.substring(1).toInt) / rp)
+          case "http" => Left(Http./(server, p) / rp)
+          case "https" => Right(Https./(server, p) / rp)
         })
       case _ => None
     }
