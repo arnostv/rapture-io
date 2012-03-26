@@ -23,3 +23,4 @@ case class IpAddress(b1 : Int, b2 : Int, b3 : Int, b4 : Int) {
   def isPrivate = IpAddress.privateSubnets.exists(inSubnet)
 }
 
+object Localhost extends IpAddress(127, 0, 0, 1)

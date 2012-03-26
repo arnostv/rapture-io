@@ -139,6 +139,20 @@ trait Net { this : Io =>
       * @param port The port to connect to this URL on, defaulting to port 80 */
     def /(domainName : String, port : Int = Services.Tcp.http.portNo) =
       new HttpUrlBase(domainName, port)
+  
+    private val UrlRegex = """(https?):\/\/([\.\-a-z0-9]+)(:[1-9][0-9]*)(\/.*)""".r
+
+    // FIXME: This should be generalised to all schemes
+    /** Parses a URL string into an HttpUrl or HttpsUrl */
+    def parse(s : String) : Option[Either[HttpUrl, HttpsUrl]] = s match {
+      case UrlRegex(scheme, server, port, path) =>
+        val rp = new RelativePath(0, path.split("/"))
+        Some(scheme match {
+          case "http" => Left(Http./(server, port.substring(1).toInt) / rp)
+          case "https" => Right(Https./(server, port.substring(1).toInt) / rp)
+        })
+      case _ => None
+    }
   }
 
   /** Factory for creating new HTTPS URLs */
