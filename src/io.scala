@@ -44,13 +44,13 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
       new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile)))
   }
 
-  /** Type class object for reading `Byte`s froo `HttpUrl`s */
+  /** Type class object for reading `Byte`s from `HttpUrl`s */
   implicit object HttpStreamByteReader extends StreamReader[HttpUrl, Byte] {
     def input(url : HttpUrl) : Input[Byte] =
       new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream))
   }
 
-  /** Type class object for reading `Byte`s froo `HttpsUrl`s */
+  /** Type class object for reading `Byte`s from `HttpsUrl`s */
   implicit object HttpsStreamByteReader extends StreamReader[HttpsUrl, Byte] {
     def input(url : HttpsUrl) : Input[Byte] =
       new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream))
