@@ -43,12 +43,12 @@ trait Sockets { this : Io =>
     else socket.bind(new InetSocketAddress(port))
   }*/
 
-  class SocketUrlBase(val domainName : String, val port : Int) extends UrlBase[SocketUrl]
+  class SocketUrlBase(val hostname : String, val port : Int) extends UrlBase[SocketUrl]
       { thisUrlBase =>
     
     def scheme = Socket
-    lazy val javaSocket = new java.net.Socket(domainName, port)
-    override def toString() = scheme.schemeName+"://"+domainName+":"+port
+    lazy val javaSocket = new java.net.Socket(hostname, port)
+    override def toString() = scheme.schemeName+"://"+hostname+":"+port
     
     def makePath(elems : Seq[String]) : SocketUrl = new SocketUrl {
       val urlBase = thisUrlBase
@@ -57,7 +57,7 @@ trait Sockets { this : Io =>
   }
 
   object Socket extends Scheme[SocketUrl]("socket") {
-    def apply(domainName : String, port : Int) = new SocketUrlBase(domainName, port)
+    def apply(hostname : String, port : Int) = new SocketUrlBase(hostname, port)
   }
 
 

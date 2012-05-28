@@ -33,6 +33,9 @@ trait Net { this : Io =>
     private[io] def javaConnection =
       new URL(toString).openConnection().asInstanceOf[HttpURLConnection]
     
+    def hostname : String
+    def port : Int
+
     /** Sends an HTTP post to this URL.
       *
       * @param contentType the MIME type of the request content
@@ -84,23 +87,32 @@ trait Net { this : Io =>
 
 
   /** Represets a URL with the http scheme */
-  class HttpUrl(val urlBase : UrlBase[HttpUrl], val elements : Seq[String]) extends Url[HttpUrl]
+  class HttpUrl(val urlBase : NetUrlBase[HttpUrl], val elements : Seq[String]) extends Url[HttpUrl]
       with NetUrl[HttpUrl] with PathUrl[HttpUrl] { thisHttpUrl =>
     
     def makePath(xs : Seq[String]) = new HttpUrl(urlBase, elements)
+    def hostname = urlBase.hostname
+    def port = urlBase.port
   }
 
   /** Represents a URL with the https scheme */
-  class HttpsUrl(val urlBase : UrlBase[HttpsUrl], val elements : Seq[String]) extends Url[HttpsUrl]
+  class HttpsUrl(val urlBase : NetUrlBase[HttpsUrl], val elements : Seq[String]) extends Url[HttpsUrl]
       with NetUrl[HttpsUrl] with PathUrl[HttpsUrl] { thisHttpsUrl =>
     
     def makePath(xs : Seq[String]) = new HttpsUrl(urlBase, elements)
+    def hostname = urlBase.hostname
+    def port = urlBase.port
   }
 
-  class HttpUrlBase(val domainName : String, val port : Int) extends
-      UrlBase[HttpUrl] { thisUrlBase =>
+  trait NetUrlBase[+T <: Url[T] with NetUrl[T]] extends UrlBase[T] {
+    def hostname : String
+    def port : Int
+  }
+
+  class HttpUrlBase(val hostname : String, val port : Int) extends
+      NetUrlBase[HttpUrl] { thisUrlBase =>
     
-    override def toString() = scheme.schemeName+"://"+domainName+(if(port == 80) "" else ":"+port)
+    override def toString() = scheme.schemeName+"://"+hostname+(if(port == 80) "" else ":"+port)
     
     def makePath(elements : Seq[String]) : HttpUrl = new HttpUrl(thisUrlBase, elements)
 
@@ -111,13 +123,13 @@ trait Net { this : Io =>
     def /(path : RelativePath) = makePath(path.elements)
     
     override def equals(that : Any) : Boolean =
-      that.isInstanceOf[HttpUrlBase] && domainName == that.asInstanceOf[HttpUrlBase].domainName
+      that.isInstanceOf[HttpUrlBase] && hostname == that.asInstanceOf[HttpUrlBase].hostname
   }
 
-  class HttpsUrlBase(val domainName : String, val port : Int) extends UrlBase[HttpsUrl]
+  class HttpsUrlBase(val hostname : String, val port : Int) extends NetUrlBase[HttpsUrl]
       { thisUrlBase =>
     
-    override def toString() = scheme.schemeName+"://"+domainName+(if(port == 443) "" else ":"+port)
+    override def toString() = scheme.schemeName+"://"+hostname+(if(port == 443) "" else ":"+port)
     
     def makePath(elements : Seq[String]) : HttpsUrl = new HttpsUrl(thisUrlBase, elements)
     
@@ -128,17 +140,17 @@ trait Net { this : Io =>
     def /(path : RelativePath) = makePath(path.elements)
     
     override def equals(that : Any) : Boolean =
-      that.isInstanceOf[HttpsUrlBase] && domainName == that.asInstanceOf[HttpsUrlBase].domainName
+      that.isInstanceOf[HttpsUrlBase] && hostname == that.asInstanceOf[HttpsUrlBase].hostname
   }
 
   /** Factory for creating new HTTP URLs */
   object Http extends Scheme[HttpUrl]("http") {
     /** Creates a new URL with the http scheme with the specified domain name and port
       *
-      * @param domainName A `String` of the domain name for the URL
+      * @param hostname A `String` of the domain name for the URL
       * @param port The port to connect to this URL on, defaulting to port 80 */
-    def /(domainName : String, port : Int = Services.Tcp.http.portNo) =
-      new HttpUrlBase(domainName, port)
+    def /(hostname : String, port : Int = Services.Tcp.http.portNo) =
+      new HttpUrlBase(hostname, port)
   
     private val UrlRegex = """(https?):\/\/([\.\-a-z0-9]+)(:[1-9][0-9]*)?(\/.*)""".r
 
@@ -160,10 +172,10 @@ trait Net { this : Io =>
   object Https extends Scheme[HttpsUrl]("https") {
     /** Creates a new URL with the https scheme with the specified domain name and port
       *
-      * @param domainName A `String` of the domain name for the URL
+      * @param hostname A `String` of the domain name for the URL
       * @param port The port to connect to this URL on, defaulting to port 443 */
-    def /(domainName : String, port : Int = Services.Tcp.https.portNo) =
-      new HttpsUrlBase(domainName, port)
+    def /(hostname : String, port : Int = Services.Tcp.https.portNo) =
+      new HttpsUrlBase(hostname, port)
   }
 }
 
