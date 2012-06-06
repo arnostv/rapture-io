@@ -21,11 +21,14 @@ License.
 
 package rapture.io
 
+object Base64 extends Base64Codec
+object Base64Url extends Base64Codec(char62 = '-', char63 = '_')
+
 /** RFC2045 base-64 codec, based on http://migbase64.sourceforge.net/. */
-object Base64 {
+class Base64Codec(val char62 : Char = '+', val char63 : Char = '/', val padChar : Char = '=') {
   
   private val Alphabet =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray
+    ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"+char62+char63).toCharArray
   
   private lazy val Decodabet = {
     val x = new Array[Int](256)
@@ -90,9 +93,9 @@ object Base64 {
         out(outPos + 1) = Alphabet((block >>> 6) & 0x3F)
         
         if(left == 2) out(outPos + 2) = Alphabet(block & 0x3F)
-        else if(endPadding) out(outPos + 2) = '='
+        else if(endPadding) out(outPos + 2) = padChar
         
-        if(endPadding) out(outPos + 3) = '='
+        if(endPadding) out(outPos + 3) = padChar
       }
       
       out
@@ -109,7 +112,7 @@ object Base64 {
     
     if(inLen == 0) new Array[Byte](0) else {
       
-      val padding = if(in(inLen - 1) == '=') (if(in(inLen - 2) == '=') 2 else 1) else 0
+      val padding = if(in(inLen - 1) == padChar) (if(in(inLen - 2) == padChar) 2 else 1) else 0
 
       // FIXME: This doesn't seem to accommodate different kinds of linebreak
       val lineBreaks = if(inLen > 76) (if(in(76) == '\r') inLen/78 else 0) << 1 else 0
