@@ -247,7 +247,15 @@ trait Streams { this : Io =>
           i - offset
       }
     }
-    
+   
+    /** Reads the whole stream into an accumulator */
+    def slurp[Acc]()(implicit accumulatorBuilder : AccumulatorBuilder[Data, Acc],
+        mf : Manifest[Data]) : Acc = {
+      val acc = accumulatorBuilder.make()
+      pumpTo(acc)
+      acc.buffer
+    }
+
     /** Closes the input stream so that no further data will be provided. */
     def close() : Unit
     
