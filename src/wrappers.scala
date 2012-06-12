@@ -6,7 +6,7 @@ The primary distribution site is
 
   http://www.propensive.com/
 
-Copyright 2011 Propensive Ltd.
+Copyright 2012 Propensive Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
@@ -133,6 +133,11 @@ trait Wrappers { this : Io =>
   /** Type class object for creating an Input[Char] from a Java Reader */
   implicit object ReaderBuilder extends InputBuilder[Reader, Char] {
     def input(s : Reader) = new CharInput(s)
+  }
+
+  /** Type class object for creating an Input[String] from a Java Reader */
+  implicit object LineReaderBuilder extends InputBuilder[Reader, String] {
+    def input(s : Reader) = new LineInput(s)
   }
 
   /** Type class object for creating an Output[Byte] from a Java Reader */

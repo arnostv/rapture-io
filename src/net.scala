@@ -6,7 +6,7 @@ The primary distribution site is
 
   http://www.propensive.com/
 
-Copyright 2011 Propensive Ltd.
+Copyright 2012 Propensive Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
@@ -28,7 +28,7 @@ import java.net._
 trait Net { this : Io =>
 
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
-  trait NetUrl[+U <: Url[U]] { netUrl : U  =>
+  trait NetUrl[+U <: Url[U]] { netUrl : U =>
     
     private[io] def javaConnection =
       new URL(toString).openConnection().asInstanceOf[HttpURLConnection]
@@ -71,9 +71,9 @@ trait Net { this : Io =>
       * @param authenticate the username and password to provide for basic HTTP authentication,
       *        defaulting to no authentication.
       * @tparam Data the type of data which will be streamed back, typically `Byte` or `Char`
-      & @return a pair consisting of the response code of this request and an [[rapture.io.Input]]
+      * @return a pair consisting of the response code of this request and an [[rapture.io.Input]]
       *         resulting from this HTTP post. */
-    def formPost[Data](params : Seq[(String, String)],
+    def formPost[Data](params : Map[String, String],
         authenticate : Option[(String, String)] = None)(implicit encoding : Encodings.Encoding,
         ib : InputBuilder[InputStream, Data]) : (Int, Input[Data]) = {
 
@@ -84,7 +84,6 @@ trait Net { this : Io =>
       }
     }
   }
-
 
   /** Represets a URL with the http scheme */
   class HttpUrl(val urlBase : NetUrlBase[HttpUrl], val elements : Seq[String]) extends Url[HttpUrl]

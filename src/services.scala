@@ -6,7 +6,7 @@ The primary distribution site is
 
   http://www.propensive.com/
 
-Copyright 2011 Propensive Ltd.
+Copyright 2012 Propensive Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
