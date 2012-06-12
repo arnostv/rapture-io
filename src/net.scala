@@ -27,6 +27,26 @@ import java.net._
 /** Provides functionality for handling internet URLs, namely HTTP and HTTPS schemes. */
 trait Net { this : Io =>
 
+  class HttpResponse(val headers : Map[String, List[String]], val code : Int, is : InputStream) {
+    def input[Data](implicit ib : InputBuilder[InputStream, Data]) = ib.input(is)
+  }
+
+  trait PostType[-C] {
+    def contentType : MimeTypes.MimeType
+    def sender(content : C) : Input[Byte]
+  }
+
+  implicit val FormPostType = new PostType[Map[String, String]] {
+    def contentType = MimeTypes.`application/x-www-form-urlencoded`
+    def sender(content : Map[String, String]) = ByteArrayInput((content map { case (k, v) =>
+        k.urlEncode+"="+v.urlEncode } mkString).getBytes("UTF-8"))
+  }
+
+  implicit val StringPostType = new PostType[String] {
+    def contentType = MimeTypes.`text/plain`
+    def sender(content : String) = ByteArrayInput(content.getBytes("UTF-8"))
+  }
+
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
   trait NetUrl[+U <: Url[U]] { netUrl : U =>
     
@@ -38,50 +58,32 @@ trait Net { this : Io =>
 
     /** Sends an HTTP post to this URL.
       *
-      * @param contentType the MIME type of the request content
+      * @param content the content to post to the URL
       * @param authenticate the username and password to provide for basic HTTP authentication,
       *        defaulting to no authentication.
-      * @param sender a block of code to write data to the `Output` for the HTTP post.
-      * @return a pair consisting of the response code of this request and an [[rapture.io.Input]]
-      *         resulting from this HTTP post. */
-    def post[P, R](contentType : MimeTypes.MimeType, authenticate : Option[(String, String)] =
-        None)(sender : Output[P] => Unit)(implicit encoding : Encodings.Encoding, ib :
-        InputBuilder[InputStream, R], ob : OutputBuilder[OutputStream, P]) : (Int, Input[R]) = {
+      * @return the HTTP response from the remote host */
+    def post[C](content : C, authenticate : Option[(String, String)] = None)(implicit pt :
+        PostType[C]) : HttpResponse = {
 
       val conn = netUrl.javaConnection
       conn.setRequestMethod("POST")
       conn.setDoOutput(true)
       conn.setUseCaches(false)
-      
+
       if(authenticate.isDefined) conn.setRequestProperty("Authorization",
           Base64.encode((authenticate.get._1+":"+authenticate.get._2).getBytes("UTF-8"),
           endPadding = true).mkString)
-      
-      conn.setRequestProperty("Content-Type", contentType.name)
-      
-      ensuring(ob.output(conn.getOutputStream))(sender)(_.close())
-      
-      (conn.getResponseCode(), ib.input(conn.getInputStream))
-    }
 
-    /** Imitates an HTTP form post to this URL.
-      *
-      * @usecase def formPost[Data](params : Seq[(String, String)]) : (Int, Input[Data])
-      * @param params a sequence of key/value pairs for the form parameters to send
-      * @param authenticate the username and password to provide for basic HTTP authentication,
-      *        defaulting to no authentication.
-      * @tparam Data the type of data which will be streamed back, typically `Byte` or `Char`
-      * @return a pair consisting of the response code of this request and an [[rapture.io.Input]]
-      *         resulting from this HTTP post. */
-    def formPost[Data](params : Map[String, String],
-        authenticate : Option[(String, String)] = None)(implicit encoding : Encodings.Encoding,
-        ib : InputBuilder[InputStream, Data]) : (Int, Input[Data]) = {
+      conn.setRequestProperty("Content-Type", pt.contentType.name)
 
-      post(MimeTypes.`application/x-www-form-urlencoded`, authenticate) { out : Output[Char] =>
-        out.writeBlock((params map { case (k, v) => k.urlEncode+"="+v.urlEncode } mkString
-            "&").toCharArray)
-        out.flush()
-      }
+      ensuring(OutputStreamBuilder.output(conn.getOutputStream)) { out =>
+        pt.sender(content).pumpTo(out)
+      } (_.close())
+
+      import scala.collection.JavaConversions._
+
+      new HttpResponse(mapAsScalaMap(conn.getHeaderFields()).toMap.mapValues(_.toList),
+          conn.getResponseCode(), conn.getInputStream())
     }
   }
 
