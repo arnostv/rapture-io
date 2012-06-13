@@ -39,7 +39,7 @@ trait Net { this : Io =>
   implicit val FormPostType = new PostType[Map[String, String]] {
     def contentType = MimeTypes.`application/x-www-form-urlencoded`
     def sender(content : Map[String, String]) = ByteArrayInput((content map { case (k, v) =>
-        k.urlEncode+"="+v.urlEncode } mkString).getBytes("UTF-8"))
+        k.urlEncode+"="+v.urlEncode } mkString "&").getBytes("UTF-8"))
   }
 
   implicit val StringPostType = new PostType[String] {
@@ -62,8 +62,8 @@ trait Net { this : Io =>
       * @param authenticate the username and password to provide for basic HTTP authentication,
       *        defaulting to no authentication.
       * @return the HTTP response from the remote host */
-    def post[C](content : C, authenticate : Option[(String, String)] = None)(implicit pt :
-        PostType[C]) : HttpResponse = {
+    def post[C : PostType](content : C, authenticate : Option[(String, String)] = None) :
+        HttpResponse = {
 
       val conn = netUrl.javaConnection
       conn.setRequestMethod("POST")
@@ -74,10 +74,10 @@ trait Net { this : Io =>
           Base64.encode((authenticate.get._1+":"+authenticate.get._2).getBytes("UTF-8"),
           endPadding = true).mkString)
 
-      conn.setRequestProperty("Content-Type", pt.contentType.name)
+      conn.setRequestProperty("Content-Type", implicitly[PostType[C]].contentType.name)
 
       ensuring(OutputStreamBuilder.output(conn.getOutputStream)) { out =>
-        pt.sender(content).pumpTo(out)
+        implicitly[PostType[C]].sender(content).pumpTo(out)
       } (_.close())
 
       import scala.collection.JavaConversions._
