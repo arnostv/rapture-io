@@ -206,7 +206,7 @@ trait Streams { this : Io =>
   }
 
   /** An Input provides an incoming stream of data */
-  trait Input[Data] {
+  trait Input[@specialized(Byte, Char) Data] {
 
     private var beingHandled = false
     
