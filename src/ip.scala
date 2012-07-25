@@ -21,27 +21,41 @@ License.
 
 package rapture.io
 
-object IpAddress {
+object Ip4 {
 
   def parse(s : String) = {
     val vs = s.split("\\.").map(_.toInt)
-    IpAddress(vs(0), vs(1), vs(2), vs(3))
+    Ip4(vs(0), vs(1), vs(2), vs(3))
   }
   
   def fromLong(lng : Long) =
-    IpAddress((lng>>24 & 255L).toInt, (lng>>16 & 255L).toInt, (lng>>8 & 255L).toInt,
+    Ip4((lng>>24 & 255L).toInt, (lng>>16 & 255L).toInt, (lng>>8 & 255L).toInt,
         (lng & 255L).toInt)
   
-  lazy val privateSubnets = List(IpAddress(10, 0, 0, 0), IpAddress(192, 168, 0, 0),
-      IpAddress(172, 16, 0, 0))
+  lazy val privateSubnets = List(Ip4(10, 0, 0, 0)/8, Ip4(192, 168, 0, 0)/16,
+      Ip4(172, 16, 0, 0)/12, Ip4(127, 0, 0, 0)/8)
 }
 
-case class IpAddress(b1 : Int, b2 : Int, b3 : Int, b4 : Int) {
+case class Ip4(b1 : Int, b2 : Int, b3 : Int, b4 : Int) {
   def asLong = (b1.toLong<<24) + (b2<<16) + (b3<<8) + b4
-  def /(i : Int) = IpAddress.fromLong((asLong>>(32 - i))<<(32 - i))
-  def inSubnet(ip : IpAddress) = (asLong & ip.asLong) == ip.asLong
+  def /(i : Int) : Subnet = new Subnet(this, i)
+  def in(subnet : Subnet) = subnet contains this
   override def toString() = b1+"."+b2+"."+b3+"."+b4
-  def isPrivate = IpAddress.privateSubnets.exists(inSubnet)
+  def isPrivate = Ip4.privateSubnets.exists(in)
 }
 
-object Localhost extends IpAddress(127, 0, 0, 1)
+object Subnet {
+  def parse(s : String) = {
+    val x = s.split("\\/")
+    new Subnet(Ip4.parse(x(0)), x(1).toInt)
+  }
+}
+
+class Subnet(baseIp : Ip4, val bits : Int) {
+  val ip = Ip4.fromLong((baseIp.asLong>>(32 - bits))<<(32 - bits))
+  def size = math.pow(2, bits).toLong
+  override def toString() = Ip4.toString+"/"+bits
+  def contains(ip2 : Ip4) = Ip4.fromLong((ip2.asLong>>(32 - bits))<<(32 - bits)) == ip
+}
+
+object Localhost extends Ip4(127, 0, 0, 1)
