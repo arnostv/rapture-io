@@ -71,7 +71,7 @@ trait Files { this : Io =>
     def /(path : AbsolutePath[FileUrl]) = makePath(path.elements)
   }
 
-  class FileUrl(val urlBase : UrlBase[FileUrl], val elements : Seq[String]) extends Url[FileUrl]
+  class FileUrl(val urlBase : UrlBase[FileUrl], elements : Seq[String]) extends Url[FileUrl](elements)
       with PathUrl[FileUrl] {
 
     lazy val javaFile : JavaFile = new JavaFile(pathString)

@@ -52,7 +52,6 @@ trait Sockets { this : Io =>
     
     def makePath(elems : Seq[String]) : SocketUrl = new SocketUrl {
       val urlBase = thisUrlBase
-	    val elements : Seq[String] = elems.toArray[String]
     }
   }
 
@@ -61,7 +60,7 @@ trait Sockets { this : Io =>
   }
 
 
-  abstract class SocketUrl extends Url[SocketUrl] {
+  abstract class SocketUrl extends Url[SocketUrl](Nil) {
     def javaSocket = urlBase.asInstanceOf[SocketUrlBase].javaSocket
     def makePath(elems : Seq[String]) = urlBase.makePath(elems)
   }

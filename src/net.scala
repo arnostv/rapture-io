@@ -88,7 +88,7 @@ trait Net { this : Io =>
   }
 
   /** Represets a URL with the http scheme */
-  class HttpUrl(val urlBase : NetUrlBase[HttpUrl], val elements : Seq[String]) extends Url[HttpUrl]
+  class HttpUrl(val urlBase : NetUrlBase[HttpUrl], elements : Seq[String]) extends Url[HttpUrl](elements)
       with NetUrl[HttpUrl] with PathUrl[HttpUrl] { thisHttpUrl =>
     
     def makePath(xs : Seq[String]) = new HttpUrl(urlBase, elements)
@@ -97,7 +97,7 @@ trait Net { this : Io =>
   }
 
   /** Represents a URL with the https scheme */
-  class HttpsUrl(val urlBase : NetUrlBase[HttpsUrl], val elements : Seq[String]) extends Url[HttpsUrl]
+  class HttpsUrl(val urlBase : NetUrlBase[HttpsUrl], elements : Seq[String]) extends Url[HttpsUrl](elements)
       with NetUrl[HttpsUrl] with PathUrl[HttpsUrl] { thisHttpsUrl =>
     
     def makePath(xs : Seq[String]) = new HttpsUrl(urlBase, elements)

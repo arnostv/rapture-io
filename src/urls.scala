@@ -28,7 +28,8 @@ import java.net._
 trait Urls { this : Io =>
 
   /** Represents a generic URL */
-  trait Url[+UrlType <: Url[UrlType]] extends AbsolutePath[UrlType] { thisPath : UrlType =>
+  abstract class Url[+UrlType <: Url[UrlType]](elements : Seq[String])
+      extends AbsolutePath[UrlType](elements) { thisPath : UrlType =>
     
     /** The base for this URL */
     val urlBase : UrlBase[UrlType]

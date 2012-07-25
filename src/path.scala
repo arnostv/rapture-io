@@ -49,11 +49,9 @@ trait Paths { this : Io =>
   }
 
   /** Represents an absolute (i.e. relative to a canonical base) path. */
-  trait AbsolutePath[+PathType <: AbsolutePath[PathType]] extends Path { path =>
+  abstract class AbsolutePath[+PathType <: AbsolutePath[PathType]](elements : Seq[String])
+      extends RelativePath(0, elements) { path =>
   
-    /** The components of the path */
-    val elements : Seq[String]
-
     /** Constructs a new path */
     def makePath(elements : Seq[String]) : PathType
     
@@ -76,7 +74,7 @@ trait Paths { this : Io =>
     def parent : PathType = drop(1)
 
     /** Constructs a new path by appending the specified path element to this path */
-    def /(p : String) : AbsolutePath[PathType] = makePath(path.elements ++ Array(p))
+    override def /(p : String) : AbsolutePath[PathType] = makePath(path.elements ++ Array(p))
 
     override def toString() = pathString
     
@@ -150,7 +148,7 @@ trait Paths { this : Io =>
   /** Defines a very simple absolute path with an unspecified base
     *
     * @param elements The path elements which make up this absolute path */
-  class SimplePath(val elements : Seq[String]) extends AbsolutePath[SimplePath] {
+  class SimplePath(elements : Seq[String]) extends AbsolutePath[SimplePath](elements) {
     def makePath(elements : Seq[String]) = new SimplePath(elements)
   }
 
