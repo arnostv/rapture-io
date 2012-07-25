@@ -65,7 +65,7 @@ trait Files { this : Io =>
     def /(resource : String) = makePath(Array(resource))
     
     /** Creates a new FileUrl of the specified path, relative to the filesystem root. */
-    def /(path : RelativePath) = makePath(path.elements)
+    def /(path : Path) = makePath(path.elements)
     
     /** Creates a new FileUrl of the specified path, on the filesystem root. */
     def /(path : AbsolutePath[FileUrl]) = makePath(path.elements)

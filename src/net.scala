@@ -121,7 +121,7 @@ trait Net { this : Io =>
     
     def /(element : String) = makePath(Array(element))
     
-    def /(path : RelativePath) = makePath(path.elements)
+    def /(path : Path) = makePath(path.elements)
     
     override def equals(that : Any) : Boolean =
       that.isInstanceOf[HttpUrlBase] && hostname == that.asInstanceOf[HttpUrlBase].hostname
@@ -138,7 +138,7 @@ trait Net { this : Io =>
     
     def /(element : String) = makePath(Array(element))
     
-    def /(path : RelativePath) = makePath(path.elements)
+    def /(path : Path) = makePath(path.elements)
     
     override def equals(that : Any) : Boolean =
       that.isInstanceOf[HttpsUrlBase] && hostname == that.asInstanceOf[HttpsUrlBase].hostname
@@ -159,7 +159,7 @@ trait Net { this : Io =>
     /** Parses a URL string into an HttpUrl or HttpsUrl */
     def parse(s : String) : Option[Either[HttpUrl, HttpsUrl]] = s match {
       case UrlRegex(scheme, server, port, path) =>
-        val rp = new RelativePath(0, path.split("/"))
+        val rp = new Path(0, path.split("/"))
         val p = if(port == null) 80 else port.substring(1).toInt
         Some(scheme match {
           case "http" => Left(Http./(server, p) / rp)

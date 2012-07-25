@@ -32,17 +32,6 @@ trait Paths { this : Io =>
 
   val $ = ""
 
-  trait Path {
-
-    val elements : Seq[String]
-    
-    override def equals(that : Any) : Boolean =
-      that.isInstanceOf[Path] && (that.asInstanceOf[Path].elements.toArray[String] :
-          WrappedArray[String]) == (elements.toArray[String] : WrappedArray[String])
-      // ^^^ FIXME
-      // that.isInstanceOf[Path] && that.asInstanceOf[Path].elements == elements
-  }
-
   object / {
     def unapply(p : SimplePath) : Option[(SimplePath, String)] =
       if(p.isRoot) None else Some((p.tail, p.head))
@@ -50,8 +39,11 @@ trait Paths { this : Io =>
 
   /** Represents an absolute (i.e. relative to a canonical base) path. */
   abstract class AbsolutePath[+PathType <: AbsolutePath[PathType]](elements : Seq[String])
-      extends RelativePath(0, elements) { path =>
-  
+      extends Path(0, elements) { path =>
+ 
+    /** This is an absolute path */
+    override def absolute = true
+
     /** Constructs a new path */
     def makePath(elements : Seq[String]) : PathType
     
@@ -96,7 +88,7 @@ trait Paths { this : Io =>
       else makePath(path.elements.takeRight(n))
     
     /** Constructs a new path by following the relative link from this path */
-    def ++(dest : RelativePath) = makePath(path.elements.drop(dest.ascent) ++ dest.elements)
+    def ++(dest : Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements)
 
     /** Calculates the relative link between this path and the specified destination path
       *
@@ -113,16 +105,16 @@ trait Paths { this : Io =>
           go(x2 :: xs, ys, up, tail)
         
         case (_, _, x :: Nil, y :: Nil) if x == y =>
-          new RelativePath(0, Array[String]())
+          new Path(0, Array[String]())
         
         case (_, _, x :: Nil, y :: ys) =>
-          new RelativePath(up, tail.reverse.toArray[String] ++ Array(y) ++ ys)
+          new Path(up, tail.reverse.toArray[String] ++ Array(y) ++ ys)
         
         case (0, _, Nil, ys) =>
-          new RelativePath(1, Array[String](dest.head))
+          new Path(1, Array[String](dest.head))
         
         case (_, _, Nil, ys) =>
-          new RelativePath(up, tail.reverse.toArray[String] ++ ys.toArray[String])
+          new Path(up, tail.reverse.toArray[String] ++ ys.toArray[String])
         
         case (_, _, _ :: x :: xs, Nil) =>
           go(x :: xs, Nil, up + 1, tail)
@@ -161,15 +153,24 @@ trait Paths { this : Io =>
     * @param ascent The number of levels to navigate up the path hierarchy to reach the common
     *        parent
     * @param elements The `String` components of this path */
-  class RelativePath(val ascent : Int, val elements : Seq[String]) extends Path { path =>
+  class Path(val ascent : Int, val elements : Seq[String]) { path =>
+    
+    /** This is a relative path */
+    def absolute = false
     
     /** Adds a path component to this relative path */
-    def /(s : String) : RelativePath = new RelativePath(ascent, Array(s) ++ elements)
+    def /(s : String) : Path = new Path(ascent, Array(s) ++ elements)
 
     override def toString() =
       if(ascent == 0 && elements.isEmpty) "."
       else if(ascent == 0 && elements == Array("")) "/"
       else (Array.fill(ascent)("..") ++ elements).mkString("/")
+      
+    override def equals(that : Any) = that match {
+      case p : Path => p.absolute == absolute && p.ascent == ascent && (p.elements.toArray[String] :
+          WrappedArray[String]) == (elements.toArray[String] : WrappedArray[String])
+      case _ => false
+    }
   }
 
   /** Allows for easy construction of relative paths from `String`s */
@@ -177,7 +178,7 @@ trait Paths { this : Io =>
     /** Constructs a relative path from the path components `string` and `string2`
       *
       * @param string2 the second component of the relative path to be constructed */
-    def /(string2 : String) = new RelativePath(0, Array(string, string2))
+    def /(string2 : String) = new Path(0, Array(string, string2))
   }
 
 }

@@ -43,13 +43,13 @@ trait Urls { this : Io =>
     override def /(element : String) = urlBase.makePath(thisPath.elements ++ Array(element))
     
     /** Constructs a new URL by calculating the destination URL by following  the given
-      * `RelativePath` from this URL */
-    def /(path : RelativePath) = urlBase.makePath(path.elements)
+      * `Path` from this URL */
+    def /(path : Path) = urlBase.makePath(path.elements)
     
     /** Calculates the destination of the given link from this URL
       *
       * @param path the relative path */
-    override def ++(dest : RelativePath) : UrlType =
+    override def ++(dest : Path) : UrlType =
       urlBase.makePath(dest.elements ++ thisPath.elements.drop(dest.ascent))
 
     /** Calculates the path between this URL and the given destination URL, if possible as a
@@ -79,6 +79,6 @@ trait Urls { this : Io =>
   /** Specifies additional methods for URLs which have a hierarchical structure. */
   trait PathUrl[+UrlType <: Url[UrlType]] { pathUrl : UrlType =>
     def /(d : String) : UrlType
-    def /(path : RelativePath) : UrlType
+    def /(path : Path) : UrlType
   }
 }
