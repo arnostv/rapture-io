@@ -34,7 +34,7 @@ trait Extractors { this : Io =>
     
     def unapply(in : Input[Char]) : Option[Seq[scala.xml.Node]] = try {
       val so = new StringOutput
-      in pumpTo so
+      in > so
       unapply(so.buffer)
     } catch { case e : Exception => None }
 
@@ -47,7 +47,7 @@ trait Extractors { this : Io =>
     
     def unapply(in : Input[Char]) : Option[List[Any]] = try {
       val so = new StringOutput
-      in pumpTo so
+      in > so
       unapply(so.buffer)
     } catch { case e : Exception => None }
 
@@ -63,7 +63,7 @@ trait Extractors { this : Io =>
 
     def unapply(in : Input[Char]) : Option[Map[String, Any]] = try {
       val so = new StringOutput
-      in pumpTo so
+      in > so
       unapply(so.buffer)
     } catch { case e : Exception => None }
 

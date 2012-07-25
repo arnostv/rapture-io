@@ -85,11 +85,11 @@ trait Streams { this : Io =>
     def input[Data](implicit sr : StreamReader[UrlType, Data]) = sr.input(url)
     
     /** Pumps the input for the specified resource to the destination URL provided */
-    def pumpTo[Data, DestUrlType](dest : DestUrlType)(implicit sr :
+    def >[Data, DestUrlType](dest : DestUrlType)(implicit sr :
         StreamReader[UrlType, Data], sw : StreamWriter[DestUrlType, Data], mf : Manifest[Data]) = {
 
       handleInput[Data, Int] { in =>
-        writable(dest).handleOutput[Data, Int] { out => in.pumpTo(out) }
+        writable(dest).handleOutput[Data, Int] { out => in.>(out) }
       }
     }
  
@@ -97,8 +97,8 @@ trait Streams { this : Io =>
       *
       * @tparam Data The type that the data should be pumped as
       * @param output The destination for data to be pumped to */
-    def pumpTo[Data](output : Output[Data])(implicit sr : StreamReader[UrlType, Data],
-        mf : Manifest[Data]) = handleInput[Data, Int] { in => in.pumpTo(output) }
+    def >[Data](output : Output[Data])(implicit sr : StreamReader[UrlType, Data],
+        mf : Manifest[Data]) = handleInput[Data, Int] { in => in.>(output) }
 
     /** Carefully handles writing to the input stream, ensuring that it is closed following
       * data being written to the stream. Handling an input stream which is already being handled
@@ -131,7 +131,7 @@ trait Streams { this : Io =>
         AccumulatorBuilder[Data, Acc], mf : Manifest[Data]) = {
 
       val c = AccumulatorBuilder.make()
-      input[Data].pumpTo(c)
+      input[Data].>(c)
 
       c.buffer
     }
@@ -254,7 +254,7 @@ trait Streams { this : Io =>
     def slurp[Acc]()(implicit accumulatorBuilder : AccumulatorBuilder[Data, Acc],
         mf : Manifest[Data]) : Acc = {
       val acc = accumulatorBuilder.make()
-      pumpTo(acc)
+      >(acc)
       acc.buffer
     }
 
@@ -264,14 +264,14 @@ trait Streams { this : Io =>
     /** Pumps the data from this `Input[Data]` to the given destination.
       *
       * @param dest The destination URL for data to be pumped to */
-    def pumpTo[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamWriter[UrlType, Data],
-        mf : Manifest[Data]) : Int = dest.handleOutput[Data, Int] { out => pumpTo(out) }
+    def >[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamWriter[UrlType, Data],
+        mf : Manifest[Data]) : Int = dest.handleOutput[Data, Int] { out => >(out) }
    
     /** Pumps data from this `Input` to the specified `Output` until the end of the stream is
       * reached.
       *
       * @param out The output stream to receive data pumped from this `Input` */
-    def pumpTo(out : Output[Data])(implicit mf : Manifest[Data]) : Int = {
+    def >(out : Output[Data])(implicit mf : Manifest[Data]) : Int = {
       val buf = new Array[Data](65536)
       var len = readBlock(buf)
       var count = 0
@@ -332,7 +332,7 @@ trait Streams { this : Io =>
     
     /** Pumps data from the specified URL to the given destination URL */
     def pump[DestUrlType <: Url[DestUrlType]](url : UrlType, dest : DestUrlType)(implicit sw :
-      StreamWriter[DestUrlType, Data], mf : Manifest[Data]) : Int = input(url).pumpTo(dest)
+      StreamWriter[DestUrlType, Data], mf : Manifest[Data]) : Int = input(url).>(dest)
   }
 
   /** Type class object for reading `Char`s from a `String` */
