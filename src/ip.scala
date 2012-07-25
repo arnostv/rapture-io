@@ -51,10 +51,21 @@ object Subnet {
   }
 }
 
-class Subnet(baseIp : Ip4, val bits : Int) {
+class Subnet(baseIp : Ip4, val bits : Int) extends Iterable[Ip4] {
+
+  def iterator : Iterator[Ip4] = new Iterator[Ip4] {
+    private var current = baseIp.asLong - 1
+    def hasNext = current < maximum.asLong
+    def next = {
+      current += 1
+      Ip4.fromLong(current)
+    }
+  }
+
+  def maximum = Ip4.fromLong((((baseIp.asLong>>(32 - bits)) + 1)<<(32 - bits)) - 1)
   val ip = Ip4.fromLong((baseIp.asLong>>(32 - bits))<<(32 - bits))
-  def size = math.pow(2, bits).toLong
-  override def toString() = Ip4.toString+"/"+bits
+  override def size = 1 << (32 - bits)
+  override def toString() = baseIp.toString+"/"+bits
   def contains(ip2 : Ip4) = Ip4.fromLong((ip2.asLong>>(32 - bits))<<(32 - bits)) == ip
 }
 
