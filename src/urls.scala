@@ -49,7 +49,7 @@ trait Urls { this : Io =>
     /** Calculates the destination of the given link from this URL
       *
       * @param path the relative path */
-    override def ++(dest : Path) : UrlType =
+    override def +(dest : Path) : UrlType =
       urlBase.makePath(dest.elements ++ thisPath.elements.drop(dest.ascent))
 
     /** Calculates the path between this URL and the given destination URL, if possible as a

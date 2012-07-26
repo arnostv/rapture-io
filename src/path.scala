@@ -88,7 +88,10 @@ trait Paths { this : Io =>
       else makePath(path.elements.takeRight(n))
     
     /** Constructs a new path by following the relative link from this path */
-    def ++(dest : Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements)
+    def +(dest : Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements)
+
+    def -[SrcPathType <: AbsolutePath[SrcPathType]](src : AbsolutePath[SrcPathType]) =
+      src link this
 
     /** Calculates the relative link between this path and the specified destination path
       *
