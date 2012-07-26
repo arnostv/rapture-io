@@ -319,7 +319,7 @@ trait Streams { this : Io =>
   /** Generic type class for reading a particular kind of data from 
     */
   @implicitNotFound(msg = "Cannot find implicit StreamReader for ${UrlType} Urls. ${UrlType} URLs "+
-      "can only be read from if a StreamReader implicit exists within scope.")
+      "can only be read if a StreamReader implicit exists within scope.")
   trait StreamReader[-UrlType, Data] {
   
     def doNotClose = false

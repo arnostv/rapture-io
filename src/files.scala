@@ -42,7 +42,9 @@ trait Files { this : Io =>
   }
 
   /** The file scheme object used as a factory for FileUrls. */
-  object File extends Scheme[FileUrl]("file") with UrlBase[FileUrl] { thisUrlBase =>
+  object File extends UrlBase[FileUrl] with Scheme[FileUrl] { thisUrlBase =>
+
+    def schemeName = "file"
     
     /** Provides a FileUrl for the current working directory, as determined by the user.dir
       * environment variable. */
@@ -62,7 +64,7 @@ trait Files { this : Io =>
     /** Creates a new FileUrl of the specified resource in the filesystem root.
       *
       * @param resource the resource beneath the filesystem root to create. */
-    def /(resource : String) = makePath(Array(resource))
+    override def /(resource : String) = makePath(Array(resource))
     
     /** Creates a new FileUrl of the specified path, relative to the filesystem root. */
     def /(path : Path) = makePath(path.elements)

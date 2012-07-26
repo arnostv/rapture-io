@@ -119,7 +119,7 @@ trait Net { this : Io =>
 
     def scheme = Http
     
-    def /(element : String) = makePath(Array(element))
+    override def /(element : String) = makePath(Array(element))
     
     def /(path : Path) = makePath(path.elements)
     
@@ -136,7 +136,7 @@ trait Net { this : Io =>
     
     def scheme = Https
     
-    def /(element : String) = makePath(Array(element))
+    override def /(element : String) = makePath(Array(element))
     
     def /(path : Path) = makePath(path.elements)
     
@@ -145,7 +145,9 @@ trait Net { this : Io =>
   }
 
   /** Factory for creating new HTTP URLs */
-  object Http extends Scheme[HttpUrl]("http") {
+  object Http extends Scheme[HttpUrl] {
+    def schemeName = "http"
+    
     /** Creates a new URL with the http scheme with the specified domain name and port
       *
       * @param hostname A `String` of the domain name for the URL
@@ -170,7 +172,9 @@ trait Net { this : Io =>
   }
 
   /** Factory for creating new HTTPS URLs */
-  object Https extends Scheme[HttpsUrl]("https") {
+  object Https extends Scheme[HttpsUrl] {
+    def schemeName = "https"
+
     /** Creates a new URL with the https scheme with the specified domain name and port
       *
       * @param hostname A `String` of the domain name for the URL

@@ -55,7 +55,8 @@ trait Sockets { this : Io =>
     }
   }
 
-  object Socket extends Scheme[SocketUrl]("socket") {
+  object Socket extends Scheme[SocketUrl] {
+    def schemeName = "socket"
     def apply(hostname : String, port : Int) = new SocketUrlBase(hostname, port)
   }
 

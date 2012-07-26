@@ -67,10 +67,10 @@ trait Urls { this : Io =>
   }
 
   /** Repenesents a URL scheme */
-  case class Scheme[+U <: Url[U]](schemeName : String)
+  trait Scheme[+U <: Url[U]] { def schemeName : String }
 
   /** Defines a base to upon which the hierarchical part of the URL is appended */
-  trait UrlBase[+U <: Url[U]] {
+  abstract class UrlBase[+U <: Url[U]] extends AbsolutePath[U](Nil) {
     override def toString() = scheme.schemeName+"://"
     def scheme : Scheme[U]
     def makePath(elements : Seq[String]) : U
