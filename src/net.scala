@@ -77,7 +77,7 @@ trait Net { this : Io =>
       conn.setRequestProperty("Content-Type", implicitly[PostType[C]].contentType.name)
 
       ensuring(OutputStreamBuilder.output(conn.getOutputStream)) { out =>
-        implicitly[PostType[C]].sender(content).>(out)
+        implicitly[PostType[C]].sender(content) > out
       } (_.close())
 
       import scala.collection.JavaConversions._

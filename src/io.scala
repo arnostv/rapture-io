@@ -40,8 +40,13 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
 
   /** Type class object for writing `Byte`s to `FileUrl`s */
   implicit object FileStreamByteWriter extends StreamWriter[FileUrl, Byte] {
-    def output(url : FileUrl, append : Boolean = false) : Output[Byte] =
+    def output(url : FileUrl) : Output[Byte] =
       new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile)))
+  }
+
+  implicit object FileStreamByteAppender extends StreamAppender[FileUrl, Byte] {
+    def appendOutput(url : FileUrl) : Output[Byte] =
+      new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile, true)))
   }
 
   /** Type class object for reading `Byte`s from `HttpUrl`s */
@@ -58,12 +63,12 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
 
   implicit def stdoutWriter[Data] = new StreamWriter[Stdout[Data], Data] {
     override def doNotClose = true
-    def output(stdout : Stdout[Data], append : Boolean = false) = stdout.output
+    def output(stdout : Stdout[Data]) = stdout.output
   }
 
   implicit def stderrWriter[Data] = new StreamWriter[Stderr[Data], Data] {
     override def doNotClose = true
-    def output(stderr : Stderr[Data], append : Boolean = false) = stderr.output
+    def output(stderr : Stderr[Data]) = stderr.output
   }
 
   implicit def stdin[Data] = new StreamReader[Stdin[Data], Data] {

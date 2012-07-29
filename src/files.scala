@@ -31,7 +31,7 @@ trait Files { this : Io =>
 
   /** Type class object for writing `FileUrl`s as `Output[Stream]`s */
   implicit object FileStreamCharWriter extends StreamWriter[FileUrl, Char] {
-    def output(url : FileUrl, append : Boolean = false) : Output[Char] =
+    def output(url : FileUrl) : Output[Char] =
       new CharOutput(new BufferedWriter(new FileWriter(url.javaFile)))
   }
 
