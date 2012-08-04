@@ -6,7 +6,7 @@ The primary distribution site is
 
   http://www.propensive.com/
 
-Copyright 2012 Propensive Ltd.
+Copyright 2010-2012 Propensive Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
@@ -57,7 +57,7 @@ trait Sockets { this : Io =>
 
   object Socket extends Scheme[SocketUrl] {
     def schemeName = "socket"
-    def apply(hostname : String, port : Int) = new SocketUrlBase(hostname, port)
+    def apply(hostname : String, port : Int) : SocketUrlBase = new SocketUrlBase(hostname, port)
   }
 
 
