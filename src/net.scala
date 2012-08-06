@@ -39,7 +39,8 @@ trait Net { this : Io =>
   implicit val FormPostType = new PostType[Map[String, String]] {
     def contentType = MimeTypes.`application/x-www-form-urlencoded`
     def sender(content : Map[String, String]) = ByteArrayInput((content map { case (k, v) =>
-        k.urlEncode+"="+v.urlEncode } mkString "&").getBytes("UTF-8"))
+      URLEncoder.encode(k, "UTF-8")+"="+URLEncoder.encode(v, "UTF-8")
+    } mkString "&").getBytes("UTF-8"))
   }
 
   implicit val StringPostType = new PostType[String] {

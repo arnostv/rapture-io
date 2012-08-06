@@ -21,7 +21,6 @@ License.
 
 package rapture
 
-import java.net._
 /** The I/O package provides a framework for generalised streaming and URL handling.
   *
   * @author Jon Pretty
@@ -29,13 +28,8 @@ import java.net._
   */
 package object io extends Io {
 
-  type JavaFile = java.io.File
+  implicit val implicitConversions = language.implicitConversions
 
-  implicit def urlCodec(s : String) = new {
-    def urlEncode(implicit encoding : Encodings.Encoding = Encodings.`UTF-8`) =
-      URLEncoder.encode(s, encoding.name)
-    def urlDecode(implicit encoding : Encodings.Encoding = Encodings.`UTF-8`) =
-      URLDecoder.decode(s, encoding.name)
-  }
+  type JavaFile = java.io.File
 
 }

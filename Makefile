@@ -3,7 +3,7 @@ all: package
 compile:
 	@mkdir -p bin
 	@echo Compiling...
-	@/opt/scala-2.10.0-M6/bin/scalac -usejavacp -unchecked -deprecation -d bin src/*.scala
+	@/opt/scala-2.10.0-M6/bin/scalac -feature -usejavacp -unchecked -deprecation -d bin src/*.scala
 
 doc:
 	@mkdir -p doc

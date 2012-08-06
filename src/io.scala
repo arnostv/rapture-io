@@ -22,6 +22,7 @@ License.
 package rapture.io
 
 import java.io._
+import java.net._
 
 /** Combines different elements of the I/O framework.  This class provides implementations of
   * type class objects which should be given higher priority than the defaults.  This allows
@@ -69,6 +70,13 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
   implicit def stdin[Data] = new StreamReader[Stdin[Data], Data] {
     override def doNotClose = true
     def input(stdin : Stdin[Data]) = stdin.input
+  }
+
+  implicit def urlCodec(s : String) = new {
+    def urlEncode(implicit encoding : Encodings.Encoding = Encodings.`UTF-8`) =
+      URLEncoder.encode(s, encoding.name)
+    def urlDecode(implicit encoding : Encodings.Encoding = Encodings.`UTF-8`) =
+      URLDecoder.decode(s, encoding.name)
   }
 
 
