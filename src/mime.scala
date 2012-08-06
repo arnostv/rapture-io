@@ -43,6 +43,12 @@ object MimeTypes {
     for(ext <- exts) extensions(ext) = this :: extensions.get(ext).getOrElse(Nil)
   }
 
+  val `text/plain` =
+    MimeType("text/plain", "asc", "conf", "def", "diff", "in", "list", "log", "pot", "text", "txt")
+  
+  val `application/x-www-form-urlencoded` = MimeType("application/x-www-form-urlencoded")
+  
+  /*
   val `application/activemessage` = MimeType("application/activemessage")
   val `application/andrew-inset` = MimeType("application/andrew-inset", "ez")
   val `application/applefile` = MimeType("application/applefile")
@@ -1320,7 +1326,6 @@ object MimeTypes {
   val `application/x-ustar` = MimeType("application/x-ustar", "ustar")
   val `application/x-wais-source` = MimeType("application/x-wais-source", "src")
   val `application/x-wingz` = MimeType("application/x-wingz", "wz")
-  val `application/x-www-form-urlencoded` = MimeType("application/x-www-form-urlencoded")
   val `application/x-x509-ca-cert` = MimeType("application/x-x509-ca-cert", "crt", "der")
   val `application/x-xcf` = MimeType("application/x-xcf", "xcf")
   val `application/x-xfig` = MimeType("application/x-xfig", "fig")
@@ -1672,9 +1677,6 @@ object MimeTypes {
   val `text/mathml` = MimeType("text/mathml", "mml")
   val `text/parityfec` = MimeType("text/parityfec")
   
-  val `text/plain` =
-    MimeType("text/plain", "asc", "conf", "def", "diff", "in", "list", "log", "pot", "text", "txt")
-  
   val `text/prs.fallenstein.rst` = MimeType("text/prs.fallenstein.rst")
   val `text/prs.lines.tag` = MimeType("text/prs.lines.tag", "dsc")
   val `text/red` = MimeType("text/red")
@@ -1820,4 +1822,5 @@ object MimeTypes {
   val `video/x-sgi-movie` = MimeType("video/x-sgi-movie", "movie")
   val `x-conference/x-cooltalk` = MimeType("x-conference/x-cooltalk", "ice")
   val `x-world/x-vrml` = MimeType("x-world/x-vrml", "vrm", "vrml", "wrl")
+  */
 }

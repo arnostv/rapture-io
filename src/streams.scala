@@ -23,6 +23,7 @@ package rapture.io
 
 import java.io._
 import java.net._
+import scala.reflect._
 
 import annotation.implicitNotFound
 
@@ -86,7 +87,7 @@ trait Streams { this : Io =>
     
     /** Pumps the input for the specified resource to the destination URL provided */
     def >[Data, DestUrlType](dest : DestUrlType)(implicit sr :
-        StreamReader[UrlType, Data], sw : StreamWriter[DestUrlType, Data], mf : Manifest[Data]) = {
+        StreamReader[UrlType, Data], sw : StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
         writable(dest).handleOutput[Data, Int] { out => in.>(out) }
@@ -98,7 +99,7 @@ trait Streams { this : Io =>
       * @tparam Data The type that the data should be pumped as
       * @param output The destination for data to be pumped to */
     def >[Data](output : Output[Data])(implicit sr : StreamReader[UrlType, Data],
-        mf : Manifest[Data]) = handleInput[Data, Int] { in => in.>(output) }
+        mf : ClassTag[Data]) = handleInput[Data, Int] { in => in.>(output) }
 
     /** Carefully handles writing to the input stream, ensuring that it is closed following
       * data being written to the stream. Handling an input stream which is already being handled
@@ -128,7 +129,7 @@ trait Streams { this : Io =>
       * @tparam Acc The type of the object data will be accumulated into
       * @return The accumulated data */
     def slurp[Data, Acc]()(implicit sr : StreamReader[UrlType, Data], AccumulatorBuilder :
-        AccumulatorBuilder[Data, Acc], mf : Manifest[Data]) = {
+        AccumulatorBuilder[Data, Acc], mf : ClassTag[Data]) = {
 
       val c = AccumulatorBuilder.make()
       input[Data].>(c)
@@ -252,7 +253,7 @@ trait Streams { this : Io =>
    
     /** Reads the whole stream into an accumulator */
     def slurp[Acc]()(implicit accumulatorBuilder : AccumulatorBuilder[Data, Acc],
-        mf : Manifest[Data]) : Acc = {
+        mf : ClassTag[Data]) : Acc = {
       val acc = accumulatorBuilder.make()
       >(acc)
       acc.buffer
@@ -265,13 +266,13 @@ trait Streams { this : Io =>
       *
       * @param dest The destination URL for data to be pumped to */
     def >[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamWriter[UrlType, Data],
-        mf : Manifest[Data]) : Int = dest.handleOutput[Data, Int] { out => >(out) }
+        mf : ClassTag[Data]) : Int = dest.handleOutput[Data, Int] { out => >(out) }
    
     /** Pumps data from this `Input` to the specified `Output` until the end of the stream is
       * reached.
       *
       * @param out The output stream to receive data pumped from this `Input` */
-    def >(out : Output[Data])(implicit mf : Manifest[Data]) : Int = {
+    def >(out : Output[Data])(implicit mf : ClassTag[Data]) : Int = {
       val buf = new Array[Data](65536)
       var len = readBlock(buf)
       var count = 0
@@ -332,7 +333,7 @@ trait Streams { this : Io =>
     
     /** Pumps data from the specified URL to the given destination URL */
     def pump[DestUrlType <: Url[DestUrlType]](url : UrlType, dest : DestUrlType)(implicit sw :
-      StreamWriter[DestUrlType, Data], mf : Manifest[Data]) : Int = input(url).>(dest)
+      StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) : Int = input(url).>(dest)
   }
 
   /** Type class object for reading `Char`s from a `String` */
