@@ -170,7 +170,7 @@ trait Streams { this : Io =>
     * @tparam Data Units of data to be streamed, typically `Byte` or `Char` */
   @implicitNotFound(msg = "Cannot find implicit StreamWriter for ${UrlType} Urls. ${UrlType} URLs "+
       "can only be written to if a StreamWriter implicit exists within scope.")
-  trait StreamWriter[-UrlType, Data] {
+  trait StreamWriter[-UrlType, @specialized(Byte, Char) Data] {
     def doNotClose = false
     def output(url : UrlType, append : Boolean = false) : Output[Data]
   }
@@ -286,7 +286,7 @@ trait Streams { this : Io =>
   }
 
   /** Defines a generic output stream */
-  trait Output[Data] {
+  trait Output[@specialized(Byte, Char) Data] {
     private var beingHandled = false
    
     /** Writes one item of data to this stream
@@ -321,7 +321,7 @@ trait Streams { this : Io =>
     */
   @implicitNotFound(msg = "Cannot find implicit StreamReader for ${UrlType} Urls. ${UrlType} URLs "+
       "can only be read if a StreamReader implicit exists within scope.")
-  trait StreamReader[-UrlType, Data] {
+  trait StreamReader[-UrlType, @specialized(Byte, Char) Data] {
   
     def doNotClose = false
 

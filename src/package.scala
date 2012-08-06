@@ -28,7 +28,7 @@ package rapture
   */
 package object io extends Io {
 
-  implicit val implicitConversions = language.implicitConversions
+  //implicit val implicitConversions = language.implicitConversions
 
   type JavaFile = java.io.File
 

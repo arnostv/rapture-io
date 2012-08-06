@@ -33,14 +33,20 @@ trait Wrappers { this : Io =>
 
   /** Wraps a `java.io.Reader` as an `Input[Char]` */
   class CharInput(in : Reader) extends Input[Char] {
-    def ready() = in.ready()
+
+    private val bin = new BufferedReader(in)
+
+    def ready() = bin.ready()
     
-    def read() = in.read() match {
+    def read() = bin.read() match {
       case -1 => None
       case x => Some(x.toChar)
     }
     
-    def close() = in.close()
+    def close() = bin.close()
+    
+    override def readBlock(array : Array[Char], offset : Int = 0, length : Int = -1) : Int =
+      bin.read(array, offset, if(length == -1) (array.length - offset) else length)
   
     override def toString() = "<character input>"
   }
@@ -48,14 +54,19 @@ trait Wrappers { this : Io =>
   /** Wraps a `java.io.InputStream` as an `Input[Byte]` */
   class ByteInput(in : InputStream) extends Input[Byte] {
     
+    private val bin = new BufferedInputStream(in)
+
     // FIXME: This might be really slow
-    def ready() = in.available() > 0
+    def ready() = bin.available() > 0
     
-    def read() = in.read() match {
+    def read() = bin.read() match {
       case -1 => None
       case x => Some(x.toByte)
     }
     
+    override def readBlock(array : Array[Byte], offset : Int = 0, length : Int = -1) : Int =
+      bin.read(array, offset, if(length == -1) (array.length - offset) else length)
+
     def close() = in.close()
   
     override def toString() = "<byte input>"
@@ -65,22 +76,42 @@ trait Wrappers { this : Io =>
     *
     * @param out The `java.io.OutputStream` to be wrapped */
   class ByteOutput(out : OutputStream) extends Output[Byte] {
-    def write(b : Byte) = out.write(b)
     
-    def flush() : Unit = out.flush()
-    def close() : Unit = out.close()
+    private val bout = new BufferedOutputStream(out)
+    
+    def write(b : Byte) = bout.write(b)
+    
+    def flush() : Unit = bout.flush()
+    def close() : Unit = bout.close()
     
     override def toString() = "<byte output>"
+    
+    override def writeBlock(array : Array[Byte], offset : Int = 0, length : Int = -1) : Int = {
+      val len = if(length == -1) (array.length - offset) else length
+      bout.write(array, offset, len)
+      len
+    }
+
   }
 
   /** Wraps a `java.io.Writer`
     *
     * @param out The `java.io.Writer` to be wrapped */
   class CharOutput(out : Writer) extends Output[Char] {
-    def write(b : Char) = out.write(b)
-    def flush() : Unit = out.flush()
-    def close() : Unit = out.close()
+    
+    private val bout = new BufferedWriter(out)
+    
+    def write(b : Char) = bout.write(b)
+    def flush() : Unit = bout.flush()
+    def close() : Unit = bout.close()
     override def toString() = "<character output>"
+    
+    override def writeBlock(array : Array[Char], offset : Int = 0, length : Int = -1) : Int = {
+      val len = if(length == -1) (array.length - offset) else length
+      bout.write(array, offset, len)
+      len
+    }
+
   }
 
   /** Wraps a `java.io.BufferedWriter` for providing line-by-line output of `String`s
