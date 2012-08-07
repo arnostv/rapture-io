@@ -181,6 +181,10 @@ trait Wrappers { this : Io =>
     def output(s : Writer) = new CharOutput(s)
   }
 
+  implicit object AppenderBuilder extends AppenderBuilder[Writer, Char] {
+    def appendOutput(s : Writer) = new CharOutput(s)
+  }
+
   /** Type class definition for creating an Output[Char] from a Java OutputStream, taking an
     * [[Encodings.Encoding]] implicitly for converting between `Byte`s and `Char`s */
   implicit def outputStreamCharBuilder(implicit encoding : Encodings.Encoding) =

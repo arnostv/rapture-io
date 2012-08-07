@@ -68,7 +68,7 @@ trait Sockets { this : Io =>
 
   /** Type class object for getting an `Output[Byte]` from a socket URL. */
   implicit object SocketStreamByteWriter extends StreamWriter[SocketUrl, Byte] {
-    def output(url : SocketUrl, append : Boolean = false) : Output[Byte] =
+    def output(url : SocketUrl) : Output[Byte] =
       new ByteOutput(new BufferedOutputStream(url.javaSocket.getOutputStream))
   }
 }

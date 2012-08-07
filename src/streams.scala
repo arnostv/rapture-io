@@ -76,6 +76,24 @@ trait Streams { this : Io =>
     * @tparam Data The type of data that the [[Output]] carries */
   trait OutputBuilder[OutputType, Data] { def output(s : OutputType) : Output[Data] }
 
+  trait AppenderBuilder[OutputType, Data] { def appendOutput(s : OutputType) : Output[Data] }
+
+  implicit def makeAppendable[UrlType](url : UrlType) : Appendable[UrlType] =
+    new Appendable(url)
+
+  class Appendable[UrlType](url : UrlType) {
+    def appendOutput[Data](implicit sa : StreamAppender[UrlType, Data]) = sa.appendOutput(url)
+    
+    def handleAppend[Data, Result](body : Output[Data] => Result)(implicit sw :
+        StreamAppender[UrlType, Data]) : Result = {
+      
+      ensuring(appendOutput[Data])(body) { out =>
+        out.flush()
+        if(!sw.doNotClose) out.close()
+      }
+    }
+  }
+
   /** Provides methods for URLs which can be read as streams */
   implicit def makeReadable[UrlType](url : UrlType) : Readable[UrlType] =
     new Readable(url)
@@ -90,16 +108,24 @@ trait Streams { this : Io =>
         StreamReader[UrlType, Data], sw : StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
-        writable(dest).handleOutput[Data, Int] { out => in.>(out) }
+        makeWritable(dest).handleOutput[Data, Int](in > _)
+      }
+    }
+ 
+    def >>[Data, DestUrlType](dest : DestUrlType)(implicit sr :
+        StreamReader[UrlType, Data], sw : StreamAppender[DestUrlType, Data], mf : Manifest[Data]) = {
+
+      handleInput[Data, Int] { in =>
+        makeAppendable(dest).handleAppend[Data, Int](in > _)
       }
     }
  
     /** Pumps the input for the specified resource to the destination output provided
       *
       * @tparam Data The type that the data should be pumped as
-      * @param output The destination for data to be pumped to */
-    def >[Data](output : Output[Data])(implicit sr : StreamReader[UrlType, Data],
-        mf : ClassTag[Data]) = handleInput[Data, Int] { in => in.>(output) }
+      * @param out The destination for data to be pumped to */
+    def >[Data](out : Output[Data])(implicit sr : StreamReader[UrlType, Data],
+        mf : ClassTag[Data]) = handleInput[Data, Int](_ > out)
 
     /** Carefully handles writing to the input stream, ensuring that it is closed following
       * data being written to the stream. Handling an input stream which is already being handled
@@ -132,7 +158,7 @@ trait Streams { this : Io =>
         AccumulatorBuilder[Data, Acc], mf : ClassTag[Data]) = {
 
       val c = AccumulatorBuilder.make()
-      input[Data].>(c)
+      input[Data] > c
 
       c.buffer
     }
@@ -140,7 +166,7 @@ trait Streams { this : Io =>
 
   /** Provides methods for URLs which can be written to as streams, most importantly for getting an
     * `Output` */
-  implicit def writable[UrlType](url : UrlType) : Writable[UrlType] = new Writable[UrlType](url)
+  implicit def makeWritable[UrlType](url : UrlType) : Writable[UrlType] = new Writable[UrlType](url)
   
   class Writable[UrlType](url : UrlType) {
     
@@ -172,9 +198,13 @@ trait Streams { this : Io =>
       "can only be written to if a StreamWriter implicit exists within scope.")
   trait StreamWriter[-UrlType, @specialized(Byte, Char) Data] {
     def doNotClose = false
-    def output(url : UrlType, append : Boolean = false) : Output[Data]
+    def output(url : UrlType) : Output[Data]
   }
 
+  trait StreamAppender[-UrlType, Data] {
+    def doNotClose = false
+    def appendOutput(url : UrlType) : Output[Data]
+  }
 
   /*  Extract the encoding from an HTTP stream */
   private def extractEncoding(huc : HttpURLConnection) : String = {
@@ -268,6 +298,9 @@ trait Streams { this : Io =>
     def >[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamWriter[UrlType, Data],
         mf : ClassTag[Data]) : Int = dest.handleOutput[Data, Int] { out => >(out) }
    
+    def >>[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamAppender[UrlType, Data],
+        mf : Manifest[Data]) : Int = dest.handleAppend[Data, Int] { out => >(out) }
+    
     /** Pumps data from this `Input` to the specified `Output` until the end of the stream is
       * reached.
       *
@@ -333,7 +366,7 @@ trait Streams { this : Io =>
     
     /** Pumps data from the specified URL to the given destination URL */
     def pump[DestUrlType <: Url[DestUrlType]](url : UrlType, dest : DestUrlType)(implicit sw :
-      StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) : Int = input(url).>(dest)
+      StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) : Int = input(url) > dest
   }
 
   /** Type class object for reading `Char`s from a `String` */
