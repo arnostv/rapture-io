@@ -149,7 +149,10 @@ trait Files { this : Io =>
     /** Moves this file to a new location specified by the dest parameter. This will first attempt
       * to move the file by renaming it, but will attempt copying and deletion if renaming fails. */
     def moveTo(dest : FileUrl) = renameTo(dest) || copyTo(dest) && delete()
-   
+
+    /** Update the last-modified time of this file to the current time. */
+    def touch() = lastModified = new java.util.Date
+
     /** Set the last modified time of this file or directory. */
     def lastModified_=(d : java.util.Date) = javaFile.setLastModified(d.getTime)
     
