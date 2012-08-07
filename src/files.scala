@@ -73,6 +73,36 @@ trait Files { this : Io =>
     def /(path : AbsolutePath[FileUrl]) = makePath(path.elements)
   }
 
+  trait Navigable[UrlType] {
+    def children(url : UrlType) : List[UrlType]
+    
+    /** Returns false if the filesystem object represented by this FileUrl is a file, and true if
+      * it is a directory. */
+    def isDirectory(url : UrlType) : Boolean
+    
+    /** If this represents a directory, returns an iterator over all its descendants,
+      * otherwise returns the empty iterator. */
+    def descendants(url : UrlType) : Iterator[UrlType] = children(url).iterator.flatMap { c =>
+      if(isDirectory(c)) Iterator(c) ++ descendants(c) else Iterator(c)
+    }
+  }
+
+  implicit def navigableExtras[UrlType : Navigable](url : UrlType) = new {
+    
+    def children = implicitly[Navigable[UrlType]].children(url)
+    
+    def isDirectory : Boolean = implicitly[Navigable[UrlType]].isDirectory(url)
+
+    def descendants : Iterator[UrlType] = implicitly[Navigable[UrlType]].descendants(url)
+  }
+
+  implicit val NavigableFile = new Navigable[FileUrl] {
+    def children(url : FileUrl) : List[FileUrl] = 
+      if(url.isFile) Nil else url.javaFile.list().toList map { fn : String => url./(fn) }
+    
+    def isDirectory(url : FileUrl) = url.javaFile.isDirectory()
+  }
+
   class FileUrl(val urlBase : UrlBase[FileUrl], elements : Seq[String]) extends Url[FileUrl](elements)
       with PathUrl[FileUrl] {
 
@@ -99,10 +129,6 @@ trait Files { this : Io =>
     /** Returns the filename of this filesystem object. */
     def filename : String = javaFile.getName()
     
-    /** Returns false if the filesystem object represented by this FileUrl is a file, and true if
-      * it is a directory. */
-    def isDirectory : Boolean = javaFile.isDirectory()
-    
     /** Returns true if the filesystem object represented by this FileUrl is a file, and false if
       * it is a directory. */
     def isFile : Boolean = javaFile.isFile()
@@ -118,17 +144,6 @@ trait Files { this : Io =>
     
     /** Returns the size of the file in bytes. */
     def size : Long = javaFile.length()
-    
-    /** Returns a list of all filesystem objects immediately beneath this FileUrl if it represents
-      * a directory, or Nil if it represents a file. */
-    def children : List[FileUrl] =
-      if(isFile) Nil else javaFile.list().toList map { fn : String => /(fn) }
-    
-    /** If this FileUrl represents a directory, returns an iterator over all its descendants,
-      * otherwise returns the empty iterator. */
-    def descendants : Iterator[FileUrl] = children.iterator flatMap { c =>
-      if(c.isDirectory) Iterator(c) ++ c.descendants else Iterator(c)
-    }
     
     /** Creates a new instance of this type of URL. */
     def makePath(xs : Seq[String]) : FileUrl = File.makePath(xs)
@@ -169,7 +184,7 @@ trait Files { this : Io =>
       File(java.io.File.createTempFile(prefix, suffix, javaFile))
     
     private def deleteRecursively() : Boolean = {
-      if(isDirectory) children.foreach(_.deleteRecursively())
+      if(NavigableFile.isDirectory(this)) NavigableFile.children(this).foreach(_.deleteRecursively())
       delete()
     }
   }
