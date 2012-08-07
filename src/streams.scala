@@ -113,7 +113,7 @@ trait Streams { this : Io =>
     }
  
     def >>[Data, DestUrlType](dest : DestUrlType)(implicit sr :
-        StreamReader[UrlType, Data], sw : StreamAppender[DestUrlType, Data], mf : Manifest[Data]) = {
+        StreamReader[UrlType, Data], sw : StreamAppender[DestUrlType, Data], mf : ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
         makeAppendable(dest).handleAppend[Data, Int](in > _)
@@ -299,7 +299,7 @@ trait Streams { this : Io =>
         mf : ClassTag[Data]) : Int = dest.handleOutput[Data, Int] { out => >(out) }
    
     def >>[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamAppender[UrlType, Data],
-        mf : Manifest[Data]) : Int = dest.handleAppend[Data, Int] { out => >(out) }
+        mf : ClassTag[Data]) : Int = dest.handleAppend[Data, Int] { out => >(out) }
     
     /** Pumps data from this `Input` to the specified `Output` until the end of the stream is
       * reached.
