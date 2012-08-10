@@ -28,7 +28,7 @@ object Services {
   object Tcp extends Lookup[Int] {
     
     type Item = Port
-    case class Port(name : String, portNo : Int) extends AutoAppend { def index = portNo }
+    case class Port(name: String, portNo: Int) extends AutoAppend { def index = portNo }
     
     val tcpmux = Port("tcpmux", 1)
     val compressnet = Port("compressnet", 2)

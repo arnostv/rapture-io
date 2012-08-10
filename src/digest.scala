@@ -25,17 +25,17 @@ import java.security._
 
 abstract class Digester {
   
-  def digest(msg : Array[Byte]) : Array[Byte]
+  def digest(msg: Array[Byte]): Array[Byte]
 
   /** Digests the UTF-8 representation of the given string. */
-  def digest(msg : String) : Array[Byte] = digest(msg.getBytes("UTF-8"))
+  def digest(msg: String): Array[Byte] = digest(msg.getBytes("UTF-8"))
 
   /** Digests the UTF-8 representation of the given string, and returns the
    * result in hexadecimal form. */
-  def digestHex(msg : String) : String = digestHex(msg.getBytes("UTF-8"))
+  def digestHex(msg: String): String = digestHex(msg.getBytes("UTF-8"))
 
   /** Digests the given bytes, and returns the result in hexadecimal form. */
-  def digestHex(msg : Array[Byte]) : String = {
+  def digestHex(msg: Array[Byte]): String = {
     
     val bytes = digest(msg)
     val out = new Array[Char](bytes.length * 2)
@@ -59,12 +59,12 @@ abstract class Digester {
   /** Digests the UTF-8 representation of the given string, and returns the
     * result base-64 encoded. Note that this is not strictly RFC2045 compliant
     * as the result is not padded. Append "==" to comply. */
-  def digestBase64(msg : String) : String = digestBase64(msg.getBytes("UTF-8"))
+  def digestBase64(msg: String): String = digestBase64(msg.getBytes("UTF-8"))
 
   /** Digests the given bytes, and returns the result base-64 encoded. Note
     * that this is not strictly RFC2045 compliant as the result is not padded.
     * Append "==" to comply. */
-  def digestBase64(msg : Array[Byte]) : String =
+  def digestBase64(msg: Array[Byte]): String =
     new String(Base64.encode(digest(msg), false, false))
 }
 
@@ -74,27 +74,27 @@ object Sha256 extends Digester {
   private val random = new SecureRandom
 
   /** Digests the given bytes. */
-  def digest(msg : Array[Byte]) : Array[Byte] = {
+  def digest(msg: Array[Byte]): Array[Byte] = {
     val md = MessageDigest.getInstance("SHA-256")
     md.digest(msg)
   }
 
   /** Applies the hash function after combining the supplied key with a
     * random 64-bit salt, and returns the result base-64 encoded. */
-  def makePassword(key : Array[Char]) : String = {
+  def makePassword(key: Array[Char]): String = {
     val salt = new Array[Byte](8)
     synchronized { random.nextBytes(salt) }
     buildPass(key, salt)
   }
 
   /** Checks that the given key matches the salted hash. */
-  def checkPassword(key : Array[Char], hash : String) : Boolean = {
+  def checkPassword(key: Array[Char], hash: String): Boolean = {
     val salt = Base64.decode(hash.toCharArray)
     val newCode = buildPass(key, salt)
     hash == newCode
   }
 
-  private def buildPass(key : Array[Char], salt : Array[Byte]) : String = {
+  private def buildPass(key: Array[Char], salt: Array[Byte]): String = {
     
     val md = MessageDigest.getInstance("SHA-256")
     md.update(salt, 0, 8)
@@ -128,7 +128,7 @@ object Sha256 extends Digester {
 object Md5 extends Digester {
   
   /** Digests the given bytes. */
-  def digest(msg : Array[Byte]) : Array[Byte] = {
+  def digest(msg: Array[Byte]): Array[Byte] = {
     val md = MessageDigest.getInstance("MD5")
     md.digest(msg)
   }

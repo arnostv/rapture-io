@@ -27,13 +27,13 @@ import scala.reflect._
 
 import annotation.implicitNotFound
 
-trait Streams { this : Io =>
+trait Streams { this: Io =>
 
   /** Safely closes a stream after processing */
-  def ensuring[Result, Stream](create : Stream)(body : Stream => Result)(close : Stream => Unit) = {
+  def ensuring[Result, Stream](create: Stream)(body: Stream => Result)(close: Stream => Unit) = {
     val stream = create
     val result = try { body(stream) } catch {
-      case e : Throwable => try { close(stream) } catch { case e2 : Exception => () }
+      case e: Throwable => try { close(stream) } catch { case e2: Exception => () }
       throw e
     }
     close(stream)
@@ -41,51 +41,51 @@ trait Streams { this : Io =>
     result
   }
 
-  case class Stdout[Data](implicit outputBuilder : OutputBuilder[OutputStream, Data]) {
+  case class Stdout[Data](implicit outputBuilder: OutputBuilder[OutputStream, Data]) {
     def output = outputBuilder.output(System.out)
   }
 
-  case class Stderr[Data](implicit outputBuilder : OutputBuilder[OutputStream, Data]) {
+  case class Stderr[Data](implicit outputBuilder: OutputBuilder[OutputStream, Data]) {
     def output = outputBuilder.output(System.err)
   }
   
-  case class Stdin[Data](implicit inputBuilder : InputBuilder[InputStream, Data]) {
+  case class Stdin[Data](implicit inputBuilder: InputBuilder[InputStream, Data]) {
     def input = inputBuilder.input(System.in)
   }
 
   /** Makes a `String` viewable as an `rapture.io.Input[Char]` */
-  case class StringInput(string : String) extends CharInput(new StringReader(string))
+  case class StringInput(string: String) extends CharInput(new StringReader(string))
 
   /** Makes an `Array[Byte]` viewable as an `Input[Byte]` */
-  case class ByteArrayInput(array : Array[Byte]) extends ByteInput(new ByteArrayInputStream(array))
+  case class ByteArrayInput(array: Array[Byte]) extends ByteInput(new ByteArrayInputStream(array))
 
   /** Makes a string viewable as an `Input` */
-  implicit def stringToInput(string : String) = StringInput(string)
+  implicit def stringToInput(string: String) = StringInput(string)
 
   /** Type trait for building a new `Input` from particular kind of input stream
     *
     * @tparam InputType The type of input that is to be interpreted as an `Input`,
     *         such as `java.io.InputStream` or `java.io.Reader`
     * @tparam Data The type of data that the `Input` carries */
-  trait InputBuilder[InputType, Data] { def input(s : InputType) : Input[Data] }
+  trait InputBuilder[InputType, Data] { def input(s: InputType): Input[Data] }
   
   /** Type trait for building a new `Output[Data]` from particular kind of output stream
     *
     * @tparam OutputType The type of output that is to be interpreted as an `Output`,
     *         such as [[java.io.OutputStream]] or [[java.io.Writer]]
     * @tparam Data The type of data that the [[Output]] carries */
-  trait OutputBuilder[OutputType, Data] { def output(s : OutputType) : Output[Data] }
+  trait OutputBuilder[OutputType, Data] { def output(s: OutputType): Output[Data] }
 
-  trait AppenderBuilder[OutputType, Data] { def appendOutput(s : OutputType) : Output[Data] }
+  trait AppenderBuilder[OutputType, Data] { def appendOutput(s: OutputType): Output[Data] }
 
-  implicit def makeAppendable[UrlType](url : UrlType) : Appendable[UrlType] =
+  implicit def makeAppendable[UrlType](url: UrlType): Appendable[UrlType] =
     new Appendable(url)
 
-  class Appendable[UrlType](url : UrlType) {
-    def appendOutput[Data](implicit sa : StreamAppender[UrlType, Data]) = sa.appendOutput(url)
+  class Appendable[UrlType](url: UrlType) {
+    def appendOutput[Data](implicit sa: StreamAppender[UrlType, Data]) = sa.appendOutput(url)
     
-    def handleAppend[Data, Result](body : Output[Data] => Result)(implicit sw :
-        StreamAppender[UrlType, Data]) : Result = {
+    def handleAppend[Data, Result](body: Output[Data] => Result)(implicit sw :
+        StreamAppender[UrlType, Data]): Result = {
       
       ensuring(appendOutput[Data])(body) { out =>
         out.flush()
@@ -95,25 +95,25 @@ trait Streams { this : Io =>
   }
 
   /** Provides methods for URLs which can be read as streams */
-  implicit def makeReadable[UrlType](url : UrlType) : Readable[UrlType] =
+  implicit def makeReadable[UrlType](url: UrlType): Readable[UrlType] =
     new Readable(url)
   
-  class Readable[UrlType](url : UrlType) {
+  class Readable[UrlType](url: UrlType) {
     
     /** Gets the input for the resource specified in this URL */
-    def input[Data](implicit sr : StreamReader[UrlType, Data]) = sr.input(url)
+    def input[Data](implicit sr: StreamReader[UrlType, Data]) = sr.input(url)
     
     /** Pumps the input for the specified resource to the destination URL provided */
-    def >[Data, DestUrlType](dest : DestUrlType)(implicit sr :
-        StreamReader[UrlType, Data], sw : StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) = {
+    def >[Data, DestUrlType](dest: DestUrlType)(implicit sr :
+        StreamReader[UrlType, Data], sw: StreamWriter[DestUrlType, Data], mf: ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
         makeWritable(dest).handleOutput[Data, Int](in > _)
       }
     }
  
-    def >>[Data, DestUrlType](dest : DestUrlType)(implicit sr :
-        StreamReader[UrlType, Data], sw : StreamAppender[DestUrlType, Data], mf : ClassTag[Data]) = {
+    def >>[Data, DestUrlType](dest: DestUrlType)(implicit sr :
+        StreamReader[UrlType, Data], sw: StreamAppender[DestUrlType, Data], mf: ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
         makeAppendable(dest).handleAppend[Data, Int](in > _)
@@ -124,8 +124,8 @@ trait Streams { this : Io =>
       *
       * @tparam Data The type that the data should be pumped as
       * @param out The destination for data to be pumped to */
-    def >[Data](out : Output[Data])(implicit sr : StreamReader[UrlType, Data],
-        mf : ClassTag[Data]) = handleInput[Data, Int](_ > out)
+    def >[Data](out: Output[Data])(implicit sr: StreamReader[UrlType, Data],
+        mf: ClassTag[Data]) = handleInput[Data, Int](_ > out)
 
     /** Carefully handles writing to the input stream, ensuring that it is closed following
       * data being written to the stream. Handling an input stream which is already being handled
@@ -134,28 +134,28 @@ trait Streams { this : Io =>
       * @tparam Data The type of data the stream should carry
       * @tparam Result The type of body's result
       * @param body The code to be executed upon the this Input before it is closed */
-    def handleInput[Data, Result](body : Input[Data] => Result)(implicit sr :
-        StreamReader[UrlType, Data]) : Result = {
+    def handleInput[Data, Result](body: Input[Data] => Result)(implicit sr :
+        StreamReader[UrlType, Data]): Result = {
      
       ensuring(input[Data](sr))(body) { in => if(!sr.doNotClose) in.close() }
     }
 
-    def md5Sum()(implicit sr : StreamReader[UrlType, Byte]) =
+    def md5Sum()(implicit sr: StreamReader[UrlType, Byte]) =
       Md5.digestHex(slurp[Byte, Array[Byte]]())
 
-    def sha256Sum()(implicit sr : StreamReader[UrlType, Byte]) =
+    def sha256Sum()(implicit sr: StreamReader[UrlType, Byte]) =
       Sha256.digestHex(slurp[Byte, Array[Byte]]())
 
     /** Reads in the entirety of the stream and accumulates it into an appropriate object
       * depending on the availability of implicit Accumulator type class objects in scope.
       *
-      * @usecase def slurp[Char, String]() : String
-      * @usecase def slurp[Byte, Array[Byte]]() : Array[Byte]
+      * @usecase def slurp[Char, String](): String
+      * @usecase def slurp[Byte, Array[Byte]](): Array[Byte]
       * @tparam Data The units of data being slurped
       * @tparam Acc The type of the object data will be accumulated into
       * @return The accumulated data */
-    def slurp[Data, Acc]()(implicit sr : StreamReader[UrlType, Data], AccumulatorBuilder :
-        AccumulatorBuilder[Data, Acc], mf : ClassTag[Data]) = {
+    def slurp[Data, Acc]()(implicit sr: StreamReader[UrlType, Data], AccumulatorBuilder :
+        AccumulatorBuilder[Data, Acc], mf: ClassTag[Data]) = {
 
       val c = AccumulatorBuilder.make()
       input[Data] > c
@@ -166,22 +166,22 @@ trait Streams { this : Io =>
 
   /** Provides methods for URLs which can be written to as streams, most importantly for getting an
     * `Output` */
-  implicit def makeWritable[UrlType](url : UrlType) : Writable[UrlType] = new Writable[UrlType](url)
+  implicit def makeWritable[UrlType](url: UrlType): Writable[UrlType] = new Writable[UrlType](url)
   
-  class Writable[UrlType](url : UrlType) {
+  class Writable[UrlType](url: UrlType) {
     
     /** Gets the output stream directly
       *
       * @tparam Data The type of data to be carried by the `Output` */
-    def output[Data](implicit sw : StreamWriter[UrlType, Data]) = sw.output(url)
+    def output[Data](implicit sw: StreamWriter[UrlType, Data]) = sw.output(url)
     
     /** Carefully handles writing to the output stream, ensuring that it is closed following
       * data being written.
       *
       * @param body The code to be executed upon this `Output` before being closed.
       * @return The result from executing the body */
-    def handleOutput[Data, Result](body : Output[Data] => Result)(implicit sw :
-        StreamWriter[UrlType, Data]) : Result = {
+    def handleOutput[Data, Result](body: Output[Data] => Result)(implicit sw :
+        StreamWriter[UrlType, Data]): Result = {
       
       ensuring(output[Data])(body) { out =>
         out.flush()
@@ -198,16 +198,16 @@ trait Streams { this : Io =>
       "can only be written to if a StreamWriter implicit exists within scope.")
   trait StreamWriter[-UrlType, @specialized(Byte, Char) Data] {
     def doNotClose = false
-    def output(url : UrlType) : Output[Data]
+    def output(url: UrlType): Output[Data]
   }
 
   trait StreamAppender[-UrlType, Data] {
     def doNotClose = false
-    def appendOutput(url : UrlType) : Output[Data]
+    def appendOutput(url: UrlType): Output[Data]
   }
 
   /*  Extract the encoding from an HTTP stream */
-  private def extractEncoding(huc : HttpURLConnection) : String = {
+  private def extractEncoding(huc: HttpURLConnection): String = {
     
     huc.getContentEncoding match {
       case null =>
@@ -224,14 +224,14 @@ trait Streams { this : Io =>
 
   /** Type class object for getting an Input[Char] from an HttpUrl */
   implicit object HttpStreamCharReader extends StreamReader[HttpUrl, Char] {
-    def input(url : HttpUrl) : Input[Char] =
+    def input(url: HttpUrl): Input[Char] =
       new CharInput(new BufferedReader(new InputStreamReader(url.javaConnection.getInputStream,
           extractEncoding(url.javaConnection))))
   }
 
   /** Type class object for getting an Input[Char] from an HttpsUrl */
   implicit object HttpsStreamCharReader extends StreamReader[HttpsUrl, Char] {
-    def input(url : HttpsUrl) : Input[Char] =
+    def input(url: HttpsUrl): Input[Char] =
       new CharInput(new BufferedReader(new InputStreamReader(url.javaConnection.getInputStream,
           extractEncoding(url.javaConnection))))
   }
@@ -242,12 +242,12 @@ trait Streams { this : Io =>
     private var beingHandled = false
     
     /** Returns whether the stream can be read without blocking */
-    def ready() : Boolean
+    def ready(): Boolean
 
     /** Reads a single item of data from the input stream.  Note that each call to this method
       * will result in a new instance of `Some` to be constructed, so for reading larger block, use
       * the `readBlock` method which may be implemented more efficiently. */
-    def read() : Option[Data]
+    def read(): Option[Data]
    
     /** Default implementation for reading a block of data from the input stream into the specified
       * array.
@@ -257,7 +257,7 @@ trait Streams { this : Io =>
       *        written.  Defaults to the start of the array.
       * @param length The length of data to read from the stream into the array.
       * @return The number of items of data transferred */
-    def readBlock(array : Array[Data], offset : Int = 0, length : Int = -1) : Int = {
+    def readBlock(array: Array[Data], offset: Int = 0, length: Int = -1): Int = {
 
       val end = if(length < 0) (array.length - offset) else (offset + length)
 
@@ -282,30 +282,30 @@ trait Streams { this : Io =>
     }
    
     /** Reads the whole stream into an accumulator */
-    def slurp[Acc]()(implicit accumulatorBuilder : AccumulatorBuilder[Data, Acc],
-        mf : ClassTag[Data]) : Acc = {
+    def slurp[Acc]()(implicit accumulatorBuilder: AccumulatorBuilder[Data, Acc],
+        mf: ClassTag[Data]): Acc = {
       val acc = accumulatorBuilder.make()
       >(acc)
       acc.buffer
     }
 
     /** Closes the input stream so that no further data will be provided. */
-    def close() : Unit
+    def close(): Unit
     
     /** Pumps the data from this `Input[Data]` to the given destination.
       *
       * @param dest The destination URL for data to be pumped to */
-    def >[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamWriter[UrlType, Data],
-        mf : ClassTag[Data]) : Int = dest.handleOutput[Data, Int] { out => >(out) }
+    def >[UrlType <: Url[UrlType]](dest: UrlType)(implicit to: StreamWriter[UrlType, Data],
+        mf: ClassTag[Data]): Int = dest.handleOutput[Data, Int] { out => >(out) }
    
-    def >>[UrlType <: Url[UrlType]](dest : UrlType)(implicit to : StreamAppender[UrlType, Data],
-        mf : ClassTag[Data]) : Int = dest.handleAppend[Data, Int] { out => >(out) }
+    def >>[UrlType <: Url[UrlType]](dest: UrlType)(implicit to: StreamAppender[UrlType, Data],
+        mf: ClassTag[Data]): Int = dest.handleAppend[Data, Int] { out => >(out) }
     
     /** Pumps data from this `Input` to the specified `Output` until the end of the stream is
       * reached.
       *
       * @param out The output stream to receive data pumped from this `Input` */
-    def >(out : Output[Data])(implicit mf : ClassTag[Data]) : Int = {
+    def >(out: Output[Data])(implicit mf: ClassTag[Data]): Int = {
       val buf = new Array[Data](65536)
       var len = readBlock(buf)
       var count = 0
@@ -325,7 +325,7 @@ trait Streams { this : Io =>
     /** Writes one item of data to this stream
       *
       * @param data The data to be written */
-    def write(data : Data) : Unit
+    def write(data: Data): Unit
   
     /** Writes a block of data from an array to the stream
       *
@@ -335,7 +335,7 @@ trait Streams { this : Io =>
       * @param length The length of data to write from the array into the stream. Defaults to the
       *        remainder of the array.
       * @return The number of data items written. */
-    def writeBlock(array : Array[Data], offset : Int = 0, length : Int = -1) : Int = {
+    def writeBlock(array: Array[Data], offset: Int = 0, length: Int = -1): Int = {
       
       val end = if(length < 0) (array.length - offset) else (offset + length)
       array.slice(offset, end).foreach(write)
@@ -344,10 +344,10 @@ trait Streams { this : Io =>
     }
    
     /** Flushes the stream */
-    def flush() : Unit
+    def flush(): Unit
 
     /** Closes the stream */
-    def close() : Unit
+    def close(): Unit
   }
  
   /** Generic type class for reading a particular kind of data from 
@@ -362,16 +362,16 @@ trait Streams { this : Io =>
       *
       * @param url The URL to get the input stream from
       * @return an `Input[Data]` for the specified URL */
-    def input(url : UrlType) : Input[Data]
+    def input(url: UrlType): Input[Data]
     
     /** Pumps data from the specified URL to the given destination URL */
-    def pump[DestUrlType <: Url[DestUrlType]](url : UrlType, dest : DestUrlType)(implicit sw :
-      StreamWriter[DestUrlType, Data], mf : ClassTag[Data]) : Int = input(url) > dest
+    def pump[DestUrlType <: Url[DestUrlType]](url: UrlType, dest: DestUrlType)(implicit sw :
+      StreamWriter[DestUrlType, Data], mf: ClassTag[Data]): Int = input(url) > dest
   }
 
   /** Type class object for reading `Char`s from a `String` */
   implicit object StringCharReader extends StreamReader[String, Char] {
-    def input(s : String) : Input[Char] = StringInput(s)
+    def input(s: String): Input[Char] = StringInput(s)
   }
 
 }

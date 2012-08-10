@@ -31,11 +31,11 @@ import java.util._
 abstract class AesEncryption {
 
   /** Must be 16, 24 or 32 bytes long. */
-  protected def secretKey : Array[Byte]
+  protected def secretKey: Array[Byte]
 
   private val keySpec = new SecretKeySpec(secretKey, "AES")
 
-  def encrypt(clearText : Array[Byte]) : Array[Byte] = {
+  def encrypt(clearText: Array[Byte]): Array[Byte] = {
     
     val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
     
@@ -52,7 +52,7 @@ abstract class AesEncryption {
     cipherText
   }
 
-  def decrypt(cipherText : Array[Byte]) : Option[Array[Byte]] =
+  def decrypt(cipherText: Array[Byte]): Option[Array[Byte]] =
     if(cipherText.length < 48) None
     else {
       
@@ -82,12 +82,12 @@ abstract class AesEncryption {
       }
     }
 
-  def apply(clearText : Array[Byte]) : Array[Byte] = encrypt(clearText)
+  def apply(clearText: Array[Byte]): Array[Byte] = encrypt(clearText)
   
-  def unapply(cipherText : Array[Byte]) : Option[Array[Byte]] = decrypt(cipherText)
+  def unapply(cipherText: Array[Byte]): Option[Array[Byte]] = decrypt(cipherText)
 }
 
-class Base64StringEncryption(sk : String) {
+class Base64StringEncryption(sk: String) {
   
   private val _secretKey = sk.getBytes("ASCII")
   
@@ -95,10 +95,10 @@ class Base64StringEncryption(sk : String) {
 
   private val aesEnc = new AesEncryption { def secretKey = _secretKey }
 
-  def encrypt(string : String) : String =
+  def encrypt(string: String): String =
     Base64.encode(aesEnc.encrypt(string.getBytes("UTF-8"))).mkString
   
-  def decrypt(string : String) : Option[String] =
+  def decrypt(string: String): Option[String] =
     aesEnc.decrypt(Base64.decode(string)).map(s => new String(s, "UTF-8"))
 }
 
@@ -106,18 +106,18 @@ class Base64StringEncryption(sk : String) {
 abstract class AesNumbers {
 
   /** Must be 16, 24 or 32 bytes long. */
-  protected def secretKey : Array[Byte]
+  protected def secretKey: Array[Byte]
   
   private val keySpec = new SecretKeySpec(secretKey, "AES")
 
   private val random = new SecureRandom
 
-  protected def encryptLong(clear : Long) : String = {
+  protected def encryptLong(clear: Long): String = {
     val salt = synchronized { random.nextInt() }
     encryptLong(clear, salt)
   }
 
-  protected def encryptLong(clear : Long, salt : Int) : String = {
+  protected def encryptLong(clear: Long, salt: Int): String = {
     val cipher = Cipher.getInstance("AES/ECB/NoPadding")
     cipher.init(Cipher.ENCRYPT_MODE, keySpec)
 
@@ -146,7 +146,7 @@ abstract class AesNumbers {
     new String(Base64.encode(out, false, false))
   }
 
-  protected def decryptLong(cipherText : String) : Option[Long] =
+  protected def decryptLong(cipherText: String): Option[Long] =
     if(cipherText.length == 22) {
       val in = Base64.decode(cipherText.toCharArray)
       val cipher = Cipher.getInstance("AES/ECB/NoPadding")
@@ -191,12 +191,12 @@ abstract class AesNumbers {
   * threadsafe. */
 abstract class AesInts extends AesNumbers {
   
-  def encrypt(clear : Int) : String = encryptLong(clear & 0xFFFFFFFFL)
-  def encrypt(clear : Int, salt : Int) : String = encryptLong(clear & 0xFFFFFFFFL, salt)
-  def apply(clear : Int) : String = encrypt(clear)
-  def unapply(cipherText : String) : Option[Int] = decrypt(cipherText)
+  def encrypt(clear: Int): String = encryptLong(clear & 0xFFFFFFFFL)
+  def encrypt(clear: Int, salt: Int): String = encryptLong(clear & 0xFFFFFFFFL, salt)
+  def apply(clear: Int): String = encrypt(clear)
+  def unapply(cipherText: String): Option[Int] = decrypt(cipherText)
   
-  def decrypt(cipherText : String) : Option[Int] =
+  def decrypt(cipherText: String): Option[Int] =
     decryptLong(cipherText) match {
       case None => None
       case Some(longVal) =>
@@ -215,9 +215,9 @@ abstract class AesInts extends AesNumbers {
   * AesEncryption interface provides rather stronger theoretical guarantees.
   * This class is threadsafe. */
 abstract class AesLongs extends AesNumbers {
-  def encrypt(clear : Long) : String = encryptLong(clear)
-  def encrypt(clear : Long, salt : Int) : String = encryptLong(clear, salt)
-  def decrypt(cipherText : String) : Option[Long] = decryptLong(cipherText)
-  def apply(clear : Long) : String = encrypt(clear)
-  def unapply(cipherText : String) : Option[Long] = decrypt(cipherText)
+  def encrypt(clear: Long): String = encryptLong(clear)
+  def encrypt(clear: Long, salt: Int): String = encryptLong(clear, salt)
+  def decrypt(cipherText: String): Option[Long] = decryptLong(cipherText)
+  def apply(clear: Long): String = encrypt(clear)
+  def unapply(cipherText: String): Option[Long] = decrypt(cipherText)
 }

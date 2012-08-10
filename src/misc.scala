@@ -30,19 +30,19 @@ trait Lookup[Index] {
 
   type Item <: AutoAppend
 
-  trait AutoAppend { thisItem : Item =>
-    def index : Index
+  trait AutoAppend { thisItem: Item =>
+    def index: Index
     items(index) = thisItem
   }
 
   private val items = new HashMap[Index, Item]
   def elements = items.valuesIterator
-  def lookup(idx : Index) : Option[Item] = items.get(idx)
+  def lookup(idx: Index): Option[Item] = items.get(idx)
 }
 
 trait Cell[T] {
-  def apply() : T
-  def update(t : T) : Unit
+  def apply(): T
+  def update(t: T): Unit
 }
 
 class Counter {

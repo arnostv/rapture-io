@@ -25,14 +25,14 @@ import java.io._
 import java.net._
 
 /** Provides framework classes and traits for handling general URLs. */
-trait Urls { this : Io =>
+trait Urls { this: Io =>
 
   /** Represents a generic URL */
-  abstract class Url[+UrlType <: Url[UrlType]](elements : Seq[String])
-      extends AbsolutePath[UrlType](elements) { thisPath : UrlType =>
+  abstract class Url[+UrlType <: Url[UrlType]](elements: Seq[String])
+      extends AbsolutePath[UrlType](elements) { thisPath: UrlType =>
     
     /** The base for this URL */
-    val urlBase : UrlBase[UrlType]
+    val urlBase: UrlBase[UrlType]
 
     /** Delegate to make the URL's scheme from the UrlBase visible from the URL */
     def scheme = urlBase.scheme
@@ -40,16 +40,16 @@ trait Urls { this : Io =>
     override def toString() = urlBase.toString()+super.toString()
     
     /** Constructs a new URL by appending the given path element to the path. */
-    override def /(element : String) = urlBase.makePath(thisPath.elements ++ Array(element))
+    override def /(element: String) = urlBase.makePath(thisPath.elements ++ Array(element))
     
     /** Constructs a new URL by calculating the destination URL by following  the given
       * `Path` from this URL */
-    def /(path : Path) = urlBase.makePath(path.elements)
+    def /(path: Path) = urlBase.makePath(path.elements)
     
     /** Calculates the destination of the given link from this URL
       *
       * @param path the relative path */
-    override def +(dest : Path) : UrlType =
+    override def +(dest: Path): UrlType =
       urlBase.makePath(dest.elements ++ thisPath.elements.drop(dest.ascent))
 
     /** Calculates the path between this URL and the given destination URL, if possible as a
@@ -61,24 +61,24 @@ trait Urls { this : Io =>
       * @return The relative link between this `Url` and the destination `Url`, if possible, or the
       *         destination path if not.
       * */
-    override def link[PathType <: AbsolutePath[PathType]](dest : AbsolutePath[PathType]) : Path =
+    override def link[PathType <: AbsolutePath[PathType]](dest: AbsolutePath[PathType]): Path =
       if(dest.isInstanceOf[Url[_]] && dest.asInstanceOf[Url[_]].urlBase == urlBase) super.link(dest)
       else dest
   }
 
   /** Repenesents a URL scheme */
-  trait Scheme[+U <: Url[U]] { def schemeName : String }
+  trait Scheme[+U <: Url[U]] { def schemeName: String }
 
   /** Defines a base to upon which the hierarchical part of the URL is appended */
   abstract class UrlBase[+U <: Url[U]] extends AbsolutePath[U](Nil) {
     override def toString() = scheme.schemeName+"://"
-    def scheme : Scheme[U]
-    def makePath(elements : Seq[String]) : U
+    def scheme: Scheme[U]
+    def makePath(elements: Seq[String]): U
   }
 
   /** Specifies additional methods for URLs which have a hierarchical structure. */
-  trait PathUrl[+UrlType <: Url[UrlType]] { pathUrl : UrlType =>
-    def /(d : String) : UrlType
-    def /(path : Path) : UrlType
+  trait PathUrl[+UrlType <: Url[UrlType]] { pathUrl: UrlType =>
+    def /(d: String): UrlType
+    def /(path: Path): UrlType
   }
 }

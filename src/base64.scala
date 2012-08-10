@@ -25,7 +25,7 @@ object Base64 extends Base64Codec
 object Base64Url extends Base64Codec(char62 = '-', char63 = '_')
 
 /** RFC2045 base-64 codec, based on http://migbase64.sourceforge.net/. */
-class Base64Codec(val char62 : Char = '+', val char63 : Char = '/', val padChar : Char = '=') {
+class Base64Codec(val char62: Char = '+', val char63: Char = '/', val padChar: Char = '=') {
   
   private val Alphabet =
     ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"+char62+char63).toCharArray
@@ -41,8 +41,8 @@ class Base64Codec(val char62 : Char = '+', val char63 : Char = '/', val padChar 
   /** Encoder. The RFC requires that line breaks be added every 76 chars, and
     * that the data be padded to a multiple of 4 chars, but we do these things
     * optionally. */
-  def encode(in : Array[Byte], lineBreaks : Boolean = false,
-      endPadding : Boolean = false) : Array[Char] = {
+  def encode(in: Array[Byte], lineBreaks: Boolean = false,
+      endPadding: Boolean = false): Array[Char] = {
     
     var inLen = in.length
     
@@ -106,7 +106,7 @@ class Base64Codec(val char62 : Char = '+', val char63 : Char = '/', val padChar 
     * does not tolerate any other illegal characters, including line breaks at
     * positions other than 76-char boundaries, in which case the result will
     * be garbage. */
-  def decode(in : Array[Char]) : Array[Byte] = {
+  def decode(in: Array[Char]): Array[Byte] = {
     
     val inLen = in.length
     
@@ -162,10 +162,10 @@ class Base64Codec(val char62 : Char = '+', val char63 : Char = '/', val padChar 
     }
   }
 
-  def decode(in : String) : Array[Byte] = decode(in.toCharArray())
+  def decode(in: String): Array[Byte] = decode(in.toCharArray())
   
-  def apply(in : Array[Byte]) : Array[Char] = encode(in)
+  def apply(in: Array[Byte]): Array[Char] = encode(in)
   
-  def unapply(in : Array[Char]) : Option[Array[Byte]] = Some(decode(in))
+  def unapply(in: Array[Char]): Option[Array[Byte]] = Some(decode(in))
 }
 

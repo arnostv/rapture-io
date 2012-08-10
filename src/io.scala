@@ -35,52 +35,52 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
-    def input(url : FileUrl) : Input[Byte] =
+    def input(url: FileUrl): Input[Byte] =
       new ByteInput(new BufferedInputStream(new FileInputStream(url.javaFile)))
   }
 
   /** Type class object for writing `Byte`s to `FileUrl`s */
   implicit object FileStreamByteWriter extends StreamWriter[FileUrl, Byte] {
-    def output(url : FileUrl) : Output[Byte] =
+    def output(url: FileUrl): Output[Byte] =
       new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile)))
   }
 
   implicit object FileStreamByteAppender extends StreamAppender[FileUrl, Byte] {
-    def appendOutput(url : FileUrl) : Output[Byte] =
+    def appendOutput(url: FileUrl): Output[Byte] =
       new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile, true)))
   }
 
   /** Type class object for reading `Byte`s from `HttpUrl`s */
   implicit object HttpStreamByteReader extends StreamReader[HttpUrl, Byte] {
-    def input(url : HttpUrl) : Input[Byte] =
+    def input(url: HttpUrl): Input[Byte] =
       new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream))
   }
 
   /** Type class object for reading `Byte`s from `HttpsUrl`s */
   implicit object HttpsStreamByteReader extends StreamReader[HttpsUrl, Byte] {
-    def input(url : HttpsUrl) : Input[Byte] =
+    def input(url: HttpsUrl): Input[Byte] =
       new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream))
   }
 
   implicit def stdoutWriter[Data] = new StreamWriter[Stdout[Data], Data] {
     override def doNotClose = true
-    def output(stdout : Stdout[Data]) = stdout.output
+    def output(stdout: Stdout[Data]) = stdout.output
   }
 
   implicit def stderrWriter[Data] = new StreamWriter[Stderr[Data], Data] {
     override def doNotClose = true
-    def output(stderr : Stderr[Data]) = stderr.output
+    def output(stderr: Stderr[Data]) = stderr.output
   }
 
   implicit def stdin[Data] = new StreamReader[Stdin[Data], Data] {
     override def doNotClose = true
-    def input(stdin : Stdin[Data]) = stdin.input
+    def input(stdin: Stdin[Data]) = stdin.input
   }
 
-  implicit def urlCodec(s : String) = new {
-    def urlEncode(implicit encoding : Encodings.Encoding = Encodings.`UTF-8`) =
+  implicit def urlCodec(s: String) = new {
+    def urlEncode(implicit encoding: Encodings.Encoding = Encodings.`UTF-8`) =
       URLEncoder.encode(s, encoding.name)
-    def urlDecode(implicit encoding : Encodings.Encoding = Encodings.`UTF-8`) =
+    def urlDecode(implicit encoding: Encodings.Encoding = Encodings.`UTF-8`) =
       URLDecoder.decode(s, encoding.name)
   }
 

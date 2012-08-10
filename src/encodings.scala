@@ -29,7 +29,7 @@ package rapture.io
 object Encodings extends Lookup[String] {
   
   type Item = Encoding
-  case class Encoding(name : String) extends AutoAppend { def index = name }
+  case class Encoding(name: String) extends AutoAppend { def index = name }
   
   val `US-ASCII` = Encoding("US-ASCII")
   val `windows-1250` = Encoding("windows-1250")

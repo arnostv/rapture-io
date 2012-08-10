@@ -25,53 +25,53 @@ import java.io._
 import java.net._
 
 /** Defines some extractors for retrieving data from character streams */
-trait Extractors { this : Io =>
+trait Extractors { this: Io =>
 
   /** Defines extractors for getting Scala XML from a String or Input[Char]. The stream extractor
     * simply collects the input into a String, then parses the String, so more efficient
     * implementation may be possible. .*/
   object Xml {
     
-    def unapply(in : Input[Char]) : Option[Seq[scala.xml.Node]] = try {
+    def unapply(in: Input[Char]): Option[Seq[scala.xml.Node]] = try {
       val so = new StringOutput
       in > so
       unapply(so.buffer)
-    } catch { case e : Exception => None }
+    } catch { case e: Exception => None }
 
-    def unapply(in : String) : Option[Seq[scala.xml.Node]] =
-      try { Some(scala.xml.XML.loadString(in)) } catch { case e : Exception => None }
+    def unapply(in: String): Option[Seq[scala.xml.Node]] =
+      try { Some(scala.xml.XML.loadString(in)) } catch { case e: Exception => None }
   }
 
   /** Defines extractors for parsing a JSON array from an Input[Char] or a String. */
   object JsonArray {
     
-    def unapply(in : Input[Char]) : Option[List[Any]] = try {
+    def unapply(in: Input[Char]): Option[List[Any]] = try {
       val so = new StringOutput
       in > so
       unapply(so.buffer)
-    } catch { case e : Exception => None }
+    } catch { case e: Exception => None }
 
-    def unapply(in : String) : Option[List[Any]] = try {
+    def unapply(in: String): Option[List[Any]] = try {
       scala.util.parsing.json.JSON.parseFull(in) flatMap { a =>
         if(a.isInstanceOf[List[_]]) Some(a.asInstanceOf[List[Any]]) else None
       }
-    } catch { case e : Exception => None }
+    } catch { case e: Exception => None }
   }
 
   /** Defines extractors for parsing a JSON object from an Input[Char] or a String. */
   object JsonObject {
 
-    def unapply(in : Input[Char]) : Option[Map[String, Any]] = try {
+    def unapply(in: Input[Char]): Option[Map[String, Any]] = try {
       val so = new StringOutput
       in > so
       unapply(so.buffer)
-    } catch { case e : Exception => None }
+    } catch { case e: Exception => None }
 
-    def unapply(in : String) : Option[Map[String, Any]] = try {
+    def unapply(in: String): Option[Map[String, Any]] = try {
       scala.util.parsing.json.JSON.parseFull(in) flatMap { a =>
         if(a.isInstanceOf[Map[_, _]]) Some(a.asInstanceOf[Map[String, Any]]) else None
       }
-    } catch { case e : Exception => None }
+    } catch { case e: Exception => None }
   }
 
 }

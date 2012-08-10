@@ -26,7 +26,7 @@ import java.io._
 /** Defines the framework for accumulating streams into objects of other types, e.g. `Char`s into
   * `String`s.  This provides the infrastructure needed for the slurp method.  Three type class
   * objects are provided for accumulating streams of Bytes, `Char`s and `String`s. */
-trait Accumulators { this : Io =>
+trait Accumulators { this: Io =>
 
   /** Interface for an accumulator which is a special kind of output which collects and stores all
     * input in a buffer which can be retrieved afterwards.  No guarantees are made about input
@@ -34,10 +34,10 @@ trait Accumulators { this : Io =>
     *
     * @tparam Data The type of data to be accumulated
     * @tparam Acc The type into which the data will be accumulated */
-  trait Accumulator[Data, Acc] extends Output[Data] { def buffer : Acc }
+  trait Accumulator[Data, Acc] extends Output[Data] { def buffer: Acc }
 
   /** Defines a trait for creating new `Accumulator`s */
-  trait AccumulatorBuilder[T, U] { def make() : Accumulator[T, U] }
+  trait AccumulatorBuilder[T, U] { def make(): Accumulator[T, U] }
 
   /** Type class object for creating an accumulator of `Char`s into a `String` */
   implicit object CharAccumulator extends AccumulatorBuilder[Char, String] {
@@ -58,20 +58,20 @@ trait Accumulators { this : Io =>
   class StringOutput extends {
     private val sw = new StringWriter
   } with CharOutput(sw) with Accumulator[Char, String] {
-    def buffer : String = sw.toString
+    def buffer: String = sw.toString
   }
 
   /** Collects `Byte`s into an `Array[Byte]` */
   class ByteArrayOutput extends {
     private val baos = new ByteArrayOutputStream
   } with ByteOutput(baos) with Accumulator[Byte, Array[Byte]] {
-    def buffer : Array[Byte] = baos.toByteArray
+    def buffer: Array[Byte] = baos.toByteArray
   }
 
   /** Collects `String`s into another `String` */
   class LinesOutput extends {
     private val sw = new StringWriter
   } with LineOutput(sw) with Accumulator[String, String] {
-    def buffer : String = sw.toString
+    def buffer: String = sw.toString
   }
 }
