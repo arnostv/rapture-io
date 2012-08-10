@@ -37,20 +37,26 @@ trait Accumulators { this: Io =>
   trait Accumulator[Data, Acc] extends Output[Data] { def buffer: Acc }
 
   /** Defines a trait for creating new `Accumulator`s */
-  trait AccumulatorBuilder[T, U] { def make(): Accumulator[T, U] }
+  trait AccumulatorBuilder[T] {
+    type Out
+    def make(): Accumulator[T, Out]
+  }
 
   /** Type class object for creating an accumulator of `Char`s into a `String` */
-  implicit object CharAccumulator extends AccumulatorBuilder[Char, String] {
+  implicit object CharAccumulator extends AccumulatorBuilder[Char] {
+    type Out = String
     def make() = new StringOutput
   }
 
   /** Type class object for creating an accumulator Bytes into an `Array` of `Byte`s */
-  implicit object ByteAccumulator extends AccumulatorBuilder[Byte, Array[Byte]] {
+  implicit object ByteAccumulator extends AccumulatorBuilder[Byte] {
+    type Out = Array[Byte]
     def make() = new ByteArrayOutput
   }
 
   /** Type class object for creating an accumulator of `String`s */
-  implicit object StringAccumulator extends AccumulatorBuilder[String, String] {
+  implicit object StringAccumulator extends AccumulatorBuilder[String] {
+    type Out = String
     def make() = new LinesOutput
   }
 

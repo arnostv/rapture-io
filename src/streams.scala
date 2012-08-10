@@ -141,21 +141,20 @@ trait Streams { this: Io =>
     }
 
     def md5Sum()(implicit sr: StreamReader[UrlType, Byte]) =
-      Md5.digestHex(slurp[Byte, Array[Byte]]())
+      Md5.digestHex(slurp[Byte]())
 
     def sha256Sum()(implicit sr: StreamReader[UrlType, Byte]) =
-      Sha256.digestHex(slurp[Byte, Array[Byte]]())
+      Sha256.digestHex(slurp[Byte]())
 
     /** Reads in the entirety of the stream and accumulates it into an appropriate object
       * depending on the availability of implicit Accumulator type class objects in scope.
       *
-      * @usecase def slurp[Char, String](): String
-      * @usecase def slurp[Byte, Array[Byte]](): Array[Byte]
+      * @usecase def slurp[Char](): String
+      * @usecase def slurp[Byte](): Array[Byte]
       * @tparam Data The units of data being slurped
-      * @tparam Acc The type of the object data will be accumulated into
       * @return The accumulated data */
-    def slurp[Data, Acc]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder :
-        AccumulatorBuilder[Data, Acc], mf: ClassTag[Data]) = {
+    def slurp[Data]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder :
+        AccumulatorBuilder[Data], mf: ClassTag[Data]) = {
 
       val c = accumulatorBuilder.make()
       input[Data] > c
@@ -282,8 +281,8 @@ trait Streams { this: Io =>
     }
    
     /** Reads the whole stream into an accumulator */
-    def slurp[Acc]()(implicit accumulatorBuilder: AccumulatorBuilder[Data, Acc],
-        mf: ClassTag[Data]): Acc = {
+    def slurp()(implicit accumulatorBuilder: AccumulatorBuilder[Data],
+        mf: ClassTag[Data]) = {
       val acc = accumulatorBuilder.make()
       >(acc)
       acc.buffer
