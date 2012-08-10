@@ -42,6 +42,13 @@ case class Ip4(b1: Int, b2: Int, b3: Int, b4: Int) {
   def in(subnet: Subnet) = subnet contains this
   override def toString() = b1+"."+b2+"."+b3+"."+b4
   def isPrivate = Ip4.privateSubnets.exists(in)
+
+  override def equals(that: Any) : Boolean = that match {
+    case that: Ip4 => b1 == that.b1 && b2 == that.b2 && b3 == that.b3 && b4 == that.b4
+    case _ => false
+  }
+
+  override def hashCode = b1<<24 | b2<<16 | b3<<8 | b4
 }
 
 object Subnet {
@@ -65,8 +72,15 @@ class Subnet(baseIp: Ip4, val bits: Int) extends Iterable[Ip4] {
   def maximum = Ip4.fromLong((((baseIp.asLong>>(32 - bits)) + 1)<<(32 - bits)) - 1)
   val ip = Ip4.fromLong((baseIp.asLong>>(32 - bits))<<(32 - bits))
   override def size = 1 << (32 - bits)
-  override def toString() = baseIp.toString+"/"+bits
+  override def toString() = ip.toString+"/"+bits
   def contains(ip2: Ip4) = Ip4.fromLong((ip2.asLong>>(32 - bits))<<(32 - bits)) == ip
+
+  override def equals(that: Any) = that match {
+    case that: Subnet => ip == that.ip && bits == that.bits
+    case _ => false
+  }
+
+  override def hashCode = ip.hashCode | bits
 }
 
 object Localhost extends Ip4(127, 0, 0, 1)
