@@ -51,7 +51,7 @@ trait Net { this: Io =>
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
   trait NetUrl[+U <: Url[U]] { netUrl: U =>
     
-    private[io] def javaConnection =
+    private[io] def javaConnection : HttpURLConnection =
       new URL(toString).openConnection().asInstanceOf[HttpURLConnection]
     
     def hostname: String

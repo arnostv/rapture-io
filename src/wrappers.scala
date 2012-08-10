@@ -26,10 +26,24 @@ import java.net._
 
 import annotation.implicitNotFound
 
+trait LowPriorityWrappers { this: Io =>
+  
+  /** Type class object for creating an Input[Byte] from a Java InputStream */
+  implicit object InputStreamBuilder extends InputBuilder[InputStream, Byte] {
+    def input(s: InputStream) = new ByteInput(s)
+  }
+
+  /** Type class object for creating an Output[Byte] from a Java Reader */
+  implicit object OutputStreamBuilder extends OutputBuilder[OutputStream, Byte] {
+    def output(s: OutputStream) = new ByteOutput(s)
+  }
+
+}
+
 /** Provides wrappers around Java's standard stream classes: `InputStream`, `OutputStream`, `Reader`
   * `Writer`, generalising them into `Input`s and `Output`s parameterised by the type of data they
   * carry. */
-trait Wrappers { this: Io =>
+trait Wrappers extends LowPriorityWrappers { this: Io =>
 
   /** Wraps a `java.io.Reader` as an `Input[Char]` */
   class CharInput(in: Reader) extends Input[Char] {
@@ -158,11 +172,6 @@ trait Wrappers { this: Io =>
     def close() = in.close()
   }
 
-  /** Type class object for creating an Input[Byte] from a Java InputStream */
-  implicit object InputStreamBuilder extends InputBuilder[InputStream, Byte] {
-    def input(s: InputStream) = new ByteInput(s)
-  }
-
   /** Type class object for creating an Input[Char] from a Java Reader */
   implicit object ReaderBuilder extends InputBuilder[Reader, Char] {
     def input(s: Reader) = new CharInput(s)
@@ -171,11 +180,6 @@ trait Wrappers { this: Io =>
   /** Type class object for creating an Input[String] from a Java Reader */
   implicit object LineReaderBuilder extends InputBuilder[Reader, String] {
     def input(s: Reader) = new LineInput(s)
-  }
-
-  /** Type class object for creating an Output[Byte] from a Java Reader */
-  implicit object OutputStreamBuilder extends OutputBuilder[OutputStream, Byte] {
-    def output(s: OutputStream) = new ByteOutput(s)
   }
 
   /** Type class object for creating an Output[Char] from a Java Writer */

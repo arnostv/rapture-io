@@ -47,7 +47,8 @@ object MimeTypes {
     MimeType("text/plain", "asc", "conf", "def", "diff", "in", "list", "log", "pot", "text", "txt")
   
   val `application/x-www-form-urlencoded` = MimeType("application/x-www-form-urlencoded")
-  
+
+  // These have been commented out to avoid a compiler bug
   /*
   val `application/activemessage` = MimeType("application/activemessage")
   val `application/andrew-inset` = MimeType("application/andrew-inset", "ez")

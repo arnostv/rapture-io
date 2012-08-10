@@ -21,15 +21,9 @@ License.
 
 package rapture
 
-/** The I/O package provides a framework for generalised streaming and URL handling.
+/** The I/O package provides a framework for generalized streaming and resource handling.
   *
   * @author Jon Pretty
   * @version 0.6.0
   */
-package object io extends Io {
-
-  //implicit val implicitConversions = language.implicitConversions
-
-  type JavaFile = java.io.File
-
-}
+package object io extends io.Io

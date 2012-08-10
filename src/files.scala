@@ -38,7 +38,7 @@ trait Files { this: Io =>
   /** Type class object for reading `FileUrl`s as `Input[Stream]`s */
   implicit object FileStreamCharReader extends StreamReader[FileUrl, Char] {
     def input(url: FileUrl): Input[Char] =
-      new CharInput(new BufferedReader(new FileReader(new JavaFile(url.pathString))))
+      new CharInput(new BufferedReader(new FileReader(new java.io.File(url.pathString))))
   }
 
   /** The file scheme object used as a factory for FileUrls. */
@@ -56,7 +56,7 @@ trait Files { this: Io =>
     def makePath(elements: Seq[String]) = new FileUrl(thisUrlBase, elements.toArray[String])
     
     /** Method for creating a new FileUrl from a java.io.File. */
-    def apply(file: JavaFile) = makePath(file.getAbsolutePath.split("\\/"))
+    def apply(file: java.io.File) = makePath(file.getAbsolutePath.split("\\/"))
     
     /** Reference to the scheme for this type of URL */
     def scheme: Scheme[FileUrl] = File
@@ -106,7 +106,7 @@ trait Files { this: Io =>
   class FileUrl(val urlBase: UrlBase[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements)
       with PathUrl[FileUrl] {
 
-    lazy val javaFile: JavaFile = new JavaFile(pathString)
+    lazy val javaFile: java.io.File = new java.io.File(pathString)
     
     /** Returns true if the file or directory represented by this FileUrl can be read from. */
     def readable: Boolean = javaFile.canRead()
@@ -158,8 +158,8 @@ trait Files { this: Io =>
     def renameTo(dest: FileUrl): Boolean = javaFile.renameTo(dest.javaFile)
     
     /** Copies this file to a new location specified by the dest parameter. */
-    def copyTo(dest: FileUrl)(implicit sr: StreamReader[FileUrl, Byte],
-        sw: StreamWriter[FileUrl, Byte]): Boolean = sr.pump(this, dest) > 0
+    def copyTo(dest: FileUrl)(implicit sr: StreamReader[FileUrl, Byte]): Boolean =
+      sr.pump(this, dest) > 0
     
     /** Moves this file to a new location specified by the dest parameter. This will first attempt
       * to move the file by renaming it, but will attempt copying and deletion if renaming fails. */
