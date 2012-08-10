@@ -89,6 +89,7 @@ trait Wrappers { this: Io =>
     override def writeBlock(array: Array[Byte], offset: Int = 0, length: Int = -1): Int = {
       val len = if(length == -1) (array.length - offset) else length
       bout.write(array, offset, len)
+      bout.flush()
       len
     }
 
@@ -109,6 +110,7 @@ trait Wrappers { this: Io =>
     override def writeBlock(array: Array[Char], offset: Int = 0, length: Int = -1): Int = {
       val len = if(length == -1) (array.length - offset) else length
       bout.write(array, offset, len)
+      bout.flush()
       len
     }
 
