@@ -154,10 +154,10 @@ trait Streams { this: Io =>
       * @tparam Data The units of data being slurped
       * @tparam Acc The type of the object data will be accumulated into
       * @return The accumulated data */
-    def slurp[Data, Acc]()(implicit sr: StreamReader[UrlType, Data], AccumulatorBuilder :
+    def slurp[Data, Acc]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder :
         AccumulatorBuilder[Data, Acc], mf: ClassTag[Data]) = {
 
-      val c = AccumulatorBuilder.make()
+      val c = accumulatorBuilder.make()
       input[Data] > c
 
       c.buffer
