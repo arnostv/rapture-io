@@ -47,7 +47,7 @@ case class Ip4(b1: Int, b2: Int, b3: Int, b4: Int) {
   override def toString() = b1+"."+b2+"."+b3+"."+b4
   def isPrivate = Ip4.privateSubnets.exists(in)
 
-  override def equals(that: Any) : Boolean = that match {
+  override def equals(that: Any): Boolean = that match {
     case that: Ip4 => b1 == that.b1 && b2 == that.b2 && b3 == that.b3 && b4 == that.b4
     case _ => false
   }

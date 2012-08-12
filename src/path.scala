@@ -99,7 +99,7 @@ trait Paths { this: Io =>
       *
       * @param dest The destination path to calculate the relative link to
       * @return The calculated relative path */
-    def link[DestPathType <: AbsolutePath[DestPathType]](dest: AbsolutePath[DestPathType]) :
+    def link[DestPathType <: AbsolutePath[DestPathType]](dest: AbsolutePath[DestPathType]):
         Path = {
       
       def go(from: List[String], to: List[String], up: Int, tail: List[String]): Path =
@@ -170,7 +170,7 @@ trait Paths { this: Io =>
       else (Array.fill(ascent)("..") ++ elements).mkString("/")
       
     override def equals(that: Any) = that match {
-      case p: Path => p.absolute == absolute && p.ascent == ascent && (p.elements.toArray[String] :
+      case p: Path => p.absolute == absolute && p.ascent == ascent && (p.elements.toArray[String]:
           WrappedArray[String]) == (elements.toArray[String]: WrappedArray[String])
       case _ => false
     }

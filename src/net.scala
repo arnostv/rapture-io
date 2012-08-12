@@ -51,7 +51,7 @@ trait Net { this: Io =>
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
   trait NetUrl[+U <: Url[U]] { netUrl: U =>
     
-    private[io] def javaConnection : HttpURLConnection =
+    private[io] def javaConnection: HttpURLConnection =
       new URL(toString).openConnection().asInstanceOf[HttpURLConnection]
     
     def hostname: String
@@ -63,7 +63,7 @@ trait Net { this: Io =>
       * @param authenticate the username and password to provide for basic HTTP authentication,
       *        defaulting to no authentication.
       * @return the HTTP response from the remote host */
-    def post[C: PostType](content: C, authenticate: Option[(String, String)] = None) :
+    def post[C: PostType](content: C, authenticate: Option[(String, String)] = None):
         HttpResponse = {
 
       val conn = netUrl.javaConnection

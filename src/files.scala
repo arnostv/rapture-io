@@ -89,13 +89,17 @@ trait Files { this: Io =>
 
   implicit def navigableExtras[UrlType: Navigable](url: UrlType) = new {
     
+    /** Return a list of children of this URL */
     def children = implicitly[Navigable[UrlType]].children(url)
     
+    /** Return true if this URL node is a directory (i.e. it can contain other URLs). */
     def isDirectory: Boolean = implicitly[Navigable[UrlType]].isDirectory(url)
 
+    /** Return an iterator of all descendants of this URL. */
     def descendants: Iterator[UrlType] = implicitly[Navigable[UrlType]].descendants(url)
   }
 
+  /** Specifies how file: URLs should be navigable. */
   implicit val NavigableFile = new Navigable[FileUrl] {
     def children(url: FileUrl): List[FileUrl] = 
       if(url.isFile) Nil else url.javaFile.list().toList map { fn: String => url./(fn) }
@@ -103,10 +107,12 @@ trait Files { this: Io =>
     def isDirectory(url: FileUrl) = url.javaFile.isDirectory()
   }
 
+  /** Defines a URL for the file: scheme, and provides standard filesystem operations on the file
+    * represented by the URL. */
   class FileUrl(val urlBase: UrlBase[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements)
       with PathUrl[FileUrl] {
 
-    lazy val javaFile: java.io.File = new java.io.File(pathString)
+    private[io] lazy val javaFile: java.io.File = new java.io.File(pathString)
     
     /** Returns true if the file or directory represented by this FileUrl can be read from. */
     def readable: Boolean = javaFile.canRead()

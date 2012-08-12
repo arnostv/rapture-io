@@ -84,7 +84,7 @@ trait Streams { this: Io =>
   class Appendable[UrlType](url: UrlType) {
     def appendOutput[Data](implicit sa: StreamAppender[UrlType, Data]) = sa.appendOutput(url)
     
-    def handleAppend[Data, Result](body: Output[Data] => Result)(implicit sw :
+    def handleAppend[Data, Result](body: Output[Data] => Result)(implicit sw:
         StreamAppender[UrlType, Data]): Result = {
       
       ensuring(appendOutput[Data])(body) { out =>
@@ -104,7 +104,7 @@ trait Streams { this: Io =>
     def input[Data](implicit sr: StreamReader[UrlType, Data]) = sr.input(url)
     
     /** Pumps the input for the specified resource to the destination URL provided */
-    def >[Data, DestUrlType](dest: DestUrlType)(implicit sr :
+    def >[Data, DestUrlType](dest: DestUrlType)(implicit sr:
         StreamReader[UrlType, Data], sw: StreamWriter[DestUrlType, Data], mf: ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
@@ -112,7 +112,7 @@ trait Streams { this: Io =>
       }
     }
  
-    def >>[Data, DestUrlType](dest: DestUrlType)(implicit sr :
+    def >>[Data, DestUrlType](dest: DestUrlType)(implicit sr:
         StreamReader[UrlType, Data], sw: StreamAppender[DestUrlType, Data], mf: ClassTag[Data]) = {
 
       handleInput[Data, Int] { in =>
@@ -134,7 +134,7 @@ trait Streams { this: Io =>
       * @tparam Data The type of data the stream should carry
       * @tparam Result The type of body's result
       * @param body The code to be executed upon the this Input before it is closed */
-    def handleInput[Data, Result](body: Input[Data] => Result)(implicit sr :
+    def handleInput[Data, Result](body: Input[Data] => Result)(implicit sr:
         StreamReader[UrlType, Data]): Result = {
      
       ensuring(input[Data](sr))(body) { in => if(!sr.doNotClose) in.close() }
@@ -153,7 +153,7 @@ trait Streams { this: Io =>
       * @usecase def slurp[Byte](): Array[Byte]
       * @tparam Data The units of data being slurped
       * @return The accumulated data */
-    def slurp[Data]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder :
+    def slurp[Data]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder:
         AccumulatorBuilder[Data], mf: ClassTag[Data]) = {
 
       val c = accumulatorBuilder.make()
@@ -179,7 +179,7 @@ trait Streams { this: Io =>
       *
       * @param body The code to be executed upon this `Output` before being closed.
       * @return The result from executing the body */
-    def handleOutput[Data, Result](body: Output[Data] => Result)(implicit sw :
+    def handleOutput[Data, Result](body: Output[Data] => Result)(implicit sw:
         StreamWriter[UrlType, Data]): Result = {
       
       ensuring(output[Data])(body) { out =>
@@ -250,6 +250,10 @@ trait Streams { this: Io =>
    
     /** Default implementation for reading a block of data from the input stream into the specified
       * array.
+      *
+      * The basic implementation is provided for convenience, though it is not an efficient
+      * implementation and results in large numbers of boxing objects being created unnecessarily.
+      * Subclasses of Input should provide their own implementations of writeBlock.
       *
       * @param array The array into which content should be read
       * @param offset The offset to the position within the array that data should start to be
@@ -328,6 +332,10 @@ trait Streams { this: Io =>
   
     /** Writes a block of data from an array to the stream
       *
+      * The basic implementation is provided for convenience, though it is not an efficient
+      * implementation and results in large numbers of boxing objects being created unnecessarily.
+      * Subclasses of Output should provide their own implementations of writeBlock.
+      *
       * @param array the Array containing the data to be written to the stream
       * @param offset The offset to the position within the array that data should start to be
       *        read from when writing to the stream.  Defaults to the start of the array.
@@ -364,7 +372,7 @@ trait Streams { this: Io =>
     def input(url: UrlType): Input[Data]
     
     /** Pumps data from the specified URL to the given destination URL */
-    def pump[DestUrlType <: Url[DestUrlType]](url: UrlType, dest: DestUrlType)(implicit sw :
+    def pump[DestUrlType <: Url[DestUrlType]](url: UrlType, dest: DestUrlType)(implicit sw:
       StreamWriter[DestUrlType, Data], mf: ClassTag[Data]): Int = input(url) > dest
   }
 
