@@ -47,9 +47,6 @@ object MimeTypes {
     MimeType("text/plain", "asc", "conf", "def", "diff", "in", "list", "log", "pot", "text", "txt")
   
   val `application/x-www-form-urlencoded` = MimeType("application/x-www-form-urlencoded")
-
-  // These have been commented out to avoid a compiler bug
-  /*
   val `application/activemessage` = MimeType("application/activemessage")
   val `application/andrew-inset` = MimeType("application/andrew-inset", "ez")
   val `application/applefile` = MimeType("application/applefile")
@@ -1823,5 +1820,4 @@ object MimeTypes {
   val `video/x-sgi-movie` = MimeType("video/x-sgi-movie", "movie")
   val `x-conference/x-cooltalk` = MimeType("x-conference/x-cooltalk", "ice")
   val `x-world/x-vrml` = MimeType("x-world/x-vrml", "vrm", "vrml", "wrl")
-  */
 }
