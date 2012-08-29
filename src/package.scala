@@ -26,4 +26,8 @@ package rapture
   * @author Jon Pretty
   * @version 0.6.0
   */
-package object io extends io.Io
+package object io extends io.Io {
+
+  //implicit val implicitConversions = scala.language.implicitConversions
+
+}
