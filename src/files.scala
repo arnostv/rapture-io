@@ -112,7 +112,7 @@ trait Files { this: Io =>
   class FileUrl(val urlBase: UrlBase[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements)
       with PathUrl[FileUrl] {
 
-    private[io] lazy val javaFile: java.io.File = new java.io.File(pathString)
+    lazy val javaFile: java.io.File = new java.io.File(pathString)
     
     /** Returns true if the file or directory represented by this FileUrl can be read from. */
     def readable: Boolean = javaFile.canRead()
