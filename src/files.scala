@@ -35,6 +35,11 @@ trait Files { this: Io =>
       new CharOutput(new BufferedWriter(new FileWriter(url.javaFile)))
   }
 
+  implicit object FileStreamCharAppender extends StreamAppender[FileUrl, Char] {
+    def appendOutput(url: FileUrl): Output[Char] =
+      new CharOutput(new BufferedWriter(new FileWriter(url.javaFile, true)))
+  }
+
   /** Type class object for reading `FileUrl`s as `Input[Stream]`s */
   implicit object FileStreamCharReader extends StreamReader[FileUrl, Char] {
     def input(url: FileUrl): Input[Char] =
