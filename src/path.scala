@@ -34,7 +34,7 @@ trait Paths { this: Io =>
 
   object / {
     def unapply(p: SimplePath): Option[(SimplePath, String)] =
-      if(p.isRoot) None else Some((p.init, p.last))
+      if(p.isRoot) None else Some((p.tail, p.head))
   }
 
   /** Represents an absolute (i.e. relative to a canonical base) path. */
