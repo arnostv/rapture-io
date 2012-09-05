@@ -51,11 +51,30 @@ trait Net { this: Io =>
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
   trait NetUrl[+U <: Url[U]] { netUrl: U =>
     
+    import javax.net.ssl._
+    import javax.security.cert._
+    
     private[io] def javaConnection: HttpURLConnection =
       new URL(toString).openConnection().asInstanceOf[HttpURLConnection]
     
+    private val trustAllCertificates = {
+      Array[TrustManager](new X509TrustManager {
+        override def getAcceptedIssuers(): Array[java.security.cert.X509Certificate] = null
+        def checkClientTrusted(certs: Array[java.security.cert.X509Certificate], authType: String): Unit = ()
+        def checkServerTrusted(certs: Array[java.security.cert.X509Certificate], authType: String): Unit = ()
+      })
+    }
+    
+    private val sslContext = SSLContext.getInstance("SSL")
+    sslContext.init(null, trustAllCertificates, new java.security.SecureRandom())
+
+    private val allHostsValid = new HostnameVerifier {
+      def verify(hostname: String, session: SSLSession) = true
+    }
+
     def hostname: String
     def port: Int
+    def ssl: Boolean
 
     /** Sends an HTTP post to this URL.
       *
@@ -63,19 +82,31 @@ trait Net { this: Io =>
       * @param authenticate the username and password to provide for basic HTTP authentication,
       *        defaulting to no authentication.
       * @return the HTTP response from the remote host */
-    def post[C: PostType](content: C, authenticate: Option[(String, String)] = None):
-        HttpResponse = {
+    def post[C: PostType](content: C, authenticate: Option[(String, String)] = None,
+        ignoreInvalidCertificates: Boolean = false, httpHeaders: Map[String, String] = Map()): HttpResponse = {
 
-      val conn = netUrl.javaConnection
-      conn.setRequestMethod("POST")
-      conn.setDoOutput(true)
-      conn.setUseCaches(false)
+      val conn: URLConnection = new URL(toString).openConnection()
+      conn match {
+        case c: HttpsURLConnection =>
+          if(ignoreInvalidCertificates) {
+            c.setSSLSocketFactory(sslContext.getSocketFactory)
+            c.setHostnameVerifier(allHostsValid)
+          }
+          c.setRequestMethod("POST")
+          c.setDoOutput(true)
+          c.setUseCaches(false)
+        case c: HttpURLConnection =>
+          c.setRequestMethod("POST")
+          c.setDoOutput(true)
+          c.setUseCaches(false)
+      }
 
       if(authenticate.isDefined) conn.setRequestProperty("Authorization",
           Base64.encode((authenticate.get._1+":"+authenticate.get._2).getBytes("UTF-8"),
           endPadding = true).mkString)
 
       conn.setRequestProperty("Content-Type", implicitly[PostType[C]].contentType.name)
+      for((k, v) <- httpHeaders) conn.setRequestProperty(k, v)
 
       ensuring(OutputStreamBuilder.output(conn.getOutputStream)) { out =>
         implicitly[PostType[C]].sender(content) > out
@@ -83,8 +114,13 @@ trait Net { this: Io =>
 
       import scala.collection.JavaConversions._
 
+      val statusCode = conn match {
+        case c: HttpsURLConnection => c.getResponseCode()
+        case c: HttpURLConnection => c.getResponseCode()
+      }
+
       new HttpResponse(mapAsScalaMap(conn.getHeaderFields()).toMap.mapValues(_.toList),
-          conn.getResponseCode(), conn.getInputStream())
+          statusCode, conn.getInputStream())
     }
   }
 
@@ -95,6 +131,7 @@ trait Net { this: Io =>
     def makePath(xs: Seq[String]) = new HttpUrl(urlBase, elements)
     def hostname = urlBase.hostname
     def port = urlBase.port
+    def ssl = false
   }
 
   /** Represents a URL with the https scheme */
@@ -104,6 +141,7 @@ trait Net { this: Io =>
     def makePath(xs: Seq[String]) = new HttpsUrl(urlBase, elements)
     def hostname = urlBase.hostname
     def port = urlBase.port
+    def ssl = true
   }
 
   trait NetUrlBase[+T <: Url[T] with NetUrl[T]] extends UrlBase[T] {
