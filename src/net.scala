@@ -27,7 +27,7 @@ import java.net._
 /** Provides functionality for handling internet URLs, namely HTTP and HTTPS schemes. */
 trait Net { this: Io =>
 
-  class HttpResponse(val headers: Map[String, List[String]], val code: Int, is: InputStream) {
+  class HttpResponse(val headers: Map[String, List[String]], val status: Int, is: InputStream) {
     def input[Data](implicit ib: InputBuilder[InputStream, Data]) = ib.input(is)
   }
 
@@ -118,9 +118,12 @@ trait Net { this: Io =>
         case c: HttpsURLConnection => c.getResponseCode()
         case c: HttpURLConnection => c.getResponseCode()
       }
-
+      
+      val is = try conn.getInputStream() catch {
+        case e: IOException => new ByteArrayInputStream("".getBytes())
+      }
       new HttpResponse(mapAsScalaMap(conn.getHeaderFields()).toMap.mapValues(_.toList),
-          statusCode, conn.getInputStream())
+          statusCode, is)
     }
   }
 
