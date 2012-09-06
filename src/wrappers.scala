@@ -21,6 +21,8 @@ License.
 
 package rapture.io
 
+import language.implicitConversions
+
 import java.io._
 import java.net._
 

@@ -21,6 +21,8 @@ License.
 
 package rapture.io
 
+import language.implicitConversions
+
 import scala.collection.mutable.WrappedArray
 
 import java.io._
