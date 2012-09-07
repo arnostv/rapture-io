@@ -152,7 +152,7 @@ trait Paths { this: Io =>
   /** The canonical root for a simple path */
   object ^ extends SimplePath(Nil)
 
-  /** Represents a path which is to be considered relative to another path or URL
+  /** Represents a path which is to be considered relative to another (unspecified) path or URL
     *
     * @constructor Creates a new relative path with the specified ascent and elements
     * @param ascent The number of levels to navigate up the path hierarchy to reach the common

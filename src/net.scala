@@ -24,6 +24,8 @@ package rapture.io
 import java.io._
 import java.net._
 
+import scala.util.parsing.json._
+
 /** Provides functionality for handling internet URLs, namely HTTP and HTTPS schemes. */
 trait Net { this: Io =>
 
@@ -46,6 +48,13 @@ trait Net { this: Io =>
   implicit val StringPostType = new PostType[String] {
     def contentType = MimeTypes.`text/plain`
     def sender(content: String) = ByteArrayInput(content.getBytes("UTF-8"))
+  }
+
+  implicit val JsonObjectPostType = new PostType[JSONObject] {
+    //def contentType = MimeTypes.`application/json`
+    def contentType = MimeTypes.`application/x-www-form-urlencoded`
+    def sender(content: JSONObject) =
+      ByteArrayInput(JsonPrinter.format(Some(content), 0).getBytes("UTF-8"))
   }
 
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
