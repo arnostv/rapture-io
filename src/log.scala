@@ -59,7 +59,7 @@ object log {
     log(Fatal, zone, msg)
   
   @inline def exception(e: => Throwable)(implicit zone: Zone) =
-    log(Error, zone, e.toString)
+    log(Error, zone, e.toString+"\n    "+e.getStackTrace.mkString("\n    "))
 
   private def log(level: Level, zone: Zone, msg: String, time: Long = System.currentTimeMillis) = {
     // Ensures the date is not formatted every time
@@ -67,7 +67,9 @@ object log {
       dateString = df.format(time)
       dateCreated = time
     }
-    val formattedMsg = "%1$23s %2$5s %3$10s %4$s\n".format(dateString, level.name, zone.name, msg)
-    for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level) lgr.log(formattedMsg)
+    for(ln <- msg.split("\n")) {
+      val formattedMsg = "%1$23s %2$5s %3$10s %4$s\n".format(dateString, level.name, zone.name, msg)
+      for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level) lgr.log(formattedMsg)
+    }
   }
 }
