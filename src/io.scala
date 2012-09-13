@@ -86,6 +86,7 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
       URLDecoder.decode(s, encoding.name)
   }
 
+  def randomGuid() = java.util.UUID.randomUUID().toString
 
 }
 

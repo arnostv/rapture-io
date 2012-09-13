@@ -68,7 +68,7 @@ object log {
       dateCreated = time
     }
     for(ln <- msg.split("\n")) {
-      val formattedMsg = "%1$23s %2$5s %3$10s %4$s\n".format(dateString, level.name, zone.name, msg)
+      val formattedMsg = "%1$23s %2$5s %3$10s %4$s\n".format(dateString, level.name, zone.name, ln)
       for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level) lgr.log(formattedMsg)
     }
   }
