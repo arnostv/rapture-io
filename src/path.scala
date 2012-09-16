@@ -138,7 +138,7 @@ trait Paths { this: Io =>
 
   /** Companion object for simple paths, including a method for creating a path from a `String` */
   object SimplePath {
-    def fromString(path: String) = new SimplePath(path.replaceAll("^\\/", "").split("/") ++
+    def parse(path: String) = new SimplePath(path.replaceAll("^\\/", "").split("/") ++
         (if(path.endsWith("/")) Array("") else Array[String]()))
   }
 
