@@ -43,27 +43,30 @@ trait Sockets { this: Io =>
     else socket.bind(new InetSocketAddress(port))
   }*/
 
-  class SocketUrlBase(val hostname: String, val port: Int) extends UrlBase[SocketUrl]
-      { thisUrlBase =>
+  class SocketPathRoot(val hostname: String, val port: Int) extends PathRoot[SocketUrl]
+      { thisPathRoot =>
     
     def scheme = Socket
     lazy val javaSocket = new java.net.Socket(hostname, port)
-    override def toString() = scheme.schemeName+"://"+hostname+":"+port
     
-    def makePath(elems: Seq[String]): SocketUrl = new SocketUrl {
-      val urlBase = thisUrlBase
+    def schemeSpecificPart = "//"+hostname+":"+port
+    
+    def makePath(elems: Seq[String], afterPath: String): SocketUrl = new SocketUrl {
+      val pathRoot = thisPathRoot
     }
   }
 
   object Socket extends Scheme[SocketUrl] {
     def schemeName = "socket"
-    def apply(hostname: String, port: Int): SocketUrlBase = new SocketUrlBase(hostname, port)
+    def apply(hostname: String, port: Int): SocketPathRoot = new SocketPathRoot(hostname, port)
   }
 
 
-  abstract class SocketUrl extends Url[SocketUrl](Nil) {
-    def javaSocket = urlBase.asInstanceOf[SocketUrlBase].javaSocket
-    def makePath(elems: Seq[String]) = urlBase.makePath(elems)
+  /** FIXME: This must be wrong! */
+  abstract class SocketUrl extends Url[SocketUrl](Nil, "") {
+    def javaSocket = pathRoot.asInstanceOf[SocketPathRoot].javaSocket
+    def makePath(elems: Seq[String], afterPath: String) = pathRoot.makePath(elems, afterPath)
+    def schemeSpecificPart = ""
   }
 
   /** Type class object for getting an `Output[Byte]` from a socket URL. */

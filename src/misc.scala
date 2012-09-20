@@ -49,3 +49,7 @@ class Counter {
   private var n = 0
   def apply() = synchronized { n += 1; n }
 }
+
+object load {
+  def apply[C](implicit mf: scala.reflect.ClassTag[C]) = { mf.toString; () }
+}

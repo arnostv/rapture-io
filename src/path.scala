@@ -40,14 +40,14 @@ trait Paths { this: Io =>
   }
 
   /** Represents an absolute (i.e. relative to a canonical base) path. */
-  abstract class AbsolutePath[+PathType <: AbsolutePath[PathType]](elements: Seq[String])
+  abstract class AbsolutePath[+PathType <: AbsolutePath[PathType]](elements: Seq[String], afterPath: String)
       extends Path(0, elements) { path =>
  
     /** This is an absolute path */
     override def absolute = true
 
     /** Constructs a new path */
-    def makePath(elements: Seq[String]): PathType
+    def makePath(elements: Seq[String], afterPath: String): PathType
     
     /** Returns true if this is a root path */
     def isRoot = elements.isEmpty
@@ -68,32 +68,35 @@ trait Paths { this: Io =>
     def parent: PathType = drop(1)
 
     /** Constructs a new path by appending the specified path element to this path */
-    override def /(p: String): AbsolutePath[PathType] = makePath(path.elements ++ Array(p))
+    override def /(p: String): AbsolutePath[PathType] = makePath(path.elements ++ Array(p), afterPath)
 
     override def toString() = pathString
     
-    def pathString = elements.mkString("/", "/", "")
+    def pathString = elements.mkString("/", "/", "")+afterPath
 
     /** Drops the specified number of path elements from the left of the path */
     def drop(n: Int): PathType =
-      if(path.elements.length - n <= 0) makePath(Nil)
-      else makePath(path.elements.dropRight(n))
+      if(path.elements.length - n <= 0) makePath(Nil, afterPath)
+      else makePath(path.elements.dropRight(n), afterPath)
     
     /** Drops the specified number of path elements from the right of the path */
     def dropRight(n: Int): PathType =
-      if(path.elements.length - n <= 0) makePath(Nil)
-      else makePath(path.elements.drop(n))
+      if(path.elements.length - n <= 0) makePath(Nil, afterPath)
+      else makePath(path.elements.drop(n), afterPath)
     
     /** Drops all but the specified number of path elements from the left of the path */
     def take(n: Int): PathType =
-      if(path.elements.length - n <= 0) makePath(Nil)
-      else makePath(path.elements.takeRight(n))
+      if(path.elements.length - n <= 0) makePath(Nil, afterPath)
+      else makePath(path.elements.takeRight(n), afterPath)
     
     /** Constructs a new path by following the relative link from this path */
-    def +(dest: Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements)
+    def +(dest: Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
 
     def -[SrcPathType <: AbsolutePath[SrcPathType]](src: AbsolutePath[SrcPathType]) =
       src link this
+
+    def ?(params: Map[Symbol, String]) =
+      makePath(elements, "?"+params.map(v => v._1.name.urlEncode+"="+v._2.urlEncode).mkString("&"))
 
     /** Calculates the relative link between this path and the specified destination path
       *
@@ -139,18 +142,19 @@ trait Paths { this: Io =>
   /** Companion object for simple paths, including a method for creating a path from a `String` */
   object SimplePath {
     def parse(path: String) = new SimplePath(path.replaceAll("^\\/", "").split("/") ++
-        (if(path.endsWith("/")) Array("") else Array[String]()))
+        (if(path.endsWith("/")) Array("") else Array[String]()), "")
   }
 
   /** Defines a very simple absolute path with an unspecified base
     *
     * @param elements The path elements which make up this absolute path */
-  class SimplePath(elements: Seq[String]) extends AbsolutePath[SimplePath](elements) {
-    def makePath(elements: Seq[String]) = new SimplePath(elements)
+  class SimplePath(elements: Seq[String], afterPath: String) extends AbsolutePath[SimplePath](elements, afterPath) {
+    def makePath(elements: Seq[String], afterPath: String) =
+      new SimplePath(elements, afterPath)
   }
 
   /** The canonical root for a simple path */
-  object ^ extends SimplePath(Nil)
+  object ^ extends SimplePath(Nil, "")
 
   /** Represents a path which is to be considered relative to another (unspecified) path or URL
     *
@@ -158,7 +162,7 @@ trait Paths { this: Io =>
     * @param ascent The number of levels to navigate up the path hierarchy to reach the common
     *        parent
     * @param elements The `String` components of this path */
-  class Path(val ascent: Int, val elements: Seq[String]) { path =>
+  class Path(val ascent: Int, val elements: Seq[String]) extends Link { path =>
     
     /** This is a relative path */
     def absolute = false
