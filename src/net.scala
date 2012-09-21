@@ -214,13 +214,13 @@ trait Net { this: Io =>
 
     // FIXME: This should be generalised to all schemes
     /** Parses a URL string into an HttpUrl or HttpsUrl */
-    def parse(s: String): Option[Either[HttpUrl, HttpsUrl]] = s match {
+    def parse(s: String): Option[NetUrl[_]] = s match {
       case UrlRegex(scheme, server, port, path) =>
         val rp = new Path(0, path.split("/"))
         val p = if(port == null) 80 else port.substring(1).toInt
         Some(scheme match {
-          case "http" => Left(Http./(server, p) / rp)
-          case "https" => Right(Https./(server, p) / rp)
+          case "http" => Http./(server, p) / rp
+          case "https" => Https./(server, p) / rp
         })
       case _ => None
     }
