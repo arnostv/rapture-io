@@ -210,9 +210,8 @@ trait Net { this: Io =>
     def /(hostname: String, port: Int = Services.Tcp.http.portNo) =
       new HttpPathRoot(hostname, port)
   
-    private val UrlRegex = """(https?):\/\/([\.\-a-z0-9]+)(:[1-9][0-9]*)?\/(.*)""".r
+    private val UrlRegex = """(https?):\/\/([\.\-a-z0-9]+)(:[1-9][0-9]*)?\/?(.*)""".r
 
-    // FIXME: This should be generalised to all schemes
     /** Parses a URL string into an HttpUrl or HttpsUrl */
     def parse(s: String): Option[NetUrl[U forSome { type U <: Url[U] }]] = s match {
       case UrlRegex(scheme, server, port, path) =>
