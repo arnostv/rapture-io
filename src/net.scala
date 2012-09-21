@@ -58,7 +58,7 @@ trait Net { this: Io =>
   }
 
   /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
-  trait NetUrl[+U <: Url[U]] { netUrl: U =>
+  trait NetUrl[+U <: Url[U]] extends Uri { netUrl: U =>
     
     import javax.net.ssl._
     import javax.security.cert._
@@ -214,7 +214,7 @@ trait Net { this: Io =>
 
     // FIXME: This should be generalised to all schemes
     /** Parses a URL string into an HttpUrl or HttpsUrl */
-    def parse(s: String): Option[NetUrl[_]] = s match {
+    def parse(s: String): Option[NetUrl[U forSome { type U <: Url[U] }]] = s match {
       case UrlRegex(scheme, server, port, path) =>
         val rp = new Path(0, path.split("/"))
         val p = if(port == null) 80 else port.substring(1).toInt
