@@ -67,7 +67,8 @@ object log {
       dateString = df.format(time)
       dateCreated = time
     }
-    for(ln <- msg.split("\n")) {
+    val m = if(msg == null) "null" else msg
+    for(ln <- m.split("\n")) {
       val formattedMsg = "%1$-23s %2$-5s %3$-8s %4$s\n".format(dateString, level.name, zone.name, ln)
       for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level) lgr.log(formattedMsg)
     }
