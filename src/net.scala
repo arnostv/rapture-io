@@ -29,6 +29,34 @@ import scala.util.parsing.json._
 /** Provides functionality for handling internet URLs, namely HTTP and HTTPS schemes. */
 trait Net { this: Io =>
 
+  object HttpMethods {
+    
+    private val methods = new scala.collection.mutable.HashMap[String, Method]
+    
+    sealed class Method(val string: String) {
+      
+      def unapply(r: String) = r == string
+      override def toString = string
+      
+      methods += string -> this
+    }
+
+    trait FormMethod { this: Method => }
+
+    def method(s: String) = methods(s)
+
+    val Get = new Method("GET") with FormMethod
+    val Put = new Method("PUT")
+    val Post = new Method("POST") with FormMethod
+    val Delete = new Method("DELETE")
+    val Trace = new Method("TRACE")
+    val Options = new Method("OPTIONS")
+    val Head = new Method("HEAD")
+    val Connect = new Method("CONNECT")
+    val Patch = new Method("PATCH")
+
+  }
+
   class HttpResponse(val headers: Map[String, List[String]], val status: Int, is: InputStream) {
     def input[Data](implicit ib: InputBuilder[InputStream, Data]) = ib.input(is)
   }

@@ -39,8 +39,12 @@ object MimeTypes {
   /** Provides a simple wrapper around a String to represent a MIME type, and the filename
     * extensions which correspond to that type.*/
   case class MimeType(name: String, exts: String*) {
-    types(name) = this
+    
+    override def toString = name
+
     for(ext <- exts) extensions(ext) = this :: extensions.get(ext).getOrElse(Nil)
+    
+    types(name) = this
   }
 
   val `text/plain` =

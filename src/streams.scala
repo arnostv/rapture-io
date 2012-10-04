@@ -285,7 +285,7 @@ trait Streams { this: Io =>
           i - offset
       }
     }
-   
+
     /** Reads the whole stream into an accumulator */
     def slurp()(implicit accumulatorBuilder: AccumulatorBuilder[Data],
         mf: ClassTag[Data]) = {

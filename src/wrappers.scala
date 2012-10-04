@@ -140,7 +140,10 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
       this(new OutputStreamWriter(os, encoding.name))
     private val out = new BufferedWriter(writer)
 
-    def write(s: String) = out.write(s)
+    def write(s: String) = {
+      out.write(s)
+      out.write("\n")
+    }
 
     def flush(): Unit = out.flush()
     def close(): Unit = out.close()
@@ -197,13 +200,13 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
     * [[Encodings.Encoding]] implicitly for converting between `Byte`s and `Char`s */
   implicit def outputStreamCharBuilder(implicit encoding: Encodings.Encoding) =
     new OutputBuilder[OutputStream, Char] {
-      def output(s: OutputStream) = new CharOutput(new OutputStreamWriter(s))
+      def output(s: OutputStream) = new CharOutput(new OutputStreamWriter(s, encoding.name))
     }
 
   /** Type class definition for creating an Input[Char] from a Java InputStream, taking an
     * [[Encodings.Encoding]] implicitly for converting between `Byte`s and `Char`s */
   implicit def inputStreamCharBuilder(implicit encoding: Encodings.Encoding) =
     new InputBuilder[InputStream, Char] {
-      def input(s: InputStream) = new CharInput(new InputStreamReader(s))
+      def input(s: InputStream) = new CharInput(new InputStreamReader(s, encoding.name))
     }
 }
