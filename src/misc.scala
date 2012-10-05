@@ -40,6 +40,13 @@ trait Lookup[Index] {
   def lookup(idx: Index): Option[Item] = items.get(idx)
 }
 
+object Cell {
+  def apply[T](get: => T)(set: T => Unit) = new Cell[T] {
+    def apply(): T = get
+    def update(t: T): Unit = set(t)
+  }
+}
+
 trait Cell[T] {
   def apply(): T
   def update(t: T): Unit
