@@ -35,6 +35,8 @@ trait JsonExtraction {
     def apply(map: Map[String, Any]): Json = new Json(map)
     def apply(list: List[Any]): Json = new Json(list)
 
+    def unapply(json: Any): Option[Json] = Some(new Json(json))
+
     def format(json: Option[Any], ln: Int): String = {
       val indent = " "*ln
       json match {
@@ -81,6 +83,10 @@ trait JsonExtraction {
     def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
     def apply[T](implicit jsonExtractor: JsonExtractor[T]): T = jsonExtractor.cast(json)
 
+    def map[A, B](fn: A => B): Json = Json(json.asInstanceOf[List[A]].map(fn))
+    def flatMap[A, B](fn: A => List[B]): Json = Json(json.asInstanceOf[List[A]].flatMap(fn))
+    def foreach[A](fn: A => Unit): Unit = json.asInstanceOf[List[A]].foreach(fn)
+    
     override def toString = Json.format(Some(json), 0)
   }
 
