@@ -32,8 +32,8 @@ trait JsonExtraction {
 
     def parse(s: String): Json = new Json(JSON.parseFull(s).get)
 
-    def apply(map: Map[String, Any]): Json = new Json(new JSONObject(map))
-    def apply(list: List[Any]): Json = new Json(new JSONArray(list))
+    def apply(map: Map[String, Any]): Json = new Json(map)
+    def apply(list: List[Any]): Json = new Json(list)
 
     def format(json: Option[Any], ln: Int): String = {
       val indent = " "*ln
