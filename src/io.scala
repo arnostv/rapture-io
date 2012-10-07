@@ -33,7 +33,8 @@ import java.net._
   * `FileUrl`s should be read and written and  `HttpUrl`s and `HttpsUrl`s should be read as
   * byte-streams */
 class Io extends Paths with Streams with Urls with Files with Net with Sockets with Extractors
-    with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart {
+    with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
+    JsonExtraction {
 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
