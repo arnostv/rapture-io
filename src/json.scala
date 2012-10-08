@@ -40,17 +40,12 @@ trait JsonExtraction {
     def format(json: Option[Any], ln: Int): String = {
       val indent = " "*ln
       json match {
-        case Some(o: Map[String, Any]) => {
-          List("{",
-            o.keys.map(key => indent+" "+"\""+key+"\": "+
-                format(o.get(key), ln + 1)).mkString(",\n"),
-            indent+"}").mkString("\n")
-        }
-        case Some(a: List[Any]) => {
-          List("[",
-            a.map(v => indent+" "+format(Some(v), ln + 1)).mkString(",\n"),
-            indent+"]").mkString("\n")
-        }
+        case Some(o: Map[_, _]) =>
+          List("{", o.keys map { k => indent+" "+"\""+k+"\": "+format(o.get(k), ln + 1) } mkString
+              ",\n", indent+"}").mkString("\n")
+        case Some(a: List[_]) =>
+          List("[", a map { v => indent+" "+format(Some(v), ln + 1) } mkString(",\n"),
+              indent+"]") mkString "\n"
         case Some(s: String) =>
           "\""+s.replaceAll("\\\\", "\\\\\\\\").replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\"")+
               "\""
