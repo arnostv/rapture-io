@@ -28,5 +28,11 @@ trait CollectionExtras {
       b += after
       b.result
     }
+
+    def zipWith[T](fn: A => T)(implicit bf: CanBuildFrom[C[A], (A, T), C[(A, T)]]): C[(A, T)] = {
+      val b = bf(xs)
+      xs.foreach { x => b += (x -> fn(x)) }
+      b.result
+    }
   }
 }
