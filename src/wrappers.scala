@@ -168,10 +168,7 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
     def ready(): Boolean = in.ready()
 
     /** Reads one line from the stream as a `String` */
-    def read() = in.readLine match {
-      case null => None
-      case x => Some(x)
-    }
+    def read() = in.readLine.fromNull
 
     /** Closes the input stream and underlying `BufferedReader` */
     def close() = in.close()
