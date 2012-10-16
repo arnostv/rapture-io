@@ -23,7 +23,7 @@ package rapture.io
 
 import scala.collection.mutable._
 
-/** Provides a simple class mixin for creating a list of items from which items can be lookup up.
+/** Provides a simple class mixin for creating a list of items from which items can be looked up.
   *
   * @tparam Index The type of the key by which items are indexed */
 trait Lookup[Index] {
