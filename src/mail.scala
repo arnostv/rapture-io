@@ -28,7 +28,7 @@ trait Mail { this: Io =>
     def /(email: String): MailtoUri = new MailtoUri(email)
   }
 
-  class MailtoUri(email: String) extends Uri {
+  class MailtoUri(val email: String) extends Uri {
     def scheme = Mailto
     def schemeName = scheme.schemeName
     def schemeSpecificPart = email
