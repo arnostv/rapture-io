@@ -1,6 +1,6 @@
 /**************************************************************************************************
 Rapture I/O Library
-Version 0.6.0
+Version 0.7.0
 
 The primary distribution site is
 
@@ -24,7 +24,7 @@ package rapture
 /** The I/O package provides a framework for generalized streaming and resource handling.
   *
   * @author Jon Pretty
-  * @version 0.6.0
+  * @version 0.7.0
   */
 package object io extends io.Io {
 
