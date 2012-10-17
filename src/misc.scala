@@ -47,6 +47,14 @@ object Cell {
   }
 }
 
+object Var {
+  def apply[T](t: T) = new Cell[T] {
+    private var value = t
+    def apply(): T = value
+    def update(t: T) = value = t
+  }
+}
+
 trait Cell[T] {
   def apply(): T
   def update(t: T): Unit
