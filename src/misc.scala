@@ -69,10 +69,14 @@ object load {
   def apply[C](implicit mf: scala.reflect.ClassTag[C]) = { mf.toString; () }
 }
 
-case class Csv(xss: Array[Array[String]]) {
+case class Csv(data: Array[Array[String]]) {
   override def toString = {
     val sb = new StringBuilder
-    for(xs <- xss) sb.append("\"", xs.map(_.replaceAll("\"", "\\\"")).mkString("\",\""), "\"\n")
+    for(xs <- data) sb.append(xs.map(_.replaceAll("\"", "\\\"")).mkString("\"", "\",\"", "\"\n"))
     sb.toString
   }
+
+  def rows = data.length
+  def cols = data.headOption.map(_.length).getOrElse(0)
+
 }

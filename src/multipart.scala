@@ -50,7 +50,8 @@ trait Multipart {
 
   }
 
-  class MultipartReader(boundary: String, in: java.io.InputStream) extends Input[Multipart] {
+  class MultipartReader(boundary: String, in: java.io.InputStream, val sizeLimit: Int = 160)
+      extends Input[Multipart] {
     
     implicit val logZone = Zone("multipart")
     
@@ -102,6 +103,7 @@ trait Multipart {
           }
           
           if(count%65536 == 0) {
+            if(count > sizeLimit) throw new RuntimeException("Upload size limit exceeded.")
             buf = new Array[Byte](65536)
             bufs += buf
           }
