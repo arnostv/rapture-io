@@ -21,10 +21,12 @@ License.
 
 package rapture.io
 
+import Base._
+
 /** Basic logging functionality, introducing the concept of logging zones. Note that this is almost
   * certainly not as efficient as it ought to be, so use log4j if efficiency matters to you. */
 
-case class Zone(name: String)
+case class Zone(name: String) extends AnyVal
 
 case class Level(level: Int, name: String)
 object Trace extends Level(6, "trace")
@@ -37,8 +39,6 @@ object Fatal extends Level(1, "fatal")
 trait Logger { def log(msg: String) }
 
 case class FileLogger(file: FileUrl) extends Logger {
-  // FIXME: Here to workaround annoying import bug
-  implicit val sw = rapture.io.FileStreamCharAppender
   def log(msg: String) = StringInput(msg) >> file
 }
 
@@ -83,7 +83,7 @@ object log {
     log(Error, zone, e.toString+"\n    "+e.getStackTrace.mkString("\n    "))
 
   private def log(level: Level, zone: Zone, msg: String, time: Long = System.currentTimeMillis) = {
-    // Ensures the date is not formatted every time
+    // Ensures the date is only formatted when it changes
     if(time != dateCreated) {
       dateString = df.format(time)
       dateCreated = time

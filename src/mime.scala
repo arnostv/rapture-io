@@ -28,21 +28,21 @@ import scala.collection.mutable.HashMap
   * http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types w*/
 object MimeTypes {
  
-  private val extensions = new HashMap[String, List[MimeType]]
+  private val exts = new HashMap[String, List[MimeType]]
   private val types = new HashMap[String, MimeType]
   
   def fromString(mt: String) = types.get(mt)
 
   /** Looks up the MIME type based on a file extension. */
-  def extension(ext: String) = extensions.get(ext).getOrElse(Nil)
+  def extension(ext: String) = exts.get(ext).getOrElse(Nil)
 
   /** Provides a simple wrapper around a String to represent a MIME type, and the filename
     * extensions which correspond to that type.*/
-  case class MimeType(name: String, exts: String*) {
+  case class MimeType(name: String, extensions: String*) {
     
     override def toString = name
 
-    for(ext <- exts) extensions(ext) = this :: extensions.get(ext).getOrElse(Nil)
+    for(ext <- extensions) exts(ext) = this :: exts.get(ext).getOrElse(Nil)
     
     types(name) = this
   }

@@ -93,3 +93,4 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
 
 }
 
+object Base extends Io

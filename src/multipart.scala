@@ -23,6 +23,8 @@ package rapture.io
 
 import scala.collection.mutable.{HashMap, ListBuffer}
 
+import Base._
+
 trait Multipart {
 
   case class Multipart(data: Array[Byte], headers: Map[String, String]) {

@@ -87,7 +87,7 @@ trait Paths { this: Io =>
     /** Drops all but the specified number of path elements from the left of the path */
     def take(n: Int): PathType =
       if(path.elements.length - n <= 0) makePath(Nil, afterPath)
-      else makePath(path.elements.takeRight(n), afterPath)
+      else makePath(path.elements.take(n), afterPath)
     
     /** Constructs a new path by following the relative link from this path */
     def +(dest: Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
