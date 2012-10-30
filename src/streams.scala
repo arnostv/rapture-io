@@ -383,4 +383,9 @@ trait Streams { this: Io =>
     def input(s: String): Input[Char] = StringInput(s)
   }
 
+  /** Type class object for reading `Byte`s from a `Array[Byte]` */
+  implicit object ByteArrayReader extends StreamReader[Array[Byte], Byte] {
+    def input(s: Array[Byte]): Input[Byte] = ByteArrayInput(s)
+  }
+
 }

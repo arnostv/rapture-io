@@ -82,7 +82,7 @@ object Tests extends TestingApplication {
   val digest = new Suite("digest.scala") {
     
     val md5Sum = test {
-      "Hello World".md5Sum().toLowerCase
+      "Hello World".getBytes("UTF-8").md5Sum().toLowerCase
     } yields "e59ff97941044f85df5297e1c302d260"
     
   }
