@@ -96,4 +96,10 @@ object Tests extends TestingApplication {
     } yields "aa0d5d6739177b2bbb4c508a3014d8b0"
   }
 
+  /*val base64 = new Suite("base64.scala") {
+    val encode = test { Base64.encode("Hello World") } yields "SGVsbG8gV29ybGQK"
+    val encode2 = test { Base64.encode("Hello World!") } yields "SGVsbG8gV29ybGQhCg=="
+    val encode3 = test { Base64.encode("Hello World!!") } yields "SGVsbG8gV29ybGQhIQo="
+  }*/
+
 }
