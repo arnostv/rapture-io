@@ -39,7 +39,7 @@ trait Logging { this: Io =>
   trait Logger { def log(msg: String) }
 
   case class FileLogger(file: FileUrl) extends Logger {
-    def log(msg: String) = StringInput(msg) >> file
+    def log(msg: String) = msg >> file
   }
 
   case object StdoutLogger extends Logger {
