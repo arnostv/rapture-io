@@ -19,13 +19,11 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
 import scala.collection.mutable.{HashMap, ListBuffer}
 
-import Base._
-
-trait Multipart {
+trait Multipart { this: Io =>
 
   case class Multipart(data: Array[Byte], headers: Map[String, String]) {
     def contentType: Option[MimeTypes.MimeType] =

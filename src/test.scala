@@ -1,8 +1,7 @@
-package rapture.io
+package tests.rapture.io
 
 import rapture.test._
-
-import Base._
+import rapture.io._
 
 object Tests extends TestingApplication {
 

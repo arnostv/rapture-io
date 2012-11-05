@@ -19,7 +19,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
 import language.implicitConversions
 
@@ -56,13 +56,13 @@ trait Streams { this: Io =>
   }
 
   /** Makes a `String` viewable as an `rapture.io.Input[Char]` */
-  case class StringInput(string: String) extends CharInput(new StringReader(string))
+  case class StringIsInput(string: String) extends CharInput(new StringReader(string))
 
   /** Makes an `Array[Byte]` viewable as an `Input[Byte]` */
   case class ByteArrayInput(array: Array[Byte]) extends ByteInput(new ByteArrayInputStream(array))
 
   /** Makes a string viewable as an `Input` */
-  implicit def stringToInput(string: String) = StringInput(string)
+  implicit def stringToInput(string: String) = StringIsInput(string)
 
   /** Type trait for building a new `Input` from particular kind of input stream
     *
@@ -380,7 +380,7 @@ trait Streams { this: Io =>
 
   /** Type class object for reading `Char`s from a `String` */
   implicit object StringCharReader extends StreamReader[String, Char] {
-    def input(s: String): Input[Char] = StringInput(s)
+    def input(s: String): Input[Char] = StringIsInput(s)
   }
 
   /** Type class object for reading `Byte`s from a `Array[Byte]` */

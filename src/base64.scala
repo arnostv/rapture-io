@@ -19,153 +19,155 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
-object Base64 extends Base64Codec
-object Base64Url extends Base64Codec(char62 = '-', char63 = '_')
+trait Codecs {
 
-/** RFC2045 base-64 codec, based on http://migbase64.sourceforge.net/. */
-class Base64Codec(val char62: Char = '+', val char63: Char = '/', val padChar: Char = '=') {
-  
-  private val Alphabet =
-    ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"+char62+char63).toCharArray
-  
-  private lazy val Decodabet = {
-    val x = new Array[Int](256)
-    for(i <- 0 until Alphabet.length) x(Alphabet(i)) = i
-    x
-  }
+  object Base64 extends Base64Codec
+  object Base64Url extends Base64Codec(char62 = '-', char63 = '_')
 
-  /** Non-RFC-compliant encoder. */
-
-  /** Encoder. The RFC requires that line breaks be added every 76 chars, and
-    * that the data be padded to a multiple of 4 chars, but we do these things
-    * optionally. */
-  def encode(in: Array[Byte], lineBreaks: Boolean = false,
-      endPadding: Boolean = false): Array[Char] = {
+  /** RFC2045 base-64 codec, based on http://migbase64.sourceforge.net/. */
+  class Base64Codec(val char62: Char = '+', val char63: Char = '/', val padChar: Char = '=') {
     
-    var inLen = in.length
+    private val Alphabet =
+      ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"+char62+char63).toCharArray
     
-    if(inLen == 0) new Array[Char](0) else {
-      val evenLen = (inLen / 3) * 3
-      val outDataLen = if(endPadding) ((inLen - 1)/3 + 1) << 2 else ((inLen << 2) + 2 )/3
-      val outLen = if(lineBreaks) outDataLen + (outDataLen - 1)/76 << 1 else outDataLen
-      val out = new Array[Char](outLen)
+    private lazy val Decodabet = {
+      val x = new Array[Int](256)
+      for(i <- 0 until Alphabet.length) x(Alphabet(i)) = i
+      x
+    }
 
-      var inPos = 0
-      var outPos = 0
-      var blockCount = 0
+    /** Non-RFC-compliant encoder. */
+
+    /** Encoder. The RFC requires that line breaks be added every 76 chars, and
+      * that the data be padded to a multiple of 4 chars, but we do these things
+      * optionally. */
+    def encode(in: Array[Byte], lineBreaks: Boolean = false,
+        endPadding: Boolean = false): Array[Char] = {
       
-      while(inPos < evenLen) {
-        
-        val block = (in(inPos) & 0xFF) << 16 | (in(inPos + 1) & 0xFF) << 8 | (in(inPos + 2) & 0xFF)
-        
-        inPos += 3
-        
-        out(outPos) = Alphabet((block >>> 18) & 0x3F)
-        out(outPos + 1) = Alphabet((block >>> 12) & 0x3F)
-        out(outPos + 2) = Alphabet((block >>> 6) & 0x3F)
-        out(outPos + 3) = Alphabet(block & 0x3F)
-        
-        outPos += 4
+      var inLen = in.length
+      
+      if(inLen == 0) new Array[Char](0) else {
+        val evenLen = (inLen / 3) * 3
+        val outDataLen = if(endPadding) ((inLen - 1)/3 + 1) << 2 else ((inLen << 2) + 2 )/3
+        val outLen = if(lineBreaks) outDataLen + (outDataLen - 1)/76 << 1 else outDataLen
+        val out = new Array[Char](outLen)
 
-        if(lineBreaks) {
+        var inPos = 0
+        var outPos = 0
+        var blockCount = 0
+        
+        while(inPos < evenLen) {
           
-          blockCount += 1
+          val block = (in(inPos) & 0xFF) << 16 | (in(inPos + 1) & 0xFF) << 8 | (in(inPos + 2) & 0xFF)
           
-          if(blockCount == 19 && outPos < outLen - 2) {
-            out(outPos) = '\r'
-            out(outPos + 1) = '\n'
-            outPos += 2
-            blockCount = 0
+          inPos += 3
+          
+          out(outPos) = Alphabet((block >>> 18) & 0x3F)
+          out(outPos + 1) = Alphabet((block >>> 12) & 0x3F)
+          out(outPos + 2) = Alphabet((block >>> 6) & 0x3F)
+          out(outPos + 3) = Alphabet(block & 0x3F)
+          
+          outPos += 4
+
+          if(lineBreaks) {
+            
+            blockCount += 1
+            
+            if(blockCount == 19 && outPos < outLen - 2) {
+              out(outPos) = '\r'
+              out(outPos + 1) = '\n'
+              outPos += 2
+              blockCount = 0
+            }
           }
         }
-      }
 
-      val left = inLen - evenLen
-      
-      if(left > 0) {
+        val left = inLen - evenLen
         
-        val block =
-          ((in(evenLen) & 0xFF) << 10) | (if(left == 2) (in(inLen - 1) & 0xFF) << 2 else 0)
+        if(left > 0) {
+          
+          val block =
+            ((in(evenLen) & 0xFF) << 10) | (if(left == 2) (in(inLen - 1) & 0xFF) << 2 else 0)
+          
+          out(outPos) = Alphabet(block >>> 12)
+          out(outPos + 1) = Alphabet((block >>> 6) & 0x3F)
+          
+          if(left == 2) out(outPos + 2) = Alphabet(block & 0x3F)
+          else if(endPadding) out(outPos + 2) = padChar
+          
+          if(endPadding) out(outPos + 3) = padChar
+        }
         
-        out(outPos) = Alphabet(block >>> 12)
-        out(outPos + 1) = Alphabet((block >>> 6) & 0x3F)
-        
-        if(left == 2) out(outPos + 2) = Alphabet(block & 0x3F)
-        else if(endPadding) out(outPos + 2) = padChar
-        
-        if(endPadding) out(outPos + 3) = padChar
+        out
       }
-      
-      out
     }
-  }
 
-  /** Decoder. Supports all the variants produced by the encoder above, but
-    * does not tolerate any other illegal characters, including line breaks at
-    * positions other than 76-char boundaries, in which case the result will
-    * be garbage. */
-  def decode(in: Array[Char]): Array[Byte] = {
-    
-    val inLen = in.length
-    
-    if(inLen == 0) new Array[Byte](0) else {
+    /** Decoder. Supports all the variants produced by the encoder above, but
+      * does not tolerate any other illegal characters, including line breaks at
+      * positions other than 76-char boundaries, in which case the result will
+      * be garbage. */
+    def decode(in: Array[Char]): Array[Byte] = {
       
-      val padding = if(in(inLen - 1) == padChar) (if(in(inLen - 2) == padChar) 2 else 1) else 0
-
-      // FIXME: This doesn't seem to accommodate different kinds of linebreak
-      val lineBreaks = if(inLen > 76) (if(in(76) == '\r') inLen/78 else 0) << 1 else 0
-      val outLen = ((inLen - lineBreaks) * 6 >> 3) - padding
-      val out = new Array[Byte](outLen)
-
-      var inPos = 0
-      var outPos = 0
-      var blockCount = 0
+      val inLen = in.length
       
-      val evenLen = (outLen/3)*3
-      
-      while(outPos < evenLen) {
+      if(inLen == 0) new Array[Byte](0) else {
         
-        val block = Decodabet(in(inPos)) << 18 | Decodabet(in(inPos + 1)) << 12 |
-            Decodabet(in(inPos + 2)) << 6 | Decodabet(in(inPos + 3))
+        val padding = if(in(inLen - 1) == padChar) (if(in(inLen - 2) == padChar) 2 else 1) else 0
+
+        // FIXME: This doesn't seem to accommodate different kinds of linebreak
+        val lineBreaks = if(inLen > 76) (if(in(76) == '\r') inLen/78 else 0) << 1 else 0
+        val outLen = ((inLen - lineBreaks) * 6 >> 3) - padding
+        val out = new Array[Byte](outLen)
+
+        var inPos = 0
+        var outPos = 0
+        var blockCount = 0
         
-        inPos += 4
-
-        out(outPos) = (block >> 16).toByte
-        out(outPos + 1) = (block >> 8).toByte
-        out(outPos + 2) = block.toByte
-        outPos += 3
-
-        if(lineBreaks > 0) {
+        val evenLen = (outLen/3)*3
+        
+        while(outPos < evenLen) {
           
-          blockCount += 1
+          val block = Decodabet(in(inPos)) << 18 | Decodabet(in(inPos + 1)) << 12 |
+              Decodabet(in(inPos + 2)) << 6 | Decodabet(in(inPos + 3))
           
-          if(blockCount == 19) {
-            inPos += 2
-            blockCount = 0
+          inPos += 4
+
+          out(outPos) = (block >> 16).toByte
+          out(outPos + 1) = (block >> 8).toByte
+          out(outPos + 2) = block.toByte
+          outPos += 3
+
+          if(lineBreaks > 0) {
+            
+            blockCount += 1
+            
+            if(blockCount == 19) {
+              inPos += 2
+              blockCount = 0
+            }
           }
         }
+
+        if(outPos < outLen) {
+          
+          val block = Decodabet(in(inPos)) << 18 | Decodabet(in(inPos + 1)) << 12 |
+              (if(inPos + 2 < inLen - padding) Decodabet(in(inPos + 2)) << 6 else 0)
+
+          out(outPos) = (block >> 16).toByte
+          
+          if(outPos + 1 < outLen) out(outPos + 1) = (block >> 8).toByte
+        }
+
+        out
       }
-
-      if(outPos < outLen) {
-        
-        val block = Decodabet(in(inPos)) << 18 | Decodabet(in(inPos + 1)) << 12 |
-            (if(inPos + 2 < inLen - padding) Decodabet(in(inPos + 2)) << 6 else 0)
-
-        out(outPos) = (block >> 16).toByte
-        
-        if(outPos + 1 < outLen) out(outPos + 1) = (block >> 8).toByte
-      }
-
-      out
     }
-  }
 
-  def decode(in: String): Array[Byte] = decode(in.toCharArray())
-  
-  def apply(in: Array[Byte]): Array[Char] = encode(in)
-  
-  def unapply(in: Array[Char]): Option[Array[Byte]] = Some(decode(in))
+    def decode(in: String): Array[Byte] = decode(in.toCharArray())
+    
+    def apply(in: Array[Byte]): Array[Char] = encode(in)
+    
+    def unapply(in: Array[Char]): Option[Array[Byte]] = Some(decode(in))
+  }
 }
-

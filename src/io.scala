@@ -19,7 +19,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
 import language.implicitConversions
 
@@ -34,7 +34,8 @@ import java.net._
   * byte-streams */
 class Io extends Paths with Streams with Urls with Files with Net with Sockets with Extractors
     with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
-    JsonExtraction {
+    JsonExtraction with Encryption with Codecs with Digests with Encodings with Generation with Ips
+    with Logging with Mime with Misc with Services with Time {
 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
@@ -93,4 +94,4 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
 
 }
 
-object Base extends Io
+object io extends Io
