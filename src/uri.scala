@@ -23,6 +23,10 @@ package rapture.io
 
 trait Uris { this: Io =>
 
+  object Link {
+    val self = new Link { override def toString() = "." }
+  }
+
   trait Link
 
   trait Uri extends Link {
