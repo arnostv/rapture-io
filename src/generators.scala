@@ -19,29 +19,32 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
-object Generator {
+trait Generation { this: Io =>
 
-  def nonNull[T](f: => T) = non[T](null.asInstanceOf[T])(f)
+  object Generator {
 
-  def non[T](halt: T)(f: => T) = new Iterator[T] {
-    private var n: T = _
-    private var h = false
-    
-    def hasNext = {
-      if(!h) {
-        n = f
-        h = true
+    def nonNull[T](f: => T) = non[T](null.asInstanceOf[T])(f)
+
+    def non[T](halt: T)(f: => T) = new Iterator[T] {
+      private var n: T = _
+      private var h = false
+      
+      def hasNext = {
+        if(!h) {
+          n = f
+          h = true
+        }
+        n != halt
       }
-      n != halt
+
+      def next = {
+        if(!h) n = f
+        h = false
+        n
+      }
     }
 
-    def next = {
-      if(!h) n = f
-      h = false
-      n
-    }
   }
-
 }

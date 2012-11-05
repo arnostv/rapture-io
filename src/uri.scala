@@ -19,7 +19,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
 trait Uris { this: Io =>
 

@@ -19,64 +19,67 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
 import scala.collection.mutable._
 
-/** Provides a simple class mixin for creating a list of items from which items can be looked up.
-  *
-  * @tparam Index The type of the key by which items are indexed */
-trait Lookup[Index] {
+trait Misc { this: Io =>
 
-  type Item <: AutoAppend
+  /** Provides a simple class mixin for creating a list of items from which items can be looked up.
+    *
+    * @tparam Index The type of the key by which items are indexed */
+  trait Lookup[Index] {
 
-  trait AutoAppend { thisItem: Item =>
-    def index: Index
-    items(index) = thisItem
+    type Item <: AutoAppend
+
+    trait AutoAppend { thisItem: Item =>
+      def index: Index
+      items(index) = thisItem
+    }
+
+    private val items = new HashMap[Index, Item]
+    def elements = items.valuesIterator
+    def lookup(idx: Index): Option[Item] = items.get(idx)
   }
 
-  private val items = new HashMap[Index, Item]
-  def elements = items.valuesIterator
-  def lookup(idx: Index): Option[Item] = items.get(idx)
-}
-
-object Cell {
-  def apply[T](get: => T)(set: T => Unit): Cell[T] = new Cell[T] {
-    def apply() = get
-    def update(t: T) = set(t)
-  }
-}
-
-object Var {
-  def apply[T](t: T) = new Cell[T] {
-    private var value = t
-    def apply(): T = value
-    def update(t: T) = value = t
-  }
-}
-
-trait Cell[T] {
-  def apply(): T
-  def update(t: T): Unit
-}
-
-class Counter {
-  private var n = 0
-  def apply() = synchronized { n += 1; n }
-}
-
-object load {
-  def apply[C](implicit mf: scala.reflect.ClassTag[C]) = { mf.toString; () }
-}
-
-case class Csv(data: Array[Array[String]]) {
-  override def toString = {
-    val sb = new StringBuilder
-    for(xs <- data) sb.append(xs.map(_.replaceAll("\"", "\\\"")).mkString("\"", "\",\"", "\"\n"))
-    sb.toString
+  object Cell {
+    def apply[T](get: => T)(set: T => Unit): Cell[T] = new Cell[T] {
+      def apply() = get
+      def update(t: T) = set(t)
+    }
   }
 
-  def rows = data.length
-  def cols = data.headOption.map(_.length).getOrElse(0)
+  object Var {
+    def apply[T](t: T) = new Cell[T] {
+      private var value = t
+      def apply(): T = value
+      def update(t: T) = value = t
+    }
+  }
 
+  trait Cell[T] {
+    def apply(): T
+    def update(t: T): Unit
+  }
+
+  class Counter {
+    private var n = 0
+    def apply() = synchronized { n += 1; n }
+  }
+
+  object load {
+    def apply[C](implicit mf: scala.reflect.ClassTag[C]) = { mf.toString; () }
+  }
+
+  case class Csv(data: Array[Array[String]]) {
+    override def toString = {
+      val sb = new StringBuilder
+      for(xs <- data) sb.append(xs.map(_.replaceAll("\"", "\\\"")).mkString("\"", "\",\"", "\"\n"))
+      sb.toString
+    }
+
+    def rows = data.length
+    def cols = data.headOption.map(_.length).getOrElse(0)
+
+  }
 }

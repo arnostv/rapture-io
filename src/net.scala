@@ -19,7 +19,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.io
+package rapture
 
 import java.io._
 import java.net._
@@ -89,7 +89,7 @@ trait Net { this: Io =>
     import javax.net.ssl._
     import javax.security.cert._
     
-    private[io] def javaConnection: HttpURLConnection =
+    private[rapture] def javaConnection: HttpURLConnection =
       new URL(toString).openConnection().asInstanceOf[HttpURLConnection]
     
     private val trustAllCertificates = {
