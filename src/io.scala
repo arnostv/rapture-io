@@ -32,7 +32,7 @@ import java.net._
   * of stream over another without explicitly specifying a type parameter.  Specifically,
   * `FileUrl`s should be read and written and  `HttpUrl`s and `HttpsUrl`s should be read as
   * byte-streams */
-class Io extends Paths with Streams with Urls with Files with Net with Sockets with Extractors
+class Io extends Paths with Streams with Urls with Files with Net with /*Sockets with */Extractors
     with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
     JsonExtraction with Encryption with Codecs with Digests with Encodings with Generation with Ips
     with Logging with Mime with Misc with Services with Time {
@@ -82,9 +82,9 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
   }
 
   implicit def urlCodec(s: String) = new {
-    def urlEncode(implicit encoding: Encodings.Encoding = Encodings.`UTF-8`) =
+    def urlEncode(implicit encoding: Encoding = Encodings.`UTF-8`) =
       URLEncoder.encode(s, encoding.name)
-    def urlDecode(implicit encoding: Encodings.Encoding = Encodings.`UTF-8`) =
+    def urlDecode(implicit encoding: Encoding = Encodings.`UTF-8`) =
       URLDecoder.decode(s, encoding.name)
   }
 

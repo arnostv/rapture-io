@@ -41,13 +41,13 @@ trait Paths { this: Io =>
 
   /** Represents an absolute (i.e. relative to a canonical base) path. */
   abstract class AbsolutePath[+PathType <: AbsolutePath[PathType]](elements: Seq[String], afterPath: String)
-      extends Path(0, elements) { path =>
+      extends Path[PathType](0, elements, afterPath) { path =>
  
     /** This is an absolute path */
     override def absolute = true
 
     /** Constructs a new path */
-    def makePath(elements: Seq[String], afterPath: String): PathType
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): PathType
     
     /** Returns true if this is a root path */
     def isRoot = elements.isEmpty
@@ -68,7 +68,7 @@ trait Paths { this: Io =>
     def parent: PathType = drop(1)
 
     /** Constructs a new path by appending the specified path element to this path */
-    override def /(p: String): AbsolutePath[PathType] = makePath(path.elements ++ Array(p), afterPath)
+    override def /(p: String): PathType = makePath(0, path.elements ++ Array(p), afterPath)
 
     override def toString() = pathString
     
@@ -76,27 +76,25 @@ trait Paths { this: Io =>
 
     /** Drops the specified number of path elements from the left of the path */
     def drop(n: Int): PathType =
-      if(path.elements.length - n <= 0) makePath(Nil, afterPath)
-      else makePath(path.elements.dropRight(n), afterPath)
+      if(path.elements.length - n <= 0) makePath(0, Nil, afterPath)
+      else makePath(0, path.elements.dropRight(n), afterPath)
     
     /** Drops the specified number of path elements from the right of the path */
     def dropRight(n: Int): PathType =
-      if(path.elements.length - n <= 0) makePath(Nil, afterPath)
-      else makePath(path.elements.drop(n), afterPath)
+      if(path.elements.length - n <= 0) makePath(0, Nil, afterPath)
+      else makePath(0, path.elements.drop(n), afterPath)
     
     /** Drops all but the specified number of path elements from the left of the path */
     def take(n: Int): PathType =
-      if(path.elements.length - n <= 0) makePath(Nil, afterPath)
-      else makePath(path.elements.take(n), afterPath)
+      if(path.elements.length - n <= 0) makePath(0, Nil, afterPath)
+      else makePath(0, path.elements.take(n), afterPath)
     
     /** Constructs a new path by following the relative link from this path */
-    def +(dest: Path) = makePath(path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
+    def +[P <: Path[P]](dest: P): Path[_] =
+      makePath(0, path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
 
-    def -[SrcPathType <: AbsolutePath[SrcPathType]](src: AbsolutePath[SrcPathType]) =
-      src link this
-
-    def ?(params: Map[Symbol, String]) =
-      makePath(elements, "?"+params.map(v => v._1.name.urlEncode+"="+v._2.urlEncode).mkString("&"))
+    /*def -[P <: AbsolutePath[P]](src: P): Path[_] =
+      src link this*/
 
     /** Calculates the relative link between this path and the specified destination path
       *
@@ -104,25 +102,25 @@ trait Paths { this: Io =>
       *
       * @param dest The destination path to calculate the relative link to
       * @return The calculated relative path */
-    def link[DestPathType <: AbsolutePath[DestPathType]](dest: AbsolutePath[DestPathType]):
-        Path = {
+    /*def link[P <: AbsolutePath[P]](dest: P): (Path[T] forSome { type T <: Path[T] }) = {
       
-      def go(from: List[String], to: List[String], up: Int, tail: List[String]): Path =
+      def go(from: List[String], to: List[String], up: Int, tail: List[String]):
+          (Path[T] forSome { type T <: Path[T] }) =
         (up, tail, from, to) match {
           case (0, Nil, x :: x2 :: xs, y :: ys) if x == y =>
             go(x2 :: xs, ys, up, tail)
           
           case (_, _, x :: Nil, y :: Nil) if x == y =>
-            new Path(0, Array[String]())
+            dest.makePath(0, Array[String](), dest.afterPath)
           
           case (_, _, x :: Nil, y :: ys) =>
-            new Path(up, tail.reverse.toArray[String] ++ Array(y) ++ ys)
+            dest.makePath(up, tail.reverse.toArray[String] ++ Array(y) ++ ys, dest.afterPath)
           
           case (0, _, Nil, ys) =>
-            new Path(1, Array[String](dest.head))
+            dest.makePath(1, Array[String](dest.head), dest.afterPath)
           
           case (_, _, Nil, ys) =>
-            new Path(up, tail.reverse.toArray[String] ++ ys.toArray[String])
+            dest.makePath(up, tail.reverse.toArray[String] ++ ys.toArray[String], dest.afterPath)
           
           case (_, _, _ :: x :: xs, Nil) =>
             go(x :: xs, Nil, up + 1, tail)
@@ -136,7 +134,7 @@ trait Paths { this: Io =>
 
       go(if(isRoot) List("") else path.elements.toList, if(dest.isRoot) List("") else
           dest.elements.toList, 0, Nil)
-    }
+    }*/
   }
 
   /** Companion object for simple paths, including a method for creating a path from a `String` */
@@ -149,7 +147,7 @@ trait Paths { this: Io =>
     *
     * @param elements The path elements which make up this absolute path */
   class SimplePath(elements: Seq[String], afterPath: String) extends AbsolutePath[SimplePath](elements, afterPath) {
-    def makePath(elements: Seq[String], afterPath: String) =
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String) =
       new SimplePath(elements, afterPath)
   }
 
@@ -162,13 +160,15 @@ trait Paths { this: Io =>
     * @param ascent The number of levels to navigate up the path hierarchy to reach the common
     *        parent
     * @param elements The `String` components of this path */
-  class Path(val ascent: Int, val elements: Seq[String]) extends Link { path =>
+  abstract class Path[+PathType <: Path[PathType]](val ascent: Int, val elements: Seq[String], val afterPath: String) extends Link { path =>
     
     /** This is a relative path */
     def absolute = false
     
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): PathType
+    
     /** Adds a path component to this relative path */
-    def /(s: String): Path = new Path(ascent, Array(s) ++ elements)
+    def /(s: String): PathType = makePath(ascent, Array(s) ++ elements, "")
 
     override def toString() =
       if(ascent == 0 && elements.isEmpty) "."
@@ -176,7 +176,7 @@ trait Paths { this: Io =>
       else (Array.fill(ascent)("..") ++ elements).mkString("/")
       
     override def equals(that: Any) = that match {
-      case p: Path => p.absolute == absolute && p.ascent == ascent && (p.elements.toArray[String]:
+      case p: Path[_] => p.absolute == absolute && p.ascent == ascent && (p.elements.toArray[String]:
           WrappedArray[String]) == (elements.toArray[String]: WrappedArray[String])
       case _ => false
     }
@@ -187,7 +187,7 @@ trait Paths { this: Io =>
     /** Constructs a relative path from the path components `string` and `string2`
       *
       * @param string2 the second component of the relative path to be constructed */
-    def /(string2: String) = new Path(0, Array(string, string2))
+    def /(string2: String) = new SimplePath(Array(string, string2), "")
   }
 
 }

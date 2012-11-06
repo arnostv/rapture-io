@@ -169,7 +169,9 @@ trait Net { this: Io =>
   class HttpUrl(val pathRoot: NetPathRoot[HttpUrl], elements: Seq[String], afterPath: String) extends
       Url[HttpUrl](elements, afterPath) with NetUrl[HttpUrl] with PathUrl[HttpUrl] { thisHttpUrl =>
     
-    def makePath(xs: Seq[String], afterPath: String) = new HttpUrl(pathRoot, elements, afterPath)
+    def makePath(ascent: Int, xs: Seq[String], afterPath: String) =
+      new HttpUrl(pathRoot, elements, afterPath)
+    
     def hostname = pathRoot.hostname
     def port = pathRoot.port
     def ssl = false
@@ -181,7 +183,9 @@ trait Net { this: Io =>
       Url[HttpsUrl](elements, afterPath) with NetUrl[HttpsUrl] with PathUrl[HttpsUrl] {
       thisHttpsUrl =>
     
-    def makePath(xs: Seq[String], afterPath: String) = new HttpsUrl(pathRoot, elements, afterPath)
+    def makePath(ascent: Int, xs: Seq[String], afterPath: String) =
+      new HttpsUrl(pathRoot, elements, afterPath)
+    
     def hostname = pathRoot.hostname
     def port = pathRoot.port
     def ssl = true
@@ -196,14 +200,14 @@ trait Net { this: Io =>
   class HttpPathRoot(val hostname: String, val port: Int) extends
       NetPathRoot[HttpUrl] { thisPathRoot =>
     
-    def makePath(elements: Seq[String], afterPath: String): HttpUrl =
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): HttpUrl =
       new HttpUrl(thisPathRoot, elements, "")
 
     def scheme = Http
     
-    override def /(element: String) = makePath(Array(element), "")
+    override def /(element: String) = makePath(0, Array(element), "")
     
-    def /(path: Path) = makePath(path.elements, "")
+    def /[P <: Path[P]](path: P) = makePath(0, path.elements, "")
     
     override def equals(that: Any): Boolean =
       that.isInstanceOf[HttpPathRoot] && hostname == that.asInstanceOf[HttpPathRoot].hostname
@@ -212,14 +216,14 @@ trait Net { this: Io =>
   class HttpsPathRoot(val hostname: String, val port: Int) extends NetPathRoot[HttpsUrl]
       { thisPathRoot =>
     
-    def makePath(elements: Seq[String], afterPath: String): HttpsUrl =
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): HttpsUrl =
       new HttpsUrl(thisPathRoot, elements, afterPath)
     
     def scheme = Https
     
-    override def /(element: String) = makePath(Array(element), "")
+    override def /(element: String) = makePath(0, Array(element), "")
     
-    def /(path: Path) = makePath(path.elements, "")
+    def /[P <: Path[P]](path: P) = makePath(0, path.elements, "")
     
     override def equals(that: Any): Boolean =
       that.isInstanceOf[HttpsPathRoot] && hostname == that.asInstanceOf[HttpsPathRoot].hostname
@@ -241,7 +245,7 @@ trait Net { this: Io =>
     /** Parses a URL string into an HttpUrl or HttpsUrl */
     def parse(s: String): Option[NetUrl[U forSome { type U <: Url[U] }]] = s match {
       case UrlRegex(scheme, server, port, path) =>
-        val rp = new Path(0, path.split("/"))
+        val rp = new SimplePath(path.split("/"), "")
         val p = if(port == null) 80 else port.substring(1).toInt
         Some(scheme match {
           case "http" => Http./(server, p) / rp
