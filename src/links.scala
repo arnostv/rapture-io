@@ -81,4 +81,14 @@ trait Linking { this: Io =>
       } else dest
     }
   }
+
+  implicit object HttpFileUrlLinkable extends Linkable[FileUrl, HttpUrl] {
+    type Result = HttpUrl
+    def link(src: FileUrl, dest: HttpUrl) = dest
+  }
+
+  implicit object HttpFileUrlsLinkable extends Linkable[HttpUrl, FileUrl] {
+    type Result = FileUrl
+    def link(src: HttpUrl, dest: FileUrl) = dest
+  }
 }

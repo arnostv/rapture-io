@@ -24,10 +24,13 @@ package rapture
 trait Uris { this: Io =>
 
   object Link {
-    val self = new Link { override def toString() = "." }
+    val self = new Link {
+      def absolute = false
+      override def toString() = "."
+    }
   }
 
-  trait Link
+  trait Link { def absolute: Boolean }
 
   trait Uri extends Link {
     def scheme: Scheme[_]
