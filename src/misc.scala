@@ -82,4 +82,11 @@ trait Misc { this: Io =>
     def cols = data.headOption.map(_.length).getOrElse(0)
 
   }
+
+  /** Y-combinator. Thanks Jorge Ortiz! */
+  case class B[F, T](c: B[F, T] => (F => T)) extends (B[F, T] => (F => T)) {
+    def apply(b: B[F, T]) = c(b)
+  }
+
+  def yCombinator[F, T] = (f: (F => T) => F => T) => B[F, T](x => f(x(x)(_)))(B(x => f(x(x)(_))))
 }

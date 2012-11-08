@@ -93,6 +93,8 @@ trait Paths { this: Io =>
     def +[P <: Path[P]](dest: P): Path[_] =
       makePath(0, path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
 
+    def link[P <: Path[P]](dest: P)(implicit linkable: Linkable[AbsolutePath[PathType], P]) = linkable.link(this, dest)
+
     /*def -[P <: AbsolutePath[P]](src: P): Path[_] =
       src link this*/
 
@@ -149,6 +151,10 @@ trait Paths { this: Io =>
   class SimplePath(elements: Seq[String], afterPath: String) extends AbsolutePath[SimplePath](elements, afterPath) {
     def makePath(ascent: Int, elements: Seq[String], afterPath: String) =
       new SimplePath(elements, afterPath)
+  }
+
+  class RelativePath(ascent: Int, elements: Seq[String], afterPath: String) extends Path[RelativePath](ascent, elements, afterPath) {
+    def makePath(a: Int, e: Seq[String], ap: String): RelativePath = new RelativePath(a, e, ap)
   }
 
   /** The canonical root for a simple path */
