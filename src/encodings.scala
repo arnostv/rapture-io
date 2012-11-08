@@ -23,6 +23,8 @@ package rapture
 
 trait Encodings { this: Io =>
 
+  type Encoding = Encodings.Encoding
+
   /** Provides references to standard character encodings provided by Java. Encodings are represented
     * by instances of the Encoding case class, which is a simple wrapper over a String of the
     * encoding's name. Several standard encodings are provided and identified by the encoding's

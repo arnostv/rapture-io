@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Codecs {
+trait Codecs { this: Io =>
 
   object Base64 extends Base64Codec
   object Base64Url extends Base64Codec(char62 = '-', char63 = '_')
@@ -37,6 +37,9 @@ trait Codecs {
       for(i <- 0 until Alphabet.length) x(Alphabet(i)) = i
       x
     }
+
+    def encode(in: String)(implicit encoding: Encoding): String =
+      new String(encode(in.getBytes(encoding.name), false, false))
 
     /** Non-RFC-compliant encoder. */
 

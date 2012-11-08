@@ -136,7 +136,7 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
     *
     * @param out The `java.io.Writer` to be wrapped */
   class LineOutput(writer: Writer) extends Output[String] {
-    def this(os: OutputStream, encoding: Encodings.Encoding) =
+    def this(os: OutputStream, encoding: Encoding) =
       this(new OutputStreamWriter(os, encoding.name))
     private val out = new BufferedWriter(writer)
 
@@ -161,7 +161,7 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
     * @constructor takes the Java Reader to be wrapped
     * @param reader The Java Reader instance being wrapped. */
   class LineInput(reader: Reader) extends Input[String] {
-    def this(is: InputStream, encoding: Encodings.Encoding) =
+    def this(is: InputStream, encoding: Encoding) =
       this(new InputStreamReader(is, encoding.name))
     private val in = new BufferedReader(reader)
 
@@ -194,15 +194,15 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
   }
 
   /** Type class definition for creating an Output[Char] from a Java OutputStream, taking an
-    * [[Encodings.Encoding]] implicitly for converting between `Byte`s and `Char`s */
-  implicit def outputStreamCharBuilder(implicit encoding: Encodings.Encoding) =
+    * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
+  implicit def outputStreamCharBuilder(implicit encoding: Encoding) =
     new OutputBuilder[OutputStream, Char] {
       def output(s: OutputStream) = new CharOutput(new OutputStreamWriter(s, encoding.name))
     }
 
   /** Type class definition for creating an Input[Char] from a Java InputStream, taking an
-    * [[Encodings.Encoding]] implicitly for converting between `Byte`s and `Char`s */
-  implicit def inputStreamCharBuilder(implicit encoding: Encodings.Encoding) =
+    * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
+  implicit def inputStreamCharBuilder(implicit encoding: Encoding) =
     new InputBuilder[InputStream, Char] {
       def input(s: InputStream) = new CharInput(new InputStreamReader(s, encoding.name))
     }

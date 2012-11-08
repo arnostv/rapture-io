@@ -41,17 +41,18 @@ trait Urls { this: Io =>
     def schemeName = scheme.toString
 
     /** Constructs a new URL by appending the given path element to the path. */
-    override def /(element: String) = pathRoot.makePath(thisPath.elements ++ Array(element), afterPath)
+    override def /(element: String) = pathRoot.makePath(0, thisPath.elements ++ Array(element), afterPath)
     
-    /** Constructs a new URL by calculating the destination URL by following  the given
+    /** Constructs a new URL by calculating the destination URL by following the given
       * `Path` from this URL */
-    def /(path: Path) = pathRoot.makePath(path.elements, afterPath)
+    def /(path: SimplePath) = pathRoot.makePath(0, path.elements, afterPath)
     
     /** Calculates the destination of the given link from this URL
       *
       * @param path the relative path */
-    override def +(dest: Path): UrlType =
-      pathRoot.makePath(dest.elements ++ thisPath.elements.drop(dest.ascent), afterPath)
+    override def +[P <: Path[P]](dest: P): Path[_] =
+      if(dest.absolute) dest
+      else pathRoot.makePath(0, dest.elements ++ thisPath.elements.drop(dest.ascent), afterPath)
 
     /** Calculates the path between this URL and the given destination URL, if possible as a
       * relative path when the source and destination paths have the same base, or - failing that -
@@ -62,9 +63,10 @@ trait Urls { this: Io =>
       * @return The relative link between this `Url` and the destination `Url`, if possible, or the
       *         destination path if not.
       * */
-    override def link[PathType <: AbsolutePath[PathType]](dest: AbsolutePath[PathType]): Path =
-      if(dest.isInstanceOf[Url[_]] && dest.asInstanceOf[Url[_]].pathRoot == pathRoot) super.link(dest)
-      else dest
+    /*override def link[P <: AbsolutePath[_]](dest: P): (Path[T] forSome { type T <: Path[T] }) = dest match {
+      case dest: Url[_] if dest.pathRoot == pathRoot => super.link(dest)
+      case _ => dest
+    }*/
   }
 
   /** Repenesents a URL scheme */
@@ -76,12 +78,12 @@ trait Urls { this: Io =>
   /** Defines a base to upon which the hierarchical part of the URL is appended */
   abstract class PathRoot[+U <: Url[U]] extends AbsolutePath[U](Nil, "") {
     def scheme: Scheme[U]
-    def makePath(elements: Seq[String], afterPath: String): U
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): U
   }
 
   /** Specifies additional methods for URLs which have a hierarchical structure. */
   trait PathUrl[+UrlType <: Url[UrlType]] { pathUrl: UrlType =>
     def /(d: String): UrlType
-    def /(path: Path): UrlType
+    def /(path: SimplePath): UrlType
   }
 }

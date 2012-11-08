@@ -55,16 +55,16 @@ trait Files { this: Io =>
 
     /** Provides a FileUrl for the current working directory, as determined by the user.dir
       * environment variable. */
-    def currentDir = makePath(System.getProperty("user.dir").split("/").filter(_ != ""), "")
+    def currentDir = makePath(0, System.getProperty("user.dir").split("/").filter(_ != ""), "")
     
     /** Method for creating a new instance of this type of URL.
       *
       * @param elements The elements of the path for the new FileUrl to create */
-    def makePath(elements: Seq[String], afterPath: String) =
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): FileUrl =
       new FileUrl(thisPathRoot, elements.toArray[String])
     
     /** Method for creating a new FileUrl from a java.io.File. */
-    def apply(file: java.io.File) = makePath(file.getAbsolutePath.split("\\/"), "")
+    def apply(file: java.io.File) = makePath(0, file.getAbsolutePath.split("\\/"), "")
     
     /** Reference to the scheme for this type of URL */
     def scheme: Scheme[FileUrl] = File
@@ -72,13 +72,7 @@ trait Files { this: Io =>
     /** Creates a new FileUrl of the specified resource in the filesystem root.
       *
       * @param resource the resource beneath the filesystem root to create. */
-    override def /(resource: String) = makePath(Array(resource), "")
-    
-    /** Creates a new FileUrl of the specified path, relative to the filesystem root. */
-    def /(path: Path) = makePath(path.elements, "")
-    
-    /** Creates a new FileUrl of the specified path, on the filesystem root. */
-    def /(path: AbsolutePath[FileUrl]) = makePath(path.elements, "")
+    override def /(resource: String) = makePath(0, Array(resource), "")
   }
 
   trait Navigable[UrlType] {
@@ -162,7 +156,8 @@ trait Files { this: Io =>
     def size: Long = javaFile.length()
     
     /** Creates a new instance of this type of URL. */
-    def makePath(xs: Seq[String], afterPath: String): FileUrl = File.makePath(xs, afterPath)
+    def makePath(ascent: Int, elements: Seq[String], afterPath: String): FileUrl =
+      File.makePath(ascent, elements, afterPath)
     
     /** If the filesystem object represented by this FileUrl does not exist, it is created as a
       * directory, provided that either the immediate parent directory already exists, or the

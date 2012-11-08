@@ -75,13 +75,13 @@ object Tests extends TestingApplication {
     val getParent = test { (^ / "foo" / "bar").parent } satisfies (_ == ^ / "foo")
     val drop = test { (^ / "foo" / "bar" / "baz").drop(2) } satisfies (_ == ^ / "foo")
     val take = test { (^ / "foo" / "bar" / "baz").take(2) } satisfies (_ == ^ / "foo" / "bar")
-    val pathAppend = test { (^ / "foo" / "bar") + (^ / "baz") } satisfies (_ == ^ / "foo" / "bar" / "baz")
+    val pathAppend = test { ((^ / "foo" / "bar") + (^ / "baz")).toString } yields "/foo/bar/baz"
   }
 
   val digest = new Suite("digest.scala") {
     
     val md5Sum = test {
-      "Hello World".getBytes("UTF-8").md5Sum().toLowerCase
+      val q = "Hello World".getBytes("UTF-8").md5Sum().toLowerCase
     } yields "e59ff97941044f85df5297e1c302d260"
     
   }
@@ -95,10 +95,11 @@ object Tests extends TestingApplication {
     } yields "aa0d5d6739177b2bbb4c508a3014d8b0"
   }
 
-  /*val base64 = new Suite("base64.scala") {
-    val encode = test { Base64.encode("Hello World") } yields "SGVsbG8gV29ybGQK"
-    val encode2 = test { Base64.encode("Hello World!") } yields "SGVsbG8gV29ybGQhCg=="
-    val encode3 = test { Base64.encode("Hello World!!") } yields "SGVsbG8gV29ybGQhIQo="
-  }*/
+  val base64 = new Suite("base64.scala") {
+    implicit val encoding = Encodings.`UTF-8`
+    val encode = test { Base64.encode("Hello World") } yields "SGVsbG8gV29ybGQ"
+    val encode2 = test { Base64.encode("Hello World!") } yields "SGVsbG8gV29ybGQh"
+    val encode3 = test { Base64.encode("Hello World!!") } yields "SGVsbG8gV29ybGQhIQ"
+  }
 
 }
