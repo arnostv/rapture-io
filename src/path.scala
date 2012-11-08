@@ -93,50 +93,10 @@ trait Paths { this: Io =>
     def +[P <: Path[P]](dest: P): Path[_] =
       makePath(0, path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
 
-    def link[P <: Path[P]](dest: P)(implicit linkable: Linkable[AbsolutePath[PathType], P]) = linkable.link(this, dest)
+    def link[P <: AbsolutePath[P]](dest: P)(implicit linkable: Linkable[PathType, P]) = linkable.link(this.asInstanceOf[PathType], dest)
 
-    /*def -[P <: AbsolutePath[P]](src: P): Path[_] =
-      src link this*/
+    def -[P <: AbsolutePath[P]](src: P)(implicit linkable: Linkable[P, PathType]) = linkable.link(src, this.asInstanceOf[PathType])
 
-    /** Calculates the relative link between this path and the specified destination path
-      *
-      * FIXME: ^ / "a" / "b" link ^ / "a" does not work
-      *
-      * @param dest The destination path to calculate the relative link to
-      * @return The calculated relative path */
-    /*def link[P <: AbsolutePath[P]](dest: P): (Path[T] forSome { type T <: Path[T] }) = {
-      
-      def go(from: List[String], to: List[String], up: Int, tail: List[String]):
-          (Path[T] forSome { type T <: Path[T] }) =
-        (up, tail, from, to) match {
-          case (0, Nil, x :: x2 :: xs, y :: ys) if x == y =>
-            go(x2 :: xs, ys, up, tail)
-          
-          case (_, _, x :: Nil, y :: Nil) if x == y =>
-            dest.makePath(0, Array[String](), dest.afterPath)
-          
-          case (_, _, x :: Nil, y :: ys) =>
-            dest.makePath(up, tail.reverse.toArray[String] ++ Array(y) ++ ys, dest.afterPath)
-          
-          case (0, _, Nil, ys) =>
-            dest.makePath(1, Array[String](dest.head), dest.afterPath)
-          
-          case (_, _, Nil, ys) =>
-            dest.makePath(up, tail.reverse.toArray[String] ++ ys.toArray[String], dest.afterPath)
-          
-          case (_, _, _ :: x :: xs, Nil) =>
-            go(x :: xs, Nil, up + 1, tail)
-          
-          case (_, _, x :: Nil, Nil) =>
-            go(Nil, Nil, up, tail)
-          
-          case (_, _, _ :: x :: xs, y :: ys) =>
-            go(x :: xs, ys, up + 1, y :: tail)
-        }
-
-      go(if(isRoot) List("") else path.elements.toList, if(dest.isRoot) List("") else
-          dest.elements.toList, 0, Nil)
-    }*/
   }
 
   /** Companion object for simple paths, including a method for creating a path from a `String` */
@@ -158,7 +118,7 @@ trait Paths { this: Io =>
   }
 
   /** The canonical root for a simple path */
-  object ^ extends SimplePath(Nil, "")
+  val ^ = new SimplePath(Nil, "")
 
   /** Represents a path which is to be considered relative to another (unspecified) path or URL
     *
@@ -178,7 +138,7 @@ trait Paths { this: Io =>
 
     override def toString() =
       if(ascent == 0 && elements.isEmpty) "."
-      else if(ascent == 0 && elements == Array("")) "/"
+      else if(ascent == 0 && elements.head == "" && elements.length == 1) "/"
       else (Array.fill(ascent)("..") ++ elements).mkString("/")
       
     override def equals(that: Any) = that match {

@@ -87,12 +87,12 @@ object Tests extends TestingApplication {
   }
 
   val streams = new Suite("io.scala") {
-    val download = test {
+    /*val download = test {
       val src = Http / "www.propensive.com" / "downloads" / "aa0d5d6739177b2bbb4c508a3014d8b0"
       val dest = File / "tmp" / "aa0d5d6739177b2bbb4c508a3014d8b0"
       src > dest
       dest.md5Sum().toLowerCase
-    } yields "aa0d5d6739177b2bbb4c508a3014d8b0"
+    } yields "aa0d5d6739177b2bbb4c508a3014d8b0"*/
   }
 
   val base64 = new Suite("base64.scala") {
@@ -100,6 +100,23 @@ object Tests extends TestingApplication {
     val encode = test { Base64.encode("Hello World") } yields "SGVsbG8gV29ybGQ"
     val encode2 = test { Base64.encode("Hello World!") } yields "SGVsbG8gV29ybGQh"
     val encode3 = test { Base64.encode("Hello World!!") } yields "SGVsbG8gV29ybGQhIQ"
+  }
+
+  val linking = new Suite("links.scala") {
+    val link1 = test { (^ link ^).toString } yields "."
+    val link2 = test { (^ link ^ / "foo").toString } yields "foo"
+    val link3 = test { (^ link ^ / "foo" / "bar").toString } yields "foo/bar"
+    val link4 = test { (^ / "foo" link ^).toString } yields "/"
+    val link5 = test { (^ / "foo" / "bar" link ^).toString } yields "../"
+    val link6 = test { (^ / "foo" / "bar" link ^ / "foo").toString } yields "../foo"
+    val link7 = test { (^ / "foo" / "bar" link ^ / "foo" / "bar").toString } yields "."
+    val link8 = test { (^ / "baz" link ^ / "foo").toString } yields "foo"
+    val link9 = test { (^ / "baz" / "quux" link ^ / "foo").toString } yields "../foo"
+    val link10 = test { (^ / "baz" link ^ / "foo" / "bar").toString } yields "foo/bar"
+    val link11 = test { (^ / "baz" / "quux" link ^ / "foo" / "bar").toString } yields "../foo/bar"
+    val link12 = test { (^ / "bar" link ^ / "foo" / "bar").toString } yields "foo/bar"
+    val link13 = test { (^ / "baz" / "quux" link ^ / "quux").toString } yields "../quux"
+    val link14 = test { (^ / "foo" / "baz" / "quux" link ^ / "foo" / "quux").toString } yields "../quux"
   }
 
 }
