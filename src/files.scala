@@ -55,16 +55,16 @@ trait Files { this: Io =>
 
     /** Provides a FileUrl for the current working directory, as determined by the user.dir
       * environment variable. */
-    def currentDir = makePath(0, System.getProperty("user.dir").split("/").filter(_ != ""), "")
+    def currentDir = makePath(0, System.getProperty("user.dir").split("/").filter(_ != ""), Map())
     
     /** Method for creating a new instance of this type of URL.
       *
       * @param elements The elements of the path for the new FileUrl to create */
-    def makePath(ascent: Int, elements: Seq[String], afterPath: String): FileUrl =
+    def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): FileUrl =
       new FileUrl(thisPathRoot, elements.toArray[String])
     
     /** Method for creating a new FileUrl from a java.io.File. */
-    def apply(file: java.io.File) = makePath(0, file.getAbsolutePath.split("\\/"), "")
+    def apply(file: java.io.File) = makePath(0, file.getAbsolutePath.split("\\/"), Map())
     
     /** Reference to the scheme for this type of URL */
     def scheme: Scheme[FileUrl] = File
@@ -72,7 +72,7 @@ trait Files { this: Io =>
     /** Creates a new FileUrl of the specified resource in the filesystem root.
       *
       * @param resource the resource beneath the filesystem root to create. */
-    override def /(resource: String) = makePath(0, Array(resource), "")
+    override def /(resource: String) = makePath(0, Array(resource), Map())
   }
 
   trait Navigable[UrlType] {
@@ -111,7 +111,7 @@ trait Files { this: Io =>
 
   /** Defines a URL for the file: scheme, and provides standard filesystem operations on the file
     * represented by the URL. */
-  class FileUrl(val pathRoot: PathRoot[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements, "")
+  class FileUrl(val pathRoot: PathRoot[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements, Map())
       with PathUrl[FileUrl] {
 
     lazy val javaFile: java.io.File = new java.io.File(pathString)
@@ -156,7 +156,7 @@ trait Files { this: Io =>
     def size: Long = javaFile.length()
     
     /** Creates a new instance of this type of URL. */
-    def makePath(ascent: Int, elements: Seq[String], afterPath: String): FileUrl =
+    def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): FileUrl =
       File.makePath(ascent, elements, afterPath)
     
     /** If the filesystem object represented by this FileUrl does not exist, it is created as a
