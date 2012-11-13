@@ -53,20 +53,6 @@ trait Urls { this: Io =>
     override def +[P <: Path[P]](dest: P): Path[_] =
       if(dest.absolute) dest
       else pathRoot.makePath(0, dest.elements ++ thisPath.elements.drop(dest.ascent), afterPath)
-
-    /** Calculates the path between this URL and the given destination URL, if possible as a
-      * relative path when the source and destination paths have the same base, or - failing that -
-      * simply returns the destination path.
-      *
-      * @param dest The destination path to which the link should be calculated
-      * @tparam PathType The type of the path being linked to
-      * @return The relative link between this `Url` and the destination `Url`, if possible, or the
-      *         destination path if not.
-      * */
-    /*override def link[P <: AbsolutePath[_]](dest: P): (Path[T] forSome { type T <: Path[T] }) = dest match {
-      case dest: Url[_] if dest.pathRoot == pathRoot => super.link(dest)
-      case _ => dest
-    }*/
   }
 
   /** Repenesents a URL scheme */

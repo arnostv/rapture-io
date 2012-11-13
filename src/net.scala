@@ -83,7 +83,7 @@ trait Net { this: Io =>
       ByteArrayInput(content.toString.getBytes("UTF-8"))
   }
 
-  /** Common methods for `HttpUrl`s and `HttpsUrl`s. */
+  /** Common methods for `HttpUrl`s */
   trait NetUrl[+U <: Url[U]] extends Uri { netUrl: U =>
     
     import javax.net.ssl._
@@ -175,21 +175,7 @@ trait Net { this: Io =>
     def hostname = pathRoot.hostname
     def port = pathRoot.port
     def ssl = false
-    def canonicalPort = 80
-  }
-
-  /** Represents a URL with the https scheme */
-  class HttpsUrl(val pathRoot: NetPathRoot[HttpsUrl], elements: Seq[String], afterPath: String) extends
-      Url[HttpsUrl](elements, afterPath) with NetUrl[HttpsUrl] with PathUrl[HttpsUrl] {
-      thisHttpsUrl =>
-    
-    def makePath(ascent: Int, xs: Seq[String], afterPath: String) =
-      new HttpsUrl(pathRoot, elements, afterPath)
-    
-    def hostname = pathRoot.hostname
-    def port = pathRoot.port
-    def ssl = true
-    def canonicalPort = 443
+    def canonicalPort = if(ssl) 443 else 80
   }
 
   trait NetPathRoot[+T <: Url[T] with NetUrl[T]] extends PathRoot[T] {
@@ -197,7 +183,7 @@ trait Net { this: Io =>
     def port: Int
   }
 
-  class HttpPathRoot(val hostname: String, val port: Int) extends
+  class HttpPathRoot(val hostname: String, val port: Int, val ssl: Boolean) extends
       NetPathRoot[HttpUrl] { thisPathRoot =>
     
     def makePath(ascent: Int, elements: Seq[String], afterPath: String): HttpUrl =
@@ -213,22 +199,6 @@ trait Net { this: Io =>
       that.isInstanceOf[HttpPathRoot] && hostname == that.asInstanceOf[HttpPathRoot].hostname
   }
 
-  class HttpsPathRoot(val hostname: String, val port: Int) extends NetPathRoot[HttpsUrl]
-      { thisPathRoot =>
-    
-    def makePath(ascent: Int, elements: Seq[String], afterPath: String): HttpsUrl =
-      new HttpsUrl(thisPathRoot, elements, afterPath)
-    
-    def scheme = Https
-    
-    override def /(element: String) = makePath(0, Array(element), "")
-    
-    def /[P <: Path[P]](path: P) = makePath(0, path.elements, "")
-    
-    override def equals(that: Any): Boolean =
-      that.isInstanceOf[HttpsPathRoot] && hostname == that.asInstanceOf[HttpsPathRoot].hostname
-  }
-
   /** Factory for creating new HTTP URLs */
   object Http extends Scheme[HttpUrl] {
     def schemeName = "http"
@@ -238,11 +208,11 @@ trait Net { this: Io =>
       * @param hostname A `String` of the domain name for the URL
       * @param port The port to connect to this URL on, defaulting to port 80 */
     def /(hostname: String, port: Int = Services.Tcp.http.portNo) =
-      new HttpPathRoot(hostname, port)
+      new HttpPathRoot(hostname, port, false)
   
     private val UrlRegex = """(https?):\/\/([\.\-a-z0-9]+)(:[1-9][0-9]*)?\/?(.*)""".r
 
-    /** Parses a URL string into an HttpUrl or HttpsUrl */
+    /** Parses a URL string into an HttpUrl */
     def parse(s: String): Option[NetUrl[U forSome { type U <: Url[U] }]] = s match {
       case UrlRegex(scheme, server, port, path) =>
         val rp = new SimplePath(path.split("/"), "")
@@ -256,7 +226,7 @@ trait Net { this: Io =>
   }
 
   /** Factory for creating new HTTPS URLs */
-  object Https extends Scheme[HttpsUrl] {
+  object Https extends Scheme[HttpUrl] {
     def schemeName = "https"
 
     /** Creates a new URL with the https scheme with the specified domain name and port
@@ -264,7 +234,7 @@ trait Net { this: Io =>
       * @param hostname A `String` of the domain name for the URL
       * @param port The port to connect to this URL on, defaulting to port 443 */
     def /(hostname: String, port: Int = Services.Tcp.https.portNo) =
-      new HttpsPathRoot(hostname, port)
+      new HttpPathRoot(hostname, port, true)
   }
 }
 

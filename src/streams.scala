@@ -230,13 +230,6 @@ trait Streams { this: Io =>
           extractEncoding(url.javaConnection))))
   }
 
-  /** Type class object for getting an Input[Char] from an HttpsUrl */
-  implicit object HttpsStreamCharReader extends StreamReader[HttpsUrl, Char] {
-    def input(url: HttpsUrl): Input[Char] =
-      new CharInput(new BufferedReader(new InputStreamReader(url.javaConnection.getInputStream,
-          extractEncoding(url.javaConnection))))
-  }
-
   /** An Input provides an incoming stream of data */
   trait Input[@specialized(Byte, Char) Data] {
 

@@ -30,7 +30,7 @@ import java.net._
   * type class objects which should be given higher priority than the defaults.  This allows
   * methods which stream from URLs which have alternative means of being read to favour one type
   * of stream over another without explicitly specifying a type parameter.  Specifically,
-  * `FileUrl`s should be read and written and  `HttpUrl`s and `HttpsUrl`s should be read as
+  * `FileUrl`s should be read and written and  `HttpUrl`s should be read as
   * byte-streams */
 class Io extends Paths with Streams with Urls with Files with Net with /*Sockets with */Extractors
     with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
@@ -57,12 +57,6 @@ class Io extends Paths with Streams with Urls with Files with Net with /*Sockets
   /** Type class object for reading `Byte`s from `HttpUrl`s */
   implicit object HttpStreamByteReader extends StreamReader[HttpUrl, Byte] {
     def input(url: HttpUrl): Input[Byte] =
-      new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream))
-  }
-
-  /** Type class object for reading `Byte`s from `HttpsUrl`s */
-  implicit object HttpsStreamByteReader extends StreamReader[HttpsUrl, Byte] {
-    def input(url: HttpsUrl): Input[Byte] =
       new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream))
   }
 
