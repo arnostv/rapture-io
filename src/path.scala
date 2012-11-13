@@ -73,8 +73,6 @@ trait Paths { this: Io =>
     override def /(p: String): PathType = makePath(0, path.elements ++ Array(p), afterPath)
 
     override def toString() = pathString
-    
-    def afterPathString = afterPath.toList sortBy { case (k, (s, p)) => p } map { case (k, (s, p)) => k+s } mkString ""
 
     def pathString = elements.mkString("/", "/", "")+afterPathString
 
@@ -141,15 +139,17 @@ trait Paths { this: Io =>
     
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): PathType
     
+    protected def afterPathString = afterPath.toList sortBy { case (k, (s, p)) => p } map { case (k, (s, p)) => k+s } mkString ""
+    
     /** Adds a path component to this relative path */
     def /(s: String): PathType = makePath(ascent, Array(s) ++ elements, Map())
 
-    def ?[Q](q: Q)(implicit qt: QueryType[PathType, Q]) = makePath(ascent, elements, qt.extras(afterPath, q))
+    def /?[Q](q: Q)(implicit qt: QueryType[PathType, Q]) = makePath(ascent, elements, qt.extras(afterPath, q))
 
     override def toString() =
-      if(ascent == 0 && elements.isEmpty) "."
+      (if(ascent == 0 && elements.isEmpty) "."
       else if(ascent == 0 && elements.head == "" && elements.length == 1) "/"
-      else (Array.fill(ascent)("..") ++ elements).mkString("/")
+      else (Array.fill(ascent)("..") ++ elements).mkString("/"))+afterPathString
       
     override def equals(that: Any) = that match {
       case p: Path[_] => p.absolute == absolute && p.ascent == ascent && (p.elements.toArray[String]:
@@ -159,11 +159,11 @@ trait Paths { this: Io =>
   }
 
   /** Allows for easy construction of relative paths from `String`s */
-  implicit def richString(string: String) = new {
+  implicit def stringToRelativePath(string: String) = new {
     /** Constructs a relative path from the path components `string` and `string2`
       *
       * @param string2 the second component of the relative path to be constructed */
-    def /(string2: String) = new SimplePath(Array(string, string2), Map())
+    def /(string2: String) = new RelativePath(0, Array(string, string2), Map())
   }
 
 }

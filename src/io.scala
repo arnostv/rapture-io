@@ -75,10 +75,10 @@ class Io extends Paths with Streams with Urls with Files with Net with /*Sockets
     def input(stdin: Stdin[Data]) = stdin.input
   }
 
-  implicit def urlCodec(s: String) = new {
-    def urlEncode(implicit encoding: Encoding = Encodings.`UTF-8`) =
+  implicit class urlCodec(s: String) {
+    @inline def urlEncode(implicit encoding: Encoding = Encodings.`UTF-8`) =
       URLEncoder.encode(s, encoding.name)
-    def urlDecode(implicit encoding: Encoding = Encodings.`UTF-8`) =
+    @inline def urlDecode(implicit encoding: Encoding = Encodings.`UTF-8`) =
       URLDecoder.decode(s, encoding.name)
   }
 

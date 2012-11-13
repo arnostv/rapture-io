@@ -165,10 +165,10 @@ trait Net { this: Io =>
     }
   }
 
-  implicit object HttpQueryParameters extends QueryType[HttpUrl, Map[Symbol, String]] {
+  implicit object HttpQueryParameters extends QueryType[Path[_], Map[Symbol, String]] {
     def extras(existing: AfterPath, q: Map[Symbol, String]): AfterPath =
       existing + ('?' -> ((q.map({ case (k, v) =>
-        k.name.urlEncode+"="+v.urlEncode
+        urlCodec(k.name).urlEncode+"="+urlCodec(v).urlEncode
       }).mkString("&")) -> 1.0))
   }
 
