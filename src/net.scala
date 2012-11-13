@@ -201,7 +201,7 @@ trait Net { this: Io =>
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): HttpUrl =
       new HttpUrl(thisPathRoot, elements, Map())
 
-    def scheme = Http
+    def scheme = if(ssl) Https else Http
     
     override def /(element: String) = makePath(0, Array(element), Map())
     
