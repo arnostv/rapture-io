@@ -28,7 +28,7 @@ import java.net._
 trait Urls { this: Io =>
 
   /** Represents a generic URL */
-  abstract class Url[+UrlType <: Url[UrlType]](elements: Seq[String], afterPath: String) extends
+  abstract class Url[+UrlType <: Url[UrlType]](elements: Seq[String], afterPath: AfterPath) extends
       AbsolutePath[UrlType](elements, afterPath) with Uri { thisPath: UrlType =>
   
     /** The base for this URL */
@@ -62,9 +62,9 @@ trait Urls { this: Io =>
   }
 
   /** Defines a base to upon which the hierarchical part of the URL is appended */
-  abstract class PathRoot[+U <: Url[U]] extends AbsolutePath[U](Nil, "") {
+  abstract class PathRoot[+U <: Url[U]] extends AbsolutePath[U](Nil, Map()) {
     def scheme: Scheme[U]
-    def makePath(ascent: Int, elements: Seq[String], afterPath: String): U
+    def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): U
   }
 
   /** Specifies additional methods for URLs which have a hierarchical structure. */
