@@ -29,6 +29,7 @@ trait Mail { this: Io =>
   }
 
   class MailtoUri(val email: String) extends Uri {
+    def absolute = true
     def scheme = Mailto
     def schemeName = scheme.schemeName
     def schemeSpecificPart = email
