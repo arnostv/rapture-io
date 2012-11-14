@@ -195,8 +195,7 @@ trait Streams { this: Io =>
     *
     * @tparam Url Url for which this corresponds
     * @tparam Data Units of data to be streamed, typically `Byte` or `Char` */
-  @implicitNotFound(msg = "Cannot find implicit StreamWriter for ${UrlType} resources. ${UrlType} "+
-      "resources can only be written to if a StreamWriter implicit exists within scope.")
+  @implicitNotFound(msg = "Cannot write to ${UrlType} resources.")
   trait StreamWriter[-UrlType, @specialized(Byte, Char) Data] {
     def doNotClose = false
     def output(url: UrlType): Output[Data]
