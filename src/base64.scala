@@ -23,7 +23,11 @@ package rapture
 
 trait Codecs { this: Io =>
 
+  /** Standard Base64 codec. */
   object Base64 extends Base64Codec
+
+  /** Base64-URL codec, a URL-safe version of the Base64 codec which works in the same way as the
+    * standard codec, except uses the characters - and _ instead of + and / respectively. */
   object Base64Url extends Base64Codec(char62 = '-', char63 = '_')
 
   /** RFC2045 base-64 codec, based on http://migbase64.sourceforge.net/. */
@@ -38,6 +42,8 @@ trait Codecs { this: Io =>
       x
     }
 
+
+    /** Convenience method for encoding a string using the Base64 codec. */
     def encode(in: String)(implicit encoding: Encoding): String =
       new String(encode(in.getBytes(encoding.name), false, false))
 
@@ -154,7 +160,6 @@ trait Codecs { this: Io =>
         }
 
         if(outPos < outLen) {
-          
           val block = Decodabet(in(inPos)) << 18 | Decodabet(in(inPos + 1)) << 12 |
               (if(inPos + 2 < inLen - padding) Decodabet(in(inPos + 2)) << 6 else 0)
 
@@ -167,10 +172,13 @@ trait Codecs { this: Io =>
       }
     }
 
+    /** Convenience method for decoding a Base64 string */
     def decode(in: String): Array[Byte] = decode(in.toCharArray())
     
+    /** Encodes the input byte array as an array of characters */
     def apply(in: Array[Byte]): Array[Char] = encode(in)
     
+    /** Decodes the input character array into an array of bytes. */
     def unapply(in: Array[Char]): Option[Array[Byte]] = Some(decode(in))
   }
 }

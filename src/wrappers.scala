@@ -40,6 +40,9 @@ trait LowPriorityWrappers { this: Io =>
     def output(s: OutputStream) = new ByteOutput(s)
   }
 
+  implicit object HttpResponseByteReader extends StreamReader[HttpResponse, Byte] {
+    def input(response: HttpResponse): Input[Byte] = response.input[Byte]
+  }
 }
 
 /** Provides wrappers around Java's standard stream classes: `InputStream`, `OutputStream`, `Reader`

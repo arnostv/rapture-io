@@ -28,6 +28,7 @@ trait CollectionExtras {
 
   @inline implicit class SeqExtras[A, C[A] <: Seq[A]](val xs: C[A]) {
     
+    /** Inserts an element between each of the elements of the sequence. */
     def intersperse[B >: A, That](between: B)(implicit bf: CanBuildFrom[C[A], B, That]): That = {
       val b = bf(xs)
       xs.init foreach { x =>
@@ -38,6 +39,8 @@ trait CollectionExtras {
       b.result
     }
     
+    /** Inserts an element between each of the elements of the sequence, and additionally prepends
+      * and affixes the sequence with `before` and `after`. */
     def intersperse[B >: A, That](before: B, between: B, after: B)(implicit bf: CanBuildFrom[C[A], B, That]): That = {
       val b = bf(xs)
       b += before
@@ -50,6 +53,7 @@ trait CollectionExtras {
       b.result
     }
 
+    /** Convenience method for zipping a sequence with a value derived from each element. */
     def zipWith[T](fn: A => T)(implicit bf: CanBuildFrom[C[A], (A, T), C[(A, T)]]): C[(A, T)] = {
       val b = bf(xs)
       xs.foreach { x => b += (x -> fn(x)) }

@@ -82,9 +82,16 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
       URLDecoder.decode(s, encoding.name)
   }
 
+  // FIXME Move to misc
   implicit def nullableExtras[T](t: T) = new { def fromNull = if(t == null) None else Some(t) }
 
   def randomGuid() = java.util.UUID.randomUUID().toString
+
+  def devNull[T] = new Output[T] {
+    def close() = ()
+    def flush() = ()
+    def write(t: T) = ()
+  }
 
 }
 

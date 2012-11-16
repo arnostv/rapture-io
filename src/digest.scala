@@ -27,6 +27,7 @@ trait Digests { this: Io =>
 
   abstract class Digester {
     
+    /** Digests the array of bytes. */
     def digest(msg: Array[Byte]): Array[Byte]
 
     /** Digests the UTF-8 representation of the given string. */
@@ -49,8 +50,8 @@ trait Digests { this: Io =>
         
         val i2 = i << 1
         
-        out(i2) = ((bytes(i) & 0xF0) >>> 4).toHexString.toUpperCase.head
-        out(i2 + 1) = (bytes(i) & 0x0F).toHexString.toUpperCase.head
+        out(i2) = augmentString(((bytes(i) & 0xF0) >>> 4).toHexString.toUpperCase).head
+        out(i2 + 1) = augmentString((bytes(i) & 0x0F).toHexString.toUpperCase).head
         
         i += 1
       }

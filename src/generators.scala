@@ -25,8 +25,12 @@ trait Generation { this: Io =>
 
   object Generator {
 
+    /** An iterator which wraps a generator function, `f`, which halts upon the first occurrence of
+      * a null value */
     def nonNull[T](f: => T) = non[T](null.asInstanceOf[T])(f)
 
+    /** An iterator which wraps a generator function, `f`, which halts upon the first occurrence of
+      * the `halt` value. */
     def non[T](halt: T)(f: => T) = new Iterator[T] {
       private var n: T = _
       private var h = false

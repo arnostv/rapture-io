@@ -64,10 +64,10 @@ trait Net { this: Io =>
     def sender(content: C): Input[Byte]
   }
 
-  implicit val FormPostType = new PostType[Map[String, String]] {
+  implicit val FormPostType = new PostType[Map[Symbol, String]] {
     def contentType = MimeTypes.`application/x-www-form-urlencoded`
-    def sender(content: Map[String, String]) = ByteArrayInput((content map { case (k, v) =>
-      URLEncoder.encode(k, "UTF-8")+"="+URLEncoder.encode(v, "UTF-8")
+    def sender(content: Map[Symbol, String]) = ByteArrayInput((content map { case (k, v) =>
+      URLEncoder.encode(k.name, "UTF-8")+"="+URLEncoder.encode(v, "UTF-8")
     } mkString "&").getBytes("UTF-8"))
   }
 

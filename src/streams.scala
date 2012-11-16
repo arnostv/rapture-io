@@ -62,7 +62,7 @@ trait Streams { this: Io =>
   case class ByteArrayInput(array: Array[Byte]) extends ByteInput(new ByteArrayInputStream(array))
 
   /** Makes a string viewable as an `Input` */
-  implicit def stringToInput(string: String) = StringIsInput(string)
+  //implicit def stringToInput(string: String) = StringIsInput(string)
 
   /** Type trait for building a new `Input` from particular kind of input stream
     *
@@ -229,11 +229,37 @@ trait Streams { this: Io =>
           extractEncoding(url.javaConnection))))
   }
 
+  implicit object HttpResponseCharReader extends StreamReader[HttpResponse, Char] {
+    def input(response: HttpResponse): Input[Char] = {
+      implicit val enc = Encodings.`UTF-8`
+      response.input[Char]
+    }
+  }
+
   /** An Input provides an incoming stream of data */
-  trait Input[@specialized(Byte, Char) Data] {
+  trait Input[@specialized(Byte, Char) Data] extends Seq[Data] { thisInput =>
 
     private var beingHandled = false
+  
+    override def toString() = "<input>"
     
+    def length: Int = throw new Exception("Cannot calculate length of a stream")
+
+    def apply(n: Int) = {
+      for(i <- 0 until n) read()
+      read().get
+    }
+
+    def iterator: Iterator[Data] = new Iterator[Data] {
+      private var nextVal: Option[Data] = read()
+      def hasNext = nextVal.isDefined
+      def next() = {
+        val x = nextVal.get
+        nextVal = read()
+        x
+      }
+    }
+
     /** Returns whether the stream can be read without blocking */
     def ready(): Boolean
 
@@ -312,6 +338,56 @@ trait Streams { this: Io =>
         len = readBlock(buf)
       }
       count
+    }
+
+    def transform[T](fn: Data => T): Input[T] = new Input[T] {
+      def read(): Option[T] = thisInput.read().map(fn)
+      def ready(): Boolean = thisInput.ready()
+      def close(): Unit = thisInput.close()
+    }
+
+    /** Maps elements of the input stream to zero, one or many elements, producing a new input
+      * stream. */
+    def flatTransform[T](fn: Data => Seq[T]): Input[T] = new Input[T] {
+      private var buf: Seq[T] = Nil
+      private var cur = 0
+      private var avail = 0
+      
+      def read(): Option[T] = if(cur == avail) {
+        cur = 0
+        avail = 0
+        thisInput.read().map(fn) match {
+          case None => None
+          case Some(xs) =>
+            if(xs.isEmpty) read()
+            else if(xs.length == 1) xs.headOption
+            else {
+              avail = xs.length
+              cur += 1
+              buf = xs
+              xs.headOption
+            }
+        }
+      } else {
+        cur += 1
+        Some(buf(cur - 1))
+      }
+      
+      def ready(): Boolean = cur < avail || thisInput.ready()
+      
+      def close(): Unit = {
+        cur = 0
+        avail = 0
+        thisInput.close()
+      }
+    }
+
+    override def foreach[U](fn: Data => U): Unit = {
+      var next: Option[Data] = read()
+      while(next != None) {
+        fn(next.get)
+        next = read()
+      }
     }
   }
 

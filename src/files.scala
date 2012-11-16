@@ -114,8 +114,10 @@ trait Files { this: Io =>
   class FileUrl(val pathRoot: PathRoot[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements, Map())
       with PathUrl[FileUrl] {
 
+    /** The java.io.File corresponding to this FileUrl. */
     lazy val javaFile: java.io.File = new java.io.File(pathString)
     
+    /** The scheme-specific part of the URL, which appears after the colon */
     def schemeSpecificPart = "//"+pathString
     
     /** Returns true if the file or directory represented by this FileUrl can be read from. */
