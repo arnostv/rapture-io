@@ -51,11 +51,13 @@ trait Sockets { this: Io =>
     def schemeSpecificPart = "//"+hostname+":"+port
     
     def absolute = true
+  
   }
 
   object Socket extends Scheme[SocketUri] {
     def schemeName = "socket"
     def apply(hostname: String, port: Int): SocketUri = new SocketUri(hostname, port)
+    def apply(hostname: String, svc: TcpService): SocketUri = new SocketUri(hostname, svc.portNo)
   }
 
   /** Type class object for getting an `Output[Byte]` from a socket URL. */

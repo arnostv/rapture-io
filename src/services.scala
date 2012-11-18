@@ -23,6 +23,8 @@ package rapture
 
 trait Services { this: Io =>
 
+  type TcpService = Services.Tcp.Item
+  
   /** Provides a typesafe list of network services mapping from port number to service name.  This
     * is based on [http://www.iana.org/assignments/port-numbers] and
     * [http://www.freebsd.org/cgi/cvsweb.cgi/src/etc/services] */
