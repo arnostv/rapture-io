@@ -30,6 +30,7 @@ trait JsonExtraction {
 
     import scala.util.parsing.json._
 
+
     def parse(s: String): Json = new Json(JSON.parseFull(s).get)
 
     def apply(map: Map[String, Any]): Json = new Json(map)
@@ -56,17 +57,22 @@ trait JsonExtraction {
         case _ => "undefined"
       }
     }
+    
+  }
+
+  object JsonExtractor {
+    implicit val stringJsonExtractor = new JsonExtractor[String](_.asInstanceOf[String])
+    implicit val doubleJsonExtractor = new JsonExtractor[Double](_.asInstanceOf[Double])
+    implicit val intJsonExtractor = new JsonExtractor[Int](_.asInstanceOf[Double].toInt)
+    implicit val longJsonExtractor = new JsonExtractor[Long](_.asInstanceOf[Double].toLong)
+    implicit val booleanJsonExtractor = new JsonExtractor[Boolean](_.asInstanceOf[Boolean])
+    implicit def listJsonExtractor[T] = new JsonExtractor[List[T]](_.asInstanceOf[List[T]])
+    implicit def mapJsonExtractor[T] = new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, T]])
   }
 
   @annotation.implicitNotFound("Cannot extract type ${T} from JSON.")
   class JsonExtractor[T](val cast: Any => T)
-  implicit val stringJsonExtractor = new JsonExtractor[String](_.asInstanceOf[String])
-  implicit val doubleJsonExtractor = new JsonExtractor[Double](_.asInstanceOf[Double])
-  implicit val intJsonExtractor = new JsonExtractor[Int](_.asInstanceOf[Double].toInt)
-  implicit val longJsonExtractor = new JsonExtractor[Long](_.asInstanceOf[Double].toLong)
-  implicit val booleanJsonExtractor = new JsonExtractor[Boolean](_.asInstanceOf[Boolean])
-  implicit def listJsonExtractor[T] = new JsonExtractor[List[T]](_.asInstanceOf[List[T]])
-  implicit def mapJsonExtractor[T] = new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, T]])
+  implicit val nullExtractor: JsonExtractor[Json] = new JsonExtractor[Json](x => new Json(x))
 
   class Json(json: Any) extends Dynamic {
 
@@ -75,13 +81,15 @@ trait JsonExtraction {
     def applyDynamic(key: String)(i: Int) =
       new Json(json.asInstanceOf[Map[String, Any]].apply(key).asInstanceOf[List[Any]].apply(i))
     
-    def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
+    //def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
+    def selectDynamic[T](key: String)(implicit je: JsonExtractor[T]): T =
+      new Json(json.asInstanceOf[Map[String, Any]].apply(key)).asInstanceOf[T]
+    
     def apply[T](implicit jsonExtractor: JsonExtractor[T]): T = jsonExtractor.cast(json)
 
-    def map[A, B](fn: A => B): Json = Json(json.asInstanceOf[List[A]].map(fn))
-    def flatMap[A, B](fn: A => List[B]): Json = Json(json.asInstanceOf[List[A]].flatMap(fn))
-    def foreach[A](fn: A => Unit): Unit = json.asInstanceOf[List[A]].foreach(fn)
-    
+    def length = json.asInstanceOf[List[Json]].length
+    def iterator: Iterator[Json] = json.asInstanceOf[List[Json]].iterator
+
     override def toString = Json.format(Some(json), 0)
   }
 

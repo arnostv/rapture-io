@@ -35,7 +35,7 @@ import java.net._
 class Io extends Paths with Streams with Urls with Files with Net with Sockets with Extractors
     with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
     JsonExtraction with Encryption with Codecs with Digests with Encodings with Generation with Ips
-    with Logging with Mime with Misc with Services with Time with Linking {
+    with Logging with Mime with Misc with Services with Time with Linking with Classpath {
 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
@@ -87,7 +87,7 @@ class Io extends Paths with Streams with Urls with Files with Net with Sockets w
 
   def randomGuid() = java.util.UUID.randomUUID().toString
 
-  def devNull[T] = new Output[T] {
+  def DevNull[T] = new Output[T] {
     def close() = ()
     def flush() = ()
     def write(t: T) = ()
