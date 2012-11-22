@@ -43,7 +43,7 @@ object Tests extends TestingApplication {
     val isInSubnet = test { Ip4.parse("18.19.20.21") in Subnet.parse("18.0.0.0/8") } yields true
   }
 
-  /*val json = new Suite("json.scala") {
+  val json = new Suite("json.scala") {
     val src = """
       {
         "string": "Hello World",
@@ -57,11 +57,11 @@ object Tests extends TestingApplication {
       }
     """
 
-    val getString = test { Json.parse(src).string.as[String] } yields "Hello World"
-    val getInt = test { Json.parse(src).int.as[Int] } yields 78
-    val navigateObj = test { Json.parse(src).obj.a.as[String] } yields "A"
-    val getList = test { Json.parse(src).array.as[List[Int]] } yields List(1, 2, 3)
-  }*/
+    val getString = test { Json.parse(src).string.get[String] } yields "Hello World"
+    val getInt = test { Json.parse(src).int.get[Int] } yields 78
+    val navigateObj = test { Json.parse(src).obj.a.get[String] } yields "A"
+    val getList = test { Json.parse(src).array.get[List[Int]] } yields List(1, 2, 3)
+  }
 
   val mime = new Suite("mime.scala") {
     val getMimeType = test { MimeTypes.fromString("text/plain") } yields Some(MimeTypes.`text/plain`)

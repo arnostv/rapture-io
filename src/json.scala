@@ -81,11 +81,11 @@ trait JsonExtraction {
     def applyDynamic(key: String)(i: Int) =
       new Json(json.asInstanceOf[Map[String, Any]].apply(key).asInstanceOf[List[Any]].apply(i))
     
-    //def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
-    def selectDynamic[T](key: String)(implicit je: JsonExtractor[T]): T =
-      new Json(json.asInstanceOf[Map[String, Any]].apply(key)).asInstanceOf[T]
+    def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
+    //def selectDynamic[T](key: String)(implicit je: JsonExtractor[T]): T =
+    //  new Json(json.asInstanceOf[Map[String, Any]].apply(key)).asInstanceOf[T]
     
-    def apply[T](implicit jsonExtractor: JsonExtractor[T]): T = jsonExtractor.cast(json)
+    def get[T](implicit jsonExtractor: JsonExtractor[T]): T = jsonExtractor.cast(json)
 
     def length = json.asInstanceOf[List[Json]].length
     def iterator: Iterator[Json] = json.asInstanceOf[List[Json]].iterator

@@ -37,7 +37,7 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
     JsonExtraction with Encryption with Codecs with Digests with Encodings with Generation with Ips
     with Logging with Mime with Misc with Services with Time with Linking with Classpath {
 
-  type **[T]
+  type **[_]
 
   protected def **[T](t: => T): **[T]
   
