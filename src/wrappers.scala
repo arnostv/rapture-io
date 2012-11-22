@@ -32,16 +32,16 @@ trait LowPriorityWrappers { this: Io =>
   
   /** Type class object for creating an Input[Byte] from a Java InputStream */
   implicit object InputStreamBuilder extends InputBuilder[InputStream, Byte] {
-    def input(s: InputStream) = new ByteInput(s)
+    def input(s: InputStream) = **(new ByteInput(s))
   }
 
   /** Type class object for creating an Output[Byte] from a Java Reader */
   implicit object OutputStreamBuilder extends OutputBuilder[OutputStream, Byte] {
-    def output(s: OutputStream) = new ByteOutput(s)
+    def output(s: OutputStream) = **(new ByteOutput(s))
   }
 
   implicit object HttpResponseByteReader extends StreamReader[HttpResponse, Byte] {
-    def input(response: HttpResponse): Input[Byte] = response.input[Byte]
+    def input(response: HttpResponse): **[Input[Byte]] = **(response.input[Byte])
   }
 }
 

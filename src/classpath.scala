@@ -15,13 +15,13 @@ trait Classpath { this: Io =>
   }
 
   implicit object ClasspathStreamByteReader extends StreamReader[ClasspathUrl, Byte] {
-    def input(url: ClasspathUrl): Input[Byte] =
-      new ByteInput(this.getClass.getClassLoader.getResourceAsStream(url.pathString.substring(1)))
+    def input(url: ClasspathUrl): **[Input[Byte]] =
+      **(new ByteInput(this.getClass.getClassLoader.getResourceAsStream(url.pathString.substring(1))))
   }
 
   implicit def classpathStreamCharReader(implicit enc: Encoding) = new StreamReader[ClasspathUrl, Char] {
-    def input(url: ClasspathUrl): Input[Char] =
-      inputStreamCharBuilder(enc).input(this.getClass.getClassLoader.getResourceAsStream(url.pathString.substring(1)))
+    def input(url: ClasspathUrl): **[Input[Char]] =
+      **(inputStreamCharBuilder(enc).input(this.getClass.getClassLoader.getResourceAsStream(url.pathString.substring(1))))
   }
 
 }

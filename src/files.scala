@@ -33,19 +33,19 @@ trait Files { this: Io =>
 
   /** Type class object for writing `FileUrl`s as `Output[Stream]`s */
   implicit object FileStreamCharWriter extends StreamWriter[FileUrl, Char] {
-    def output(url: FileUrl): Output[Char] =
-      new CharOutput(new BufferedWriter(new FileWriter(url.javaFile)))
+    def output(url: FileUrl): **[Output[Char]] =
+      **(new CharOutput(new BufferedWriter(new FileWriter(url.javaFile))))
   }
 
   implicit object FileStreamCharAppender extends StreamAppender[FileUrl, Char] {
-    def appendOutput(url: FileUrl): Output[Char] =
-      new CharOutput(new BufferedWriter(new FileWriter(url.javaFile, true)))
+    def appendOutput(url: FileUrl): **[Output[Char]] =
+      **(new CharOutput(new BufferedWriter(new FileWriter(url.javaFile, true))))
   }
 
   /** Type class object for reading `FileUrl`s as `Input[Stream]`s */
   implicit object FileStreamCharReader extends StreamReader[FileUrl, Char] {
-    def input(url: FileUrl): Input[Char] =
-      new CharInput(new BufferedReader(new FileReader(new java.io.File(url.pathString))))
+    def input(url: FileUrl): **[Input[Char]] =
+      **(new CharInput(new BufferedReader(new FileReader(new java.io.File(url.pathString)))))
   }
 
   /** The file scheme object used as a factory for FileUrls. */
