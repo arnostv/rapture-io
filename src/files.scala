@@ -76,17 +76,17 @@ trait Files { this: Io =>
   }
 
   trait Navigable[UrlType] {
-    def children(url: UrlType): List[UrlType]
+    def children(url: UrlType): **[List[UrlType]]
     
     /** Returns false if the filesystem object represented by this FileUrl is a file, and true if
       * it is a directory. */
-    def isDirectory(url: UrlType): Boolean
+    def isDirectory(url: UrlType): **[Boolean]
     
     /** If this represents a directory, returns an iterator over all its descendants,
       * otherwise returns the empty iterator. */
-    def descendants(url: UrlType): Iterator[UrlType] = children(url).iterator.flatMap { c =>
+    def descendants(url: UrlType): **[Iterator[UrlType]] = **(children(url).iterator.flatMap { c =>
       if(isDirectory(c)) Iterator(c) ++ descendants(c) else Iterator(c)
-    }
+    })
   }
 
   implicit def navigableExtras[UrlType: Navigable](url: UrlType) = new {
@@ -95,18 +95,18 @@ trait Files { this: Io =>
     def children = implicitly[Navigable[UrlType]].children(url)
     
     /** Return true if this URL node is a directory (i.e. it can contain other URLs). */
-    def isDirectory: Boolean = implicitly[Navigable[UrlType]].isDirectory(url)
+    def isDirectory: **[Boolean] = implicitly[Navigable[UrlType]].isDirectory(url)
 
     /** Return an iterator of all descendants of this URL. */
-    def descendants: Iterator[UrlType] = implicitly[Navigable[UrlType]].descendants(url)
+    def descendants: **[Iterator[UrlType]] = implicitly[Navigable[UrlType]].descendants(url)
   }
 
   /** Specifies how file: URLs should be navigable. */
   implicit val NavigableFile = new Navigable[FileUrl] {
-    def children(url: FileUrl): List[FileUrl] = 
-      if(url.isFile) Nil else url.javaFile.list().toList map { fn: String => url./(fn) }
+    def children(url: FileUrl): **[List[FileUrl]] = 
+      **(if(url.isFile) Nil else url.javaFile.list().toList map { fn: String => url./(fn) })
     
-    def isDirectory(url: FileUrl) = url.javaFile.isDirectory()
+    def isDirectory(url: FileUrl) = **(url.javaFile.isDirectory())
   }
 
   /** Defines a URL for the file: scheme, and provides standard filesystem operations on the file
@@ -149,13 +149,19 @@ trait Files { this: Io =>
     def hidden: Boolean = javaFile.isHidden()
    
     /** Returns the date of the last modification to the file or directory. */
-    def lastModified = new java.util.Date(javaFile.lastModified())
+    def lastModified: **[java.util.Date] = **(javaFile.lastModified() match {
+      case 0L => throw new IOException
+      case d => new java.util.Date(d)
+    })
     
     /** Returns the size of the file in bytes. */
-    def length: Long = javaFile.length()
+    def length: **[Long] = **(javaFile.length() match {
+      case 0L if !exists => throw new IOException
+      case x => x
+    })
     
     /** Returns the size of the file in bytes. */
-    def size: Long = javaFile.length()
+    def size: **[Long] = length
     
     /** Creates a new instance of this type of URL. */
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): FileUrl =
@@ -164,8 +170,8 @@ trait Files { this: Io =>
     /** If the filesystem object represented by this FileUrl does not exist, it is created as a
       * directory, provided that either the immediate parent directory already exists, or the
       * makeParents path is set. */
-    def mkdir(makeParents: Boolean = false): Boolean =
-      if(makeParents) javaFile.mkdirs() else javaFile.mkdir()
+    def mkdir(makeParents: Boolean = false): **[Boolean] =
+      **(if(makeParents) javaFile.mkdirs() else javaFile.mkdir())
     
     /** Renames this file to a new location. */
     def renameTo(dest: FileUrl): Boolean = javaFile.renameTo(dest.javaFile)
@@ -185,16 +191,16 @@ trait Files { this: Io =>
     def lastModified_=(d: java.util.Date) = javaFile.setLastModified(d.getTime)
     
     /** Extract the file extension from the name of this file. */
-    def extension: Option[String] =
-      if(filename contains ".") Some(filename.split("\\.").last) else None
+    def extension: **[Option[String]] =
+      **(if(filename contains ".") Some(filename.split("\\.").last) else None)
     
     /** Attempt to alter the permissions of this file so that it is writable. */
     def writable_=(b: Boolean) =
       if(!b) javaFile.setReadOnly() else writable || (throw new IOException("Can't set writable"))
     
     /** Creates a temporary file beneath this directory with the prefix and suffix specified. */
-    def tempFile(prefix: String = "tmp", suffix: String = "") =
-      File(java.io.File.createTempFile(prefix, suffix, javaFile))
+    def tempFile(prefix: String = "tmp", suffix: String = ""): **[FileUrl] =
+      **(File(java.io.File.createTempFile(prefix, suffix, javaFile)))
     
     private def deleteRecursively(): Boolean = {
       if(NavigableFile.isDirectory(this)) NavigableFile.children(this).foreach(_.deleteRecursively())
