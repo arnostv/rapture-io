@@ -43,6 +43,10 @@ trait LowPriorityWrappers { this: Io =>
   implicit object HttpResponseByteReader extends StreamReader[HttpResponse, Byte] {
     def input(response: HttpResponse): **[Input[Byte]] = **(response.input[Byte])
   }
+
+  implicit val ProcIsReadable: StreamReader[Proc, Byte] = new StreamReader[Proc, Byte] {
+    def input(proc: Proc): **[Input[Byte]] = **(InputStreamBuilder.input(proc.process.getInputStream))
+  }
 }
 
 /** Provides wrappers around Java's standard stream classes: `InputStream`, `OutputStream`, `Reader`
@@ -205,7 +209,7 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
 
   /** Type class definition for creating an Input[Char] from a Java InputStream, taking an
     * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
-  implicit def inputStreamCharBuilder(implicit encoding: Encoding) =
+  implicit def inputStreamCharBuilder(implicit encoding: Encoding): InputBuilder[InputStream, Char] =
     new InputBuilder[InputStream, Char] {
       def input(s: InputStream) = new CharInput(new InputStreamReader(s, encoding.name))
     }
