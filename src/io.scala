@@ -22,6 +22,7 @@ License.
 package rapture
 
 import language.implicitConversions
+import language.higherKinds
 
 import java.io._
 import java.net._
@@ -91,7 +92,9 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
   }
 
   // FIXME Move to misc
-  implicit def nullableExtras[T](t: T) = new { def fromNull = if(t == null) None else Some(t) }
+  @inline implicit class NullableExtras[T](t: T) {
+    def fromNull = if(t == null) None else Some(t)
+  }
 
   def randomGuid() = java.util.UUID.randomUUID().toString
 

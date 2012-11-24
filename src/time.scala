@@ -21,6 +21,9 @@ License.
 
 package rapture
 
+import java.util.Calendar
+import java.text.SimpleDateFormat
+
 trait Time {
 
   object Time {
@@ -34,7 +37,7 @@ trait Time {
     val HmTimeFormat = TimeFormat("HH:mm")
     val alternativeTimeFormat = TimeFormat("H.mma")
 
-    implicit def intExtras(i: Int) = new {
+    @inline implicit class IntExtras(i: Int) {
       def seconds = i*1000
       def minutes = seconds*60
       def hours = minutes*60
@@ -46,16 +49,25 @@ trait Time {
 
 
     case class DateFormat(pattern: String) {
-      def format(d: Date): String =
-        new java.text.SimpleDateFormat(pattern).format(new java.util.Date(d.toLong))
+      def format(d: Date): String = {
+        val c = Calendar.getInstance
+        c.setTimeInMillis(d.toLong)
+        new SimpleDateFormat(pattern).format(c.getTime)
+      }
       
-      def format(dt: DateTime): String =
-        new java.text.SimpleDateFormat(pattern).format(new java.util.Date(dt.toLong))
+      def format(dt: DateTime): String = {
+        val c = Calendar.getInstance
+        c.setTimeInMillis(dt.toLong)
+        new SimpleDateFormat(pattern).format(c.getTime)
+      }
     }
 
     case class TimeFormat(pattern: String) {
-      def format(dt: DateTime): String =
-        new java.text.SimpleDateFormat(pattern).format(new java.util.Date(dt.toLong))
+      def format(dt: DateTime): String = {
+        val c = Calendar.getInstance
+        c.setTimeInMillis(dt.toLong)
+        new SimpleDateFormat(pattern).format(c.getTime)
+      }
     }
 
     implicit val dateOrder = new Ordering[Date] {
@@ -70,16 +82,17 @@ trait Time {
 
     object Date {
       def unapply(n: Long) = {
-        val d = new java.util.Date(n)
-        Some(Date(d.getYear + 1900, d.getMonth + 1, d.getDate))
+        val c = Calendar.getInstance
+        c.setTimeInMillis(n)
+        Some(Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DATE)))
       }
     }
 
     object DateTime {
       def unapply(n: Long) = {
         val Date(date) = n
-        val d = new java.util.Date(n)
-        Some(DateTime(date, d.getHours, d.getMinutes, d.getSeconds))
+        val c = Calendar.getInstance
+        Some(DateTime(date, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)))
       }
     }
 
@@ -98,11 +111,11 @@ trait Time {
       }
 
       def toLong = {
-        val d = new java.util.Date(0L)
-        d.setYear(year - 1900)
-        d.setMonth(month - 1)
-        d.setDate(day)
-        d.getTime
+        val c = Calendar.getInstance
+        c.set(Calendar.YEAR, year)
+        c.set(Calendar.MONTH, month)
+        c.set(Calendar.DATE, day)
+        c.getTimeInMillis
       }
       
       def at(hours: Int) = new {
@@ -141,14 +154,15 @@ trait Time {
       def <=(that: DateTime): Boolean = toLong <= that.toLong
 
       def toLong = {
-        val d = new java.util.Date(0L)
-        d.setYear(date.year - 1900)
-        d.setMonth(date.month - 1)
-        d.setDate(date.day)
-        d.setHours(hour)
-        d.setMinutes(minute)
-        d.setSeconds(second)
-        d.getTime
+        val c = Calendar.getInstance
+        c.setTimeInMillis(0L)
+        c.set(Calendar.YEAR, date.year)
+        c.set(Calendar.MONTH, date.month)
+        c.set(Calendar.DATE, date.day)
+        c.set(Calendar.HOUR, hour)
+        c.set(Calendar.MINUTE, minute)
+        c.set(Calendar.SECOND, second)
+        c.getTimeInMillis
       }
       
       def format(implicit dateFormat: DateFormat, timeFormat: TimeFormat) =
@@ -173,8 +187,10 @@ trait Time {
     val Nov = Month(11)
     val Dec = Month(12)
 
-    implicit def intoMonth(d: Int) = new {
-      def -(m: Month) = new {
+    implicit class IntoMonth(d: Int) {
+      def -(m: Month) = new IntoDay(m)
+      
+      class IntoDay(m: Month) {
         def -(y: Int) = Date(y, m.no, d)
       }
     }

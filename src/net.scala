@@ -21,6 +21,8 @@ License.
 
 package rapture
 
+import language.existentials
+
 import java.io._
 import java.net._
 

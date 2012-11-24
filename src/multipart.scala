@@ -35,8 +35,10 @@ trait Multipart { this: Io =>
       headers.get("Content-Disposition") flatMap { v =>
         v.split("; *").toList match {
           case h :: t =>
-            val m = t map { a => val b = a.split("="); b(0) -> b(1) } toMap
-
+            val m = t.map({ a =>
+              val b = a.split("=")
+              b(0) -> b(1)
+            }).toMap
             Some(h -> m)
           case _ => None
         }
@@ -90,10 +92,10 @@ trait Multipart { this: Io =>
             count += 1
             buf(count%65536) = next
           }
-          headers = new String(buf.slice(1, dataStart), "ISO-8859-1").split("\r") map { h =>
+          headers = new String(buf.slice(1, dataStart), "ISO-8859-1").split("\r").map({ h =>
             val i = h.indexOf(':')
             h.substring(0, i) -> h.substring(i + 2, h.length)
-          } toMap
+          }).toMap
         } else {
           count += 1
           

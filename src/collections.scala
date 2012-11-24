@@ -21,6 +21,8 @@ License.
 
 package rapture
 
+import language.higherKinds
+
 import scala.collection._
 import scala.collection.generic._
 
