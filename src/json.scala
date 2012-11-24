@@ -24,7 +24,30 @@ package rapture
 import language.dynamics
 
 /** Some useful JSON shortcuts */
-trait JsonExtraction {
+trait JsonExtraction { this: Io =>
+
+  implicit class JsonStrings(sc: StringContext) extends {
+    object json {
+      def apply(exprs: Any*): **[Json] = {
+        val sb = new StringBuilder
+        val textParts = sc.parts.iterator
+        val expressions = exprs.iterator
+        sb.append(textParts.next())
+        while(textParts.hasNext) {
+          sb.append(expressions.next match {
+            case s: String => "\""+s+"\""
+            case a => a.toString
+          })
+          sb.append(textParts.next)
+        }
+        **(Json.parse(sb.toString))
+      }
+
+      def unapplySeq(json: Json): Option[Seq[Json]] = {
+        throw new Exception("Not yet implemented")
+      }
+    }
+  }
 
   object Json {
 
