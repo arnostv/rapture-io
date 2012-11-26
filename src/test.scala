@@ -76,6 +76,10 @@ object Tests extends TestingApplication {
     val drop = test { (^ / "foo" / "bar" / "baz").drop(2) } satisfies (_ == ^ / "foo")
     val take = test { (^ / "foo" / "bar" / "baz").take(2) } satisfies (_ == ^ / "foo" / "bar")
     val pathAppend = test { ((^ / "foo" / "bar") + (^ / "baz")).toString } yields "/foo/bar/baz"
+    val head = test { (^ / "foo" / "bar" / "baz").head } yields "foo"
+    val tail = test { (^ / "foo" / "bar" / "baz").tail } yields (^ / "bar" / "baz")
+    val last = test { (^ / "foo" / "bar" / "baz").last } yields "baz"
+    val init = test { (^ / "foo" / "bar" / "baz").init } yields (^ / "foo" / "bar")
   }
 
   val digest = new Suite("digest.scala") {

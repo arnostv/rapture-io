@@ -23,6 +23,8 @@ package rapture
 
 import language.dynamics
 
+import scala.util.parsing.json._
+
 /** Some useful JSON shortcuts */
 trait JsonExtraction { this: Io =>
 
@@ -43,16 +45,27 @@ trait JsonExtraction { this: Io =>
         **(Json.parse(sb.toString))
       }
 
-      def unapplySeq(json: Json): Option[Seq[Json]] = {
-        throw new Exception("Not yet implemented")
-      }
+      def unapplySeq(json: Json): Option[Seq[Json]] = try {
+        var extracted: List[SimplePath] = Nil
+        def extract(struct: Any, path: SimplePath): Unit =
+          struct match {
+            case d: Double => ()
+            case s: String => ()
+            case m: Map[_, _] => m foreach {
+              case (k, v) =>
+                if(v == null) extracted ::= (path / k.asInstanceOf[String])
+                else extract(v, path / k.asInstanceOf[String])
+            }
+            case a: List[_] => ()
+              // Emit an exception if attempting to extract on lists
+          }
+        extract(JSON.parseFull(sc.parts.mkString("null")).get, ^)
+        Some(extracted.reverse.map(json.extract))
+      } catch { case e: Exception => None }
     }
   }
 
   object Json {
-
-    import scala.util.parsing.json._
-
 
     def parse(s: String): Json = new Json(JSON.parseFull(s).get)
 
@@ -103,6 +116,8 @@ trait JsonExtraction { this: Io =>
     
     def applyDynamic(key: String)(i: Int) =
       new Json(json.asInstanceOf[Map[String, Any]].apply(key).asInstanceOf[List[Any]].apply(i))
+    
+    def extract(sp: SimplePath): Json = if(sp == ^) this else selectDynamic(sp.head).extract(sp.tail)
     
     def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
     //def selectDynamic[T](key: String)(implicit je: JsonExtractor[T]): T =

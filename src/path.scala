@@ -55,16 +55,16 @@ trait Paths { this: Io =>
     def isRoot = elements.isEmpty
 
     /** Returns the first element of the path, if it exists */
-    def head = path.elements.last
+    def head = path.elements.head
 
     /** Returns the last element of the path, if it exists */
-    def last = path.elements.head
+    def last = path.elements.last
 
     /** Returns all but the first element of the path */
-    def tail = drop(1)
+    def tail = dropRight(1)
 
     /** Returns all but the last element of the path */
-    def init = dropRight(1)
+    def init = drop(1)
 
     /** Returns the parent path of this path; equivalent to `tail` */
     def parent: PathType = drop(1)
@@ -95,9 +95,11 @@ trait Paths { this: Io =>
     def +[P <: Path[P]](dest: P): Path[_] =
       makePath(0, path.elements.drop(dest.ascent) ++ dest.elements, afterPath)
 
-    def link[P <: AbsolutePath[P]](dest: P)(implicit linkable: Linkable[PathType, P]) = linkable.link(this.asInstanceOf[PathType], dest)
+    def link[P <: AbsolutePath[P]](dest: P)(implicit linkable: Linkable[PathType, P]) =
+      linkable.link(this.asInstanceOf[PathType], dest)
 
-    def -[P <: AbsolutePath[P]](src: P)(implicit linkable: Linkable[P, PathType]) = linkable.link(src, this.asInstanceOf[PathType])
+    def -[P <: AbsolutePath[P]](src: P)(implicit linkable: Linkable[P, PathType]) =
+      linkable.link(src, this.asInstanceOf[PathType])
 
   }
 
