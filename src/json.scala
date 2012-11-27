@@ -65,21 +65,22 @@ trait JsonExtraction { this: Io =>
         * values are specified in the extractor must match, whereas variable elements appearing
         * in the extractor must exist. Lists may not appear in the extractor. */
       def unapplySeq(json: Json): Option[Seq[Json]] = try {
-        var extracted: List[SimplePath] = Nil
+        var paths: List[SimplePath] = Nil
         def extract(struct: Any, path: SimplePath): Unit =
           struct match {
             case d: Double => if(json.extract(path).get[Double](JsonExtractor.doubleJsonExtractor) != d) throw new Exception("Value doesn't match")
             case s: String => if(json.extract(path).get[String](JsonExtractor.stringJsonExtractor) != s) throw new Exception("Value doesn't match")
             case m: Map[_, _] => m foreach {
               case (k, v) =>
-                if(v == null) extracted ::= (path / k.asInstanceOf[String])
+                if(v == null) paths ::= (path / k.asInstanceOf[String])
                 else extract(v, path / k.asInstanceOf[String])
             }
             case a: List[_] => ()
               // Emit an exception if attempting to extract on lists
           }
         extract(jp.parse(sc.parts.mkString("null")).get, ^)
-        Some(extracted.reverse.map(json.extract))
+        val extracts = paths.reverse.map(json.extract)
+        if(extracts.exists(_.json == null)) None else Some(extracts)
       } catch { case e: Exception => None }
     }
   }
@@ -144,7 +145,7 @@ trait JsonExtraction { this: Io =>
   class JsonExtractor[T](val cast: Any => T)
   implicit val nullExtractor: JsonExtractor[Json] = new JsonExtractor[Json](x => new Json(x))
 
-  class Json(json: Any) extends Dynamic {
+  class Json(private[JsonExtraction] val json: Any) extends Dynamic {
 
     /** Assumes the Json object is wrapping a List, and extracts the `i`th element from the list */
     def apply(i: Int): Json =

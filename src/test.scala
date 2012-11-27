@@ -61,6 +61,46 @@ object Tests extends TestingApplication {
     val getInt = test { Json.parse(src).int.get[Int] } yields 78
     val navigateObj = test { Json.parse(src).obj.a.get[String] } yields "A"
     val getList = test { Json.parse(src).array.get[List[Int]] } yields List(1, 2, 3)
+    
+    val extract1 = test {
+      val json""" { "string": $x } """ = Json.parse(src)
+      x.get[String]
+    } yields "Hello World"
+    
+    val extract2 = test {
+      val json""" { "int": $y } """ = Json.parse(src)
+      y.get[Int]
+    } yields 78
+    
+    val extract3 = test {
+      val json""" { "array": $z } """ = Json.parse(src)
+      z.get[List[Int]]
+    } yields List(1, 2, 3)
+    
+    val extract4 = test {
+      val json""" { "array": $z } """ = Json.parse(src)
+      z.get[String]
+    }.throws[Exception]
+    
+    val extract5 = test {
+      val json""" { "foo": $x } """ = Json.parse(src)
+      x
+    }.throws[Exception]
+
+    val extract6 = test {
+      val json""" { "obj": { "b": $x } } """ = Json.parse(src)
+      x.get[String]
+    } yields "B"
+
+    val extract7 = test {
+      val json""" { "obj": { "a": "A", "b": $x } } """ = Json.parse(src)
+      x.get[String]
+    } yields "B"
+
+    val extract8 = test {
+      val json""" { "obj": { "a": "C", "b": $x } } """ = Json.parse(src)
+      x.get[String]
+    }.throws[Exception]
   }
 
   val mime = new Suite("mime.scala") {
