@@ -23,13 +23,28 @@ package rapture
 
 import language.dynamics
 
-import scala.util.parsing.json._
-
 /** Some useful JSON shortcuts */
 trait JsonExtraction { this: Io =>
 
-  implicit class JsonStrings(sc: StringContext) extends {
+  /** Represents a JSON parser implementation which is used throughout this library */
+  trait JsonParser {
+    def parse(s: String): Option[Any]
+  }
+  
+  /** The default JSON parser implementation */
+  implicit val ScalaJsonParser = new JsonParser {
+    
+    import scala.util.parsing.json._
+    
+    def parse(s: String): Option[Any] = JSON.parseFull(s)
+  }
+
+  /** Provides support for JSON literals, in the form json" { } " or json""" { } """. Interpolation
+    * is used to substitute variable names into the JSON, and to extract values from a JSON string.
+    */
+  @inline implicit class JsonStrings(sc: StringContext)(implicit jp: JsonParser) extends {
     object json {
+      /** Creates a new interpolated JSON object. */
       def apply(exprs: Any*): **[Json] = {
         val sb = new StringBuilder
         val textParts = sc.parts.iterator
@@ -42,15 +57,19 @@ trait JsonExtraction { this: Io =>
           })
           sb.append(textParts.next)
         }
-        **(Json.parse(sb.toString))
+        **(Json.parse(sb.toString)(jp))
       }
 
+      /** Extracts values in the structure specified from parsed JSON.  Each element in the JSON
+        * structure is compared with the JSON to extract from.  Broadly speaking, elements whose
+        * values are specified in the extractor must match, whereas variable elements appearing
+        * in the extractor must exist. Lists may not appear in the extractor. */
       def unapplySeq(json: Json): Option[Seq[Json]] = try {
         var extracted: List[SimplePath] = Nil
         def extract(struct: Any, path: SimplePath): Unit =
           struct match {
-            case d: Double => ()
-            case s: String => ()
+            case d: Double => if(json.extract(path).get[Double](JsonExtractor.doubleJsonExtractor) != d) throw new Exception("Value doesn't match")
+            case s: String => if(json.extract(path).get[String](JsonExtractor.stringJsonExtractor) != s) throw new Exception("Value doesn't match")
             case m: Map[_, _] => m foreach {
               case (k, v) =>
                 if(v == null) extracted ::= (path / k.asInstanceOf[String])
@@ -59,21 +78,28 @@ trait JsonExtraction { this: Io =>
             case a: List[_] => ()
               // Emit an exception if attempting to extract on lists
           }
-        extract(JSON.parseFull(sc.parts.mkString("null")).get, ^)
+        extract(jp.parse(sc.parts.mkString("null")).get, ^)
         Some(extracted.reverse.map(json.extract))
       } catch { case e: Exception => None }
     }
   }
 
+  /** Companion object to the `Json` type, providing factory and extractor methods, and a JSON
+    * pretty printer. */
   object Json {
 
-    def parse(s: String): Json = new Json(JSON.parseFull(s).get)
+    /** Parses a string containing JSON into a `Json` object */
+    def parse(s: String)(implicit jp: JsonParser): Json = new Json(jp.parse(s).get)
 
+    /** Wraps a map into a JSON object */
     def apply(map: Map[String, Any]): Json = new Json(map)
+
+    /** Wraps a list into a JSON array */
     def apply(list: List[Any]): Json = new Json(list)
 
     def unapply(json: Any): Option[Json] = Some(new Json(json))
 
+    /** Formats the JSON object for multi-line readability. */
     def format(json: Option[Any], ln: Int): String = {
       val indent = " "*ln
       json match {
@@ -96,14 +122,22 @@ trait JsonExtraction { this: Io =>
     
   }
 
+  /** Companion object for JsonExtractor type. Defines very simple extractor methods for different
+    * types which may be contained within. */
   object JsonExtractor {
+    
+    implicit val noopExtractor = new JsonExtractor[Json](x => new Json(x))
     implicit val stringJsonExtractor = new JsonExtractor[String](_.asInstanceOf[String])
     implicit val doubleJsonExtractor = new JsonExtractor[Double](_.asInstanceOf[Double])
     implicit val intJsonExtractor = new JsonExtractor[Int](_.asInstanceOf[Double].toInt)
     implicit val longJsonExtractor = new JsonExtractor[Long](_.asInstanceOf[Double].toLong)
     implicit val booleanJsonExtractor = new JsonExtractor[Boolean](_.asInstanceOf[Boolean])
-    implicit def listJsonExtractor[T] = new JsonExtractor[List[T]](_.asInstanceOf[List[T]])
-    implicit def mapJsonExtractor[T] = new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, T]])
+    
+    implicit def listJsonExtractor[T: JsonExtractor] =
+      new JsonExtractor[List[T]](_.asInstanceOf[List[Any]].map(implicitly[JsonExtractor[T]].cast))
+    
+    implicit def mapJsonExtractor[T: JsonExtractor] =
+      new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, Any]].mapValues(implicitly[JsonExtractor[T]].cast))
   }
 
   @annotation.implicitNotFound("Cannot extract type ${T} from JSON.")
@@ -112,23 +146,32 @@ trait JsonExtraction { this: Io =>
 
   class Json(json: Any) extends Dynamic {
 
-    def apply(i: Int): Json = new Json(json.asInstanceOf[List[Any]].apply(i))
+    /** Assumes the Json object is wrapping a List, and extracts the `i`th element from the list */
+    def apply(i: Int): Json =
+      new Json(if(json == null) null else json.asInstanceOf[List[Any]].apply(i))
+   
+    /** Combines a `selectDynamic` and an `apply`.  This is necessary due to the way dynamic
+      * application is expanded. */
+    def applyDynamic(key: String)(i: Int): Json = selectDynamic(key).apply(i)
     
-    def applyDynamic(key: String)(i: Int) =
-      new Json(json.asInstanceOf[Map[String, Any]].apply(key).asInstanceOf[List[Any]].apply(i))
+    /** Navigates the JSON using the `SimplePath` parameter, and returns the element at that
+      * position in the tree. */
+    def extract(sp: SimplePath): Json =
+      if(sp == ^) this else selectDynamic(sp.head).extract(sp.tail)
     
-    def extract(sp: SimplePath): Json = if(sp == ^) this else selectDynamic(sp.head).extract(sp.tail)
+    /** Assumes the Json object wraps a `Map`, and extracts the element `key`. */
+    def selectDynamic(key: String): Json =
+      new Json(if(json == null) null else json.asInstanceOf[Map[String, Any]].get(key).getOrElse(null))
     
-    def selectDynamic(key: String): Json = new Json(json.asInstanceOf[Map[String, Any]].apply(key))
-    //def selectDynamic[T](key: String)(implicit je: JsonExtractor[T]): T =
-    //  new Json(json.asInstanceOf[Map[String, Any]].apply(key)).asInstanceOf[T]
-    
-    def get[T](implicit jsonExtractor: JsonExtractor[T]): T = jsonExtractor.cast(json)
+    /** Assumes the Json object is wrapping a `T`, and casts (intelligently) to that type. */
+    def get[T](implicit jsonExtractor: JsonExtractor[T]): **[T] = **(jsonExtractor.cast(json))
 
+    /** Assumes the Json object is wrapping a List, and returns the length */
     def length = json.asInstanceOf[List[Json]].length
+
+    /** Assumes the Json object is wrapping a List, and returns an iterator over the list */
     def iterator: Iterator[Json] = json.asInstanceOf[List[Json]].iterator
 
     override def toString = Json.format(Some(json), 0)
   }
-
 }
