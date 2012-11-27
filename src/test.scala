@@ -43,66 +43,6 @@ object Tests extends TestingApplication {
     val isInSubnet = test { Ip4.parse("18.19.20.21") in Subnet.parse("18.0.0.0/8") } yields true
   }
 
-  val json = new Suite("json.scala") {
-    val src = """
-      {
-        "string": "Hello World",
-        "int": 78,
-        "array": [1, 2, 3],
-        "obj": {
-          "a": "A",
-          "b": "B",
-          "c": "C"
-        }
-      }
-    """
-
-    val getString = test { Json.parse(src).string.get[String] } yields "Hello World"
-    val getInt = test { Json.parse(src).int.get[Int] } yields 78
-    val navigateObj = test { Json.parse(src).obj.a.get[String] } yields "A"
-    val getList = test { Json.parse(src).array.get[List[Int]] } yields List(1, 2, 3)
-    
-    val extract1 = test {
-      val json""" { "string": $x } """ = Json.parse(src)
-      x.get[String]
-    } yields "Hello World"
-    
-    val extract2 = test {
-      val json""" { "int": $y } """ = Json.parse(src)
-      y.get[Int]
-    } yields 78
-    
-    val extract3 = test {
-      val json""" { "array": $z } """ = Json.parse(src)
-      z.get[List[Int]]
-    } yields List(1, 2, 3)
-    
-    val extract4 = test {
-      val json""" { "array": $z } """ = Json.parse(src)
-      z.get[String]
-    }.throws[Exception]
-    
-    val extract5 = test {
-      val json""" { "foo": $x } """ = Json.parse(src)
-      x
-    }.throws[Exception]
-
-    val extract6 = test {
-      val json""" { "obj": { "b": $x } } """ = Json.parse(src)
-      x.get[String]
-    } yields "B"
-
-    val extract7 = test {
-      val json""" { "obj": { "a": "A", "b": $x } } """ = Json.parse(src)
-      x.get[String]
-    } yields "B"
-
-    val extract8 = test {
-      val json""" { "obj": { "a": "C", "b": $x } } """ = Json.parse(src)
-      x.get[String]
-    }.throws[Exception]
-  }
-
   val mime = new Suite("mime.scala") {
     val getMimeType = test { MimeTypes.fromString("text/plain") } yields Some(MimeTypes.`text/plain`)
     val getExtensions = test { MimeTypes.`application/xml`.extensions } satisfies (_ contains "xml")
@@ -161,6 +101,74 @@ object Tests extends TestingApplication {
     val link12 = test { (^ / "bar" link ^ / "foo" / "bar").toString } yields "foo/bar"
     val link13 = test { (^ / "baz" / "quux" link ^ / "quux").toString } yields "../quux"
     val link14 = test { (^ / "foo" / "baz" / "quux" link ^ / "foo" / "quux").toString } yields "../quux"
+  }
+
+  val strings = new Suite("strings") {
+    val httpUrl = test { (Http / "rapture.io").toString } yields "http://rapture.io/"
+    val httpsUrl = test { (Https / "rapture.io").toString } yields "https://rapture.io/"
+    val httpUrl2 = test { (Http / "rapture.io" / $).toString } yields "http://rapture.io/"
+    val httpUrl3 = test { (Http / "rapture.io" / "foo" / "bar").toString } yields "http://rapture.io/foo/bar"
+    val httpUrl4 = test { (Http./("rapture.io", 999) / "foo").toString } yields "http://rapture.io:999/foo"
+  }
+
+  val json = new Suite("json.scala") {
+    val src = """
+      {
+        "string": "Hello World",
+        "int": 78,
+        "array": [1, 2, 3],
+        "obj": {
+          "a": "A",
+          "b": "B",
+          "c": "C"
+        }
+      }
+    """
+
+    val getString = test { Json.parse(src).string.get[String] } yields "Hello World"
+    val getInt = test { Json.parse(src).int.get[Int] } yields 78
+    val navigateObj = test { Json.parse(src).obj.a.get[String] } yields "A"
+    val getList = test { Json.parse(src).array.get[List[Int]] } yields List(1, 2, 3)
+    
+    val extract1 = test {
+      val json""" { "string": $x } """ = Json.parse(src)
+      x.get[String]
+    } yields "Hello World"
+    
+    val extract2 = test {
+      val json""" { "int": $y } """ = Json.parse(src)
+      y.get[Int]
+    } yields 78
+    
+    val extract3 = test {
+      val json""" { "array": $z } """ = Json.parse(src)
+      z.get[List[Int]]
+    } yields List(1, 2, 3)
+    
+    val extract4 = test({
+      val json""" { "array": $z } """ = Json.parse(src)
+      z.get[String]
+    }).throws[Exception]
+    
+    val extract5 = test({
+      val json""" { "foo": $x } """ = Json.parse(src)
+      x
+    }).throws[Exception]
+
+    val extract6 = test {
+      val json""" { "obj": { "b": $x } } """ = Json.parse(src)
+      x.get[String]
+    } yields "B"
+
+    val extract7 = test {
+      val json""" { "obj": { "a": "A", "b": $x } } """ = Json.parse(src)
+      x.get[String]
+    } yields "B"
+
+    val extract8 = test({
+      val json""" { "obj": { "a": "C", "b": $x } } """ = Json.parse(src)
+      x.get[String]
+    }).throws[Exception]
   }
 
 }

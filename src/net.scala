@@ -198,13 +198,15 @@ trait Net { this: Io =>
   }
 
   class HttpPathRoot(val hostname: String, val port: Int, val ssl: Boolean) extends
-      NetPathRoot[HttpUrl] { thisPathRoot =>
+      NetPathRoot[HttpUrl] with Uri { thisPathRoot =>
     
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): HttpUrl =
       new HttpUrl(thisPathRoot, elements, Map())
 
     def scheme = if(ssl) Https else Http
-    
+    def canonicalPort = if(ssl) 443 else 80
+    def schemeSpecificPart = "//"+hostname+(if(port == canonicalPort) "" else ":"+port)+pathString
+
     override def /(element: String) = makePath(0, Array(element), Map())
     
     def /[P <: Path[P]](path: P) = makePath(0, path.elements, Map())
