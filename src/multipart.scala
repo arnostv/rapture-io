@@ -33,7 +33,7 @@ trait Multipart { this: Io =>
 
     lazy val contentDisposition: Option[(String, Map[String, String])] =
       headers.get("Content-Disposition") flatMap { v =>
-        v.split("; *").toList match {
+        v.split("; *").to[List] match {
           case h :: t =>
             val m = t.map({ a =>
               val b = a.split("=")

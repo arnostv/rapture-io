@@ -135,9 +135,11 @@ trait Streams { this: Io =>
       ensuring(unwrapResult(input[Data](sr)))(body) { in => if(!sr.doNotClose) in.close() }
     }
 
+    // FIXME: Don't slurp the whole stream just to create the MD5 sum
     def md5Sum()(implicit sr: StreamReader[UrlType, Byte]): **[String] =
       **(Md5.digestHex(slurp[Byte]()))
 
+    // FIXME: Don't slurp the whole stream just to create the MD5 sum
     def sha256Sum()(implicit sr: StreamReader[UrlType, Byte]): **[String] =
       **(Sha256.digestHex(slurp[Byte]()))
 

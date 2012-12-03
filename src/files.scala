@@ -104,7 +104,7 @@ trait Files { this: Io =>
   /** Specifies how file: URLs should be navigable. */
   implicit val NavigableFile = new Navigable[FileUrl] {
     def children(url: FileUrl): **[List[FileUrl]] = 
-      **(if(url.isFile) Nil else url.javaFile.list().toList map { fn: String => url./(fn) })
+      **(if(url.isFile) Nil else (url.javaFile.list().to[List]) map { fn: String => url./(fn) })
     
     def isDirectory(url: FileUrl) = **(url.javaFile.isDirectory())
   }

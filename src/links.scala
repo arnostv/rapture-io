@@ -67,7 +67,7 @@ trait Linking { this: Io =>
   implicit object SimplePathsLinkable extends Linkable[SimplePath, SimplePath] {
     type Result = RelativePath
     def link(src: SimplePath, dest: SimplePath): RelativePath = {
-      val lnk = generalLink(src.elements.toList, dest.elements.toList)
+      val lnk = generalLink(src.elements.to[List], dest.elements.to[List])
       new RelativePath(lnk._1, lnk._2, dest.afterPath)
     }
   }
@@ -76,7 +76,7 @@ trait Linking { this: Io =>
     type Result = Link
     def link(src: HttpUrl, dest: HttpUrl) = {
       if(src.ssl == dest.ssl && src.hostname == dest.hostname && src.port == dest.port) {
-        val lnk = generalLink(src.elements.toList, dest.elements.toList)
+        val lnk = generalLink(src.elements.to[List], dest.elements.to[List])
         new RelativePath(lnk._1, lnk._2, dest.afterPath)
       } else dest
     }

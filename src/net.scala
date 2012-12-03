@@ -162,7 +162,7 @@ trait Net { this: Io =>
       val is = try conn.getInputStream() catch {
         case e: IOException => new ByteArrayInputStream("".getBytes())
       }
-      new HttpResponse(mapAsScalaMap(conn.getHeaderFields()).toMap.mapValues(_.toList),
+      new HttpResponse(mapAsScalaMap(conn.getHeaderFields()).toMap.mapValues(_.to[List]),
           statusCode, is)
     }
   }

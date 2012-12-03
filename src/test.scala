@@ -109,6 +109,11 @@ object Tests extends TestingApplication {
     val httpUrl2 = test { (Http / "rapture.io" / $).toString } yields "http://rapture.io/"
     val httpUrl3 = test { (Http / "rapture.io" / "foo" / "bar").toString } yields "http://rapture.io/foo/bar"
     val httpUrl4 = test { (Http./("rapture.io", 999) / "foo").toString } yields "http://rapture.io:999/foo"
+    val fileUrl = test { (File / "foo" / "bar").toString } yields "file:///foo/bar"
+    val fileRoot = test { (File / $).toString } yields "file:///"
+    val path = test { ^.toString } yields "/"
+    val path2 = test { (^ / "foo").toString } yields "/foo"
+    val path3 = test { (^ / "foo" / "bar").toString } yields "/foo/bar"
   }
 
   val json = new Suite("json.scala") {

@@ -141,7 +141,7 @@ trait Paths { this: Io =>
     
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): PathType
     
-    protected def afterPathString = afterPath.toList sortBy { case (k, (s, p)) => p } map { case (k, (s, p)) => k+s } mkString ""
+    protected def afterPathString = afterPath.to[List] sortBy { case (k, (s, p)) => p } map { case (k, (s, p)) => k+s } mkString ""
     
     /** Adds a path component to this relative path */
     def /(s: String): PathType = makePath(ascent, Array(s) ++ elements, Map())
