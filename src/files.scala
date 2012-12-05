@@ -129,8 +129,8 @@ trait Files { this: Io =>
     /** Deletes the file represented by this FileUrl. If the recursive flag is set and the
       * filesystem object is a directory, all subfolders and their contents will also be
       * deleted. */
-    def delete(recursive: Boolean = false): Boolean =
-      if(recursive) deleteRecursively() else javaFile.delete()
+    def delete(recursive: Boolean = false): **[Boolean] =
+      **(if(recursive) deleteRecursively() else javaFile.delete())
     
     /** Add a hook to the filesystem to delete this file upon shutdown of the JVM. */
     def deleteOnExit(): Unit = javaFile.deleteOnExit()
@@ -182,7 +182,7 @@ trait Files { this: Io =>
     
     /** Moves this file to a new location specified by the dest parameter. This will first attempt
       * to move the file by renaming it, but will attempt copying and deletion if renaming fails. */
-    def moveTo(dest: FileUrl) = renameTo(dest) || copyTo(dest) && delete()
+    def moveTo(dest: FileUrl): **[Boolean] = **(renameTo(dest) || copyTo(dest) && delete())
 
     /** Update the last-modified time of this file to the current time. */
     def touch() = lastModified = new java.util.Date

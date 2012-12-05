@@ -31,9 +31,9 @@ trait Sockets { this: Io =>
     *
     * @usecase def listen(port: Int): Input[Byte]
     * @param port the port to listen to */
-  def listen[K](port: Int)(implicit ib: InputBuilder[InputStream, K]): Input[K] = {
+  def listen[K](port: Int)(implicit ib: InputBuilder[InputStream, K]): **[Input[K]] = {
     val sock = new java.net.ServerSocket(port)
-    ib.input(sock.accept().getInputStream)
+    **(ib.input(sock.accept().getInputStream))
   }
 
   /*def listen(port: Int, local: Boolean = true, timeout: Int = 2000) = {
