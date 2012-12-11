@@ -39,50 +39,50 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
     with Logging with Mime with Misc with Services with Time with Linking with Classpath with
     Processes {
 
-  type **[_]
+  type ![_]
 
-  protected def **[T](t: => T): **[T]
+  protected def except[T](t: => T): ![T]
   
-  protected def unwrapResult[T](t: => **[T]): T
+  protected def unexcept[T](t: => ![T]): T
 
-  implicit def provideUnwrap[T](t: **[T]): T = unwrapResult(t)
+  implicit def autoUnexcept[T](t: ![T]): T = unexcept(t)
 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
-    def input(url: FileUrl): **[Input[Byte]] =
-      **(new ByteInput(new BufferedInputStream(new FileInputStream(url.javaFile))))
+    def input(url: FileUrl): ![Input[Byte]] =
+      except(new ByteInput(new BufferedInputStream(new FileInputStream(url.javaFile))))
   }
 
   /** Type class object for writing `Byte`s to `FileUrl`s */
   implicit object FileStreamByteWriter extends StreamWriter[FileUrl, Byte] {
-    def output(url: FileUrl): **[Output[Byte]] =
-      **(new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile))))
+    def output(url: FileUrl): ![Output[Byte]] =
+      except(new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile))))
   }
 
   implicit object FileStreamByteAppender extends StreamAppender[FileUrl, Byte] {
-    def appendOutput(url: FileUrl): **[Output[Byte]] =
-      **(new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile, true))))
+    def appendOutput(url: FileUrl): ![Output[Byte]] =
+      except(new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile, true))))
   }
 
   /** Type class object for reading `Byte`s from `HttpUrl`s */
   implicit object HttpStreamByteReader extends StreamReader[HttpUrl, Byte] {
-    def input(url: HttpUrl): **[Input[Byte]] =
-      **(new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream)))
+    def input(url: HttpUrl): ![Input[Byte]] =
+      except(new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream)))
   }
 
   implicit def stdoutWriter[Data] = new StreamWriter[Stdout[Data], Data] {
     override def doNotClose = true
-    def output(stdout: Stdout[Data]): **[Output[Data]] = **(stdout.output)
+    def output(stdout: Stdout[Data]): ![Output[Data]] = except(stdout.output)
   }
 
   implicit def stderrWriter[Data] = new StreamWriter[Stderr[Data], Data] {
     override def doNotClose = true
-    def output(stderr: Stderr[Data]): **[Output[Data]] = **(stderr.output)
+    def output(stderr: Stderr[Data]): ![Output[Data]] = except(stderr.output)
   }
 
   implicit def stdin[Data] = new StreamReader[Stdin[Data], Data] {
     override def doNotClose = true
-    def input(stdin: Stdin[Data]): **[Input[Data]] = **(stdin.input)
+    def input(stdin: Stdin[Data]): ![Input[Data]] = except(stdin.input)
   }
 
   implicit class urlCodec(s: String) {
@@ -108,18 +108,18 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
 }
 
 object io extends Io {
-  type **[T] = T
-  @inline protected def **[T](t: => T): T = t
-  @inline protected def unwrapResult[T](t: => T): T = t
+  type ![T] = T
+  @inline protected def except[T](t: => T): T = t
+  @inline protected def unexcept[T](t: => T): T = t
 }
 
 object iox extends Io {
-  type **[T] = Either[Exception, T]
+  type ![T] = Either[Exception, T]
   
-  @inline protected def **[T](t: => T): Either[Exception, T] =
+  @inline protected def except[T](t: => T): Either[Exception, T] =
     try Right(t) catch { case e: Exception => Left(e) }
   
-  @inline protected def unwrapResult[T](t: => Either[Exception, T]): T =
+  @inline protected def unexcept[T](t: => Either[Exception, T]): T =
     t.right.getOrElse(throw t.left.get)
 }
 

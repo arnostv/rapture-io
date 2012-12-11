@@ -44,15 +44,15 @@ trait Streams { this: Io =>
   }
 
   case class Stdout[Data](implicit outputBuilder: OutputBuilder[OutputStream, Data]) {
-    def output = **(outputBuilder.output(System.out))
+    def output = except(outputBuilder.output(System.out))
   }
 
   case class Stderr[Data](implicit outputBuilder: OutputBuilder[OutputStream, Data]) {
-    def output = **(outputBuilder.output(System.err))
+    def output = except(outputBuilder.output(System.err))
   }
   
   case class Stdin[Data](implicit inputBuilder: InputBuilder[InputStream, Data]) {
-    def input = **(inputBuilder.input(System.in))
+    def input = except(inputBuilder.input(System.in))
   }
 
   /** Makes a `String` viewable as an `rapture.io.Input[Char]` */
@@ -86,7 +86,7 @@ trait Streams { this: Io =>
     def handleAppend[Data, Result](body: Output[Data] => Result)(implicit sw:
         StreamAppender[UrlType, Data]): Result = {
       
-      ensuring(unwrapResult(appendOutput[Data]))(body) { out =>
+      ensuring(unexcept(appendOutput[Data]))(body) { out =>
         out.flush()
         if(!sw.doNotClose) out.close()
       }
@@ -100,18 +100,18 @@ trait Streams { this: Io =>
   class Readable[UrlType](url: UrlType) {
     
     /** Gets the input for the resource specified in this URL */
-    def input[Data](implicit sr: StreamReader[UrlType, Data]): **[Input[Data]] = **(sr.input(url))
+    def input[Data](implicit sr: StreamReader[UrlType, Data]): ![Input[Data]] = except(sr.input(url))
     
     /** Pumps the input for the specified resource to the destination URL provided */
     def >[Data, DestUrlType](dest: DestUrlType)(implicit sr:
         StreamReader[UrlType, Data], sw: StreamWriter[DestUrlType, Data], mf: ClassTag[Data]) =
-      **(handleInput[Data, Int] { in =>
+      except(handleInput[Data, Int] { in =>
         makeWritable(dest).handleOutput[Data, Int](in > _)
       })
  
     def >>[Data, DestUrlType](dest: DestUrlType)(implicit sr:
         StreamReader[UrlType, Data], sw: StreamAppender[DestUrlType, Data], mf: ClassTag[Data]) =
-      **(handleInput[Data, Int] { in =>
+      except(handleInput[Data, Int] { in =>
         makeAppendable(dest).handleAppend[Data, Int](in > _)
       })
  
@@ -120,7 +120,7 @@ trait Streams { this: Io =>
       * @tparam Data The type that the data should be pumped as
       * @param out The destination for data to be pumped to */
     def >[Data](out: Output[Data])(implicit sr: StreamReader[UrlType, Data],
-        mf: ClassTag[Data]) = **(handleInput[Data, Int](_ > out))
+        mf: ClassTag[Data]) = except(handleInput[Data, Int](_ > out))
 
     /** Carefully handles writing to the input stream, ensuring that it is closed following
       * data being written to the stream. Handling an input stream which is already being handled
@@ -132,16 +132,16 @@ trait Streams { this: Io =>
     def handleInput[Data, Result](body: Input[Data] => Result)(implicit sr:
         StreamReader[UrlType, Data]): Result = {
      
-      ensuring(unwrapResult(input[Data](sr)))(body) { in => if(!sr.doNotClose) in.close() }
+      ensuring(unexcept(input[Data](sr)))(body) { in => if(!sr.doNotClose) in.close() }
     }
 
     // FIXME: Don't slurp the whole stream just to create the MD5 sum
-    def md5Sum()(implicit sr: StreamReader[UrlType, Byte]): **[String] =
-      **(Md5.digestHex(slurp[Byte]()))
+    def md5Sum()(implicit sr: StreamReader[UrlType, Byte]): ![String] =
+      except(Md5.digestHex(slurp[Byte]()))
 
     // FIXME: Don't slurp the whole stream just to create the MD5 sum
-    def sha256Sum()(implicit sr: StreamReader[UrlType, Byte]): **[String] =
-      **(Sha256.digestHex(slurp[Byte]()))
+    def sha256Sum()(implicit sr: StreamReader[UrlType, Byte]): ![String] =
+      except(Sha256.digestHex(slurp[Byte]()))
 
     /** Reads in the entirety of the stream and accumulates it into an appropriate object
       * depending on the availability of implicit Accumulator type class objects in scope.
@@ -151,7 +151,7 @@ trait Streams { this: Io =>
       * @tparam Data The units of data being slurped
       * @return The accumulated data */
     def slurp[Data]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder:
-        AccumulatorBuilder[Data], mf: ClassTag[Data]): **[accumulatorBuilder.Out] = ** {
+        AccumulatorBuilder[Data], mf: ClassTag[Data]): ![accumulatorBuilder.Out] = except {
 
       val c = accumulatorBuilder.make()
       input[Data] > c
@@ -169,7 +169,7 @@ trait Streams { this: Io =>
     /** Gets the output stream directly
       *
       * @tparam Data The type of data to be carried by the `Output` */
-    def output[Data](implicit sw: StreamWriter[UrlType, Data]): **[Output[Data]] = **(sw.output(url))
+    def output[Data](implicit sw: StreamWriter[UrlType, Data]): ![Output[Data]] = except(sw.output(url))
     
     /** Carefully handles writing to the output stream, ensuring that it is closed following
       * data being written.
@@ -178,7 +178,7 @@ trait Streams { this: Io =>
       * @return The result from executing the body */
     def handleOutput[Data, Result](body: Output[Data] => Result)(implicit sw:
         StreamWriter[UrlType, Data]): Result =
-      ensuring(unwrapResult(output[Data]))(body) { out =>
+      ensuring(unexcept(output[Data]))(body) { out =>
         out.flush()
         if(!sw.doNotClose) out.close()
       }
@@ -191,16 +191,16 @@ trait Streams { this: Io =>
   @implicitNotFound(msg = "Cannot write to ${UrlType} resources.")
   trait StreamWriter[-UrlType, @specialized(Byte, Char) Data] {
     def doNotClose = false
-    def output(url: UrlType): **[Output[Data]]
+    def output(url: UrlType): ![Output[Data]]
   }
 
   trait StreamAppender[-UrlType, Data] {
     def doNotClose = false
-    def appendOutput(url: UrlType): **[Output[Data]]
+    def appendOutput(url: UrlType): ![Output[Data]]
   }
 
   /*  Extract the encoding from an HTTP stream */
-  private def extractEncoding(huc: HttpURLConnection): **[String] = ** {
+  private def extractEncoding(huc: HttpURLConnection): ![String] = except {
     
     huc.getContentEncoding match {
       case null =>
@@ -217,13 +217,13 @@ trait Streams { this: Io =>
 
   /** Type class object for getting an Input[Char] from an HttpUrl */
   implicit object HttpStreamCharReader extends StreamReader[HttpUrl, Char] {
-    def input(url: HttpUrl): **[Input[Char]] =
-      **(new CharInput(new BufferedReader(new InputStreamReader(url.javaConnection.getInputStream,
+    def input(url: HttpUrl): ![Input[Char]] =
+      except(new CharInput(new BufferedReader(new InputStreamReader(url.javaConnection.getInputStream,
           extractEncoding(url.javaConnection)))))
   }
 
   implicit object HttpResponseCharReader extends StreamReader[HttpResponse, Char] {
-    def input(response: HttpResponse): **[Input[Char]] = ** {
+    def input(response: HttpResponse): ![Input[Char]] = except {
       implicit val enc = Encodings.`UTF-8`
       response.input[Char]
     }
@@ -299,7 +299,7 @@ trait Streams { this: Io =>
 
     /** Reads the whole stream into an accumulator */
     def slurp()(implicit accumulatorBuilder: AccumulatorBuilder[Data],
-        mf: ClassTag[Data]): **[accumulatorBuilder.Out] = ** {
+        mf: ClassTag[Data]): ![accumulatorBuilder.Out] = except {
       val acc = accumulatorBuilder.make()
       >(acc)
       acc.buffer
@@ -432,7 +432,7 @@ trait Streams { this: Io =>
       *
       * @param url The URL to get the input stream from
       * @return an `Input[Data]` for the specified URL */
-    def input(url: UrlType): **[Input[Data]]
+    def input(url: UrlType): ![Input[Data]]
     
     /** Pumps data from the specified URL to the given destination URL */
     def pump[DestUrlType <: Url[DestUrlType]](url: UrlType, dest: DestUrlType)(implicit sw:
@@ -441,12 +441,12 @@ trait Streams { this: Io =>
 
   /** Type class object for reading `Char`s from a `String` */
   implicit object StringCharReader extends StreamReader[String, Char] {
-    def input(s: String): **[Input[Char]] = **(StringIsInput(s))
+    def input(s: String): ![Input[Char]] = except(StringIsInput(s))
   }
 
   /** Type class object for reading `Byte`s from a `Array[Byte]` */
   implicit object ByteArrayReader extends StreamReader[Array[Byte], Byte] {
-    def input(s: Array[Byte]): **[Input[Byte]] = **(ByteArrayInput(s))
+    def input(s: Array[Byte]): ![Input[Byte]] = except(ByteArrayInput(s))
   }
 
 }
