@@ -60,6 +60,12 @@ object Tests extends TestingApplication {
     val tail = test { (^ / "foo" / "bar" / "baz").tail } yields (^ / "bar" / "baz")
     val last = test { (^ / "foo" / "bar" / "baz").last } yields "baz"
     val init = test { (^ / "foo" / "bar" / "baz").init } yields (^ / "foo" / "bar")
+  
+    val extract = test {
+      val path = ^ / "foo" / "bar"
+      val ^ / foo / bar = path
+      foo -> bar
+    } yields ("foo", "bar")
   }
 
   val digest = new Suite("digest.scala") {
