@@ -88,5 +88,12 @@ trait Misc { this: Io =>
     def apply(b: B[F, T]) = c(b)
   }
 
+  /** Times how long it takes to perform an operation, returning a pair of the result and the
+    * duration of the operation in milliseconds. */
+  def time[T](blk: => T): (T, Long) = {
+    val t = System.currentTimeMillis
+    blk -> (System.currentTimeMillis - t)
+  }
+
   def yCombinator[F, T] = (f: (F => T) => F => T) => B[F, T](x => f(x(x)(_)))(B(x => f(x(x)(_))))
 }
