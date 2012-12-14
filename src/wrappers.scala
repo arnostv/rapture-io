@@ -32,20 +32,20 @@ trait LowPriorityWrappers { this: Io =>
   
   /** Type class object for creating an Input[Byte] from a Java InputStream */
   implicit object InputStreamBuilder extends InputBuilder[InputStream, Byte] {
-    def input(s: InputStream) = except(new ByteInput(s))
+    def input(s: InputStream): ![Exception, Input[Byte]] = except(new ByteInput(s))
   }
 
   /** Type class object for creating an Output[Byte] from a Java Reader */
   implicit object OutputStreamBuilder extends OutputBuilder[OutputStream, Byte] {
-    def output(s: OutputStream) = except(new ByteOutput(s))
+    def output(s: OutputStream): ![Exception, Output[Byte]] = except(new ByteOutput(s))
   }
 
   implicit object HttpResponseByteReader extends StreamReader[HttpResponse, Byte] {
-    def input(response: HttpResponse): ![Input[Byte]] = except(response.input[Byte])
+    def input(response: HttpResponse): ![Exception, Input[Byte]] = except(response.input[Byte])
   }
 
   implicit val ProcIsReadable: StreamReader[Proc, Byte] = new StreamReader[Proc, Byte] {
-    def input(proc: Proc): ![Input[Byte]] = except(InputStreamBuilder.input(proc.process.getInputStream))
+    def input(proc: Proc): ![Exception, Input[Byte]] = except(InputStreamBuilder.input(proc.process.getInputStream))
   }
 }
 
@@ -183,17 +183,17 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
 
   /** Type class object for creating an Input[Char] from a Java Reader */
   implicit object ReaderBuilder extends InputBuilder[Reader, Char] {
-    def input(s: Reader) = new CharInput(s)
+    def input(s: Reader): ![Exception, Input[Char]] = except(new CharInput(s))
   }
 
   /** Type class object for creating an Input[String] from a Java Reader */
   implicit object LineReaderBuilder extends InputBuilder[Reader, String] {
-    def input(s: Reader) = new LineInput(s)
+    def input(s: Reader): ![Exception, Input[String]] = except(new LineInput(s))
   }
 
   /** Type class object for creating an Output[Char] from a Java Writer */
   implicit object WriterBuilder extends OutputBuilder[Writer, Char] {
-    def output(s: Writer) = new CharOutput(s)
+    def output(s: Writer): ![Exception, Output[Char]] = except(new CharOutput(s))
   }
 
   implicit object AppenderBuilder extends AppenderBuilder[Writer, Char] {
@@ -204,13 +204,13 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
     * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
   implicit def outputStreamCharBuilder(implicit encoding: Encoding) =
     new OutputBuilder[OutputStream, Char] {
-      def output(s: OutputStream) = new CharOutput(new OutputStreamWriter(s, encoding.name))
+      def output(s: OutputStream): ![Exception, Output[Char]] = except(new CharOutput(new OutputStreamWriter(s, encoding.name)))
     }
 
   /** Type class definition for creating an Input[Char] from a Java InputStream, taking an
     * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
   implicit def inputStreamCharBuilder(implicit encoding: Encoding): InputBuilder[InputStream, Char] =
     new InputBuilder[InputStream, Char] {
-      def input(s: InputStream) = new CharInput(new InputStreamReader(s, encoding.name))
+      def input(s: InputStream): ![Exception, Input[Char]] = except(new CharInput(new InputStreamReader(s, encoding.name)))
     }
 }

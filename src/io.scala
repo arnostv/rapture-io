@@ -24,6 +24,8 @@ package rapture
 import language.implicitConversions
 import language.higherKinds
 
+import scala.reflect.ClassTag
+
 import java.io._
 import java.net._
 
@@ -39,50 +41,50 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
     with Logging with Mime with Misc with Services with Time with Linking with Classpath with
     Processes {
 
-  type ![_]
+  type ![_ <: Exception, _]
 
-  protected def except[T](t: => T): ![T]
+  protected def except[E <: Exception, T](t: => T)(implicit mf: ClassTag[E]): ![E, T]
   
-  protected def unexcept[T](t: => ![T]): T
+  protected def unexcept[E <: Exception, T](t: => ![E, T]): T
 
-  implicit def autoUnexcept[T](t: ![T]): T = unexcept(t)
+  implicit def autoUnexcept[E <: Exception, T](t: ![E, T]): T = unexcept[E, T](t)
 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
-    def input(url: FileUrl): ![Input[Byte]] =
-      except(new ByteInput(new BufferedInputStream(new FileInputStream(url.javaFile))))
+    def input(url: FileUrl): ![Exception, Input[Byte]] =
+      except[Exception, Input[Byte]](new ByteInput(new BufferedInputStream(new FileInputStream(url.javaFile))))
   }
 
   /** Type class object for writing `Byte`s to `FileUrl`s */
   implicit object FileStreamByteWriter extends StreamWriter[FileUrl, Byte] {
-    def output(url: FileUrl): ![Output[Byte]] =
+    def output(url: FileUrl): ![Exception, Output[Byte]] =
       except(new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile))))
   }
 
   implicit object FileStreamByteAppender extends StreamAppender[FileUrl, Byte] {
-    def appendOutput(url: FileUrl): ![Output[Byte]] =
+    def appendOutput(url: FileUrl): ![Exception, Output[Byte]] =
       except(new ByteOutput(new BufferedOutputStream(new FileOutputStream(url.javaFile, true))))
   }
 
   /** Type class object for reading `Byte`s from `HttpUrl`s */
   implicit object HttpStreamByteReader extends StreamReader[HttpUrl, Byte] {
-    def input(url: HttpUrl): ![Input[Byte]] =
+    def input(url: HttpUrl): ![Exception, Input[Byte]] =
       except(new ByteInput(new BufferedInputStream(url.javaConnection.getInputStream)))
   }
 
   implicit def stdoutWriter[Data] = new StreamWriter[Stdout[Data], Data] {
     override def doNotClose = true
-    def output(stdout: Stdout[Data]): ![Output[Data]] = except(stdout.output)
+    def output(stdout: Stdout[Data]): ![Exception, Output[Data]] = except[Exception, Output[Data]](stdout.output)
   }
 
   implicit def stderrWriter[Data] = new StreamWriter[Stderr[Data], Data] {
     override def doNotClose = true
-    def output(stderr: Stderr[Data]): ![Output[Data]] = except(stderr.output)
+    def output(stderr: Stderr[Data]): ![Exception, Output[Data]] = except[Exception, Output[Data]](stderr.output)
   }
 
   implicit def stdin[Data] = new StreamReader[Stdin[Data], Data] {
     override def doNotClose = true
-    def input(stdin: Stdin[Data]): ![Input[Data]] = except(stdin.input)
+    def input(stdin: Stdin[Data]): ![Exception, Input[Data]] = except[Exception, Input[Data]](stdin.input)
   }
 
   implicit class urlCodec(s: String) {
@@ -108,18 +110,21 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
 }
 
 object io extends Io {
-  type ![T] = T
-  @inline protected def except[T](t: => T): T = t
-  @inline protected def unexcept[T](t: => T): T = t
+  type ![E <: Exception, T] = T
+  @inline protected def except[E <: Exception, T](t: => T)(implicit mf: ClassTag[E]): T = t
+  @inline protected def unexcept[E <: Exception, T](t: => T): T = t
 }
 
 object iox extends Io {
-  type ![T] = Either[Exception, T]
+  type ![E <: Exception, T] = Either[E, T]
   
-  @inline protected def except[T](t: => T): Either[Exception, T] =
-    try Right(t) catch { case e: Exception => Left(e) }
+  @inline protected def except[E <: Exception, T](t: => T)(implicit mf: ClassTag[E]): Either[E, T] =
+    try Right(t) catch {
+      case e: E => Left(e)
+      case e: Throwable => throw e
+    }
   
-  @inline protected def unexcept[T](t: => Either[Exception, T]): T =
+  @inline protected def unexcept[E <: Exception, T](t: => Either[E, T]): T =
     t.right.getOrElse(throw t.left.get)
 }
 

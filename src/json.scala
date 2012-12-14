@@ -45,7 +45,7 @@ trait JsonExtraction { this: Io =>
   @inline implicit class JsonStrings(sc: StringContext)(implicit jp: JsonParser) extends {
     object json {
       /** Creates a new interpolated JSON object. */
-      def apply(exprs: Any*): ![Json] = except {
+      def apply(exprs: Any*): ![Exception, Json] = except {
         val sb = new StringBuilder
         val textParts = sc.parts.iterator
         val expressions = exprs.iterator
@@ -165,7 +165,7 @@ trait JsonExtraction { this: Io =>
       new Json(if(json == null) null else json.asInstanceOf[Map[String, Any]].get(key).getOrElse(null))
     
     /** Assumes the Json object is wrapping a `T`, and casts (intelligently) to that type. */
-    def get[T](implicit jsonExtractor: JsonExtractor[T]): ![T] = except(jsonExtractor.cast(json))
+    def get[T](implicit jsonExtractor: JsonExtractor[T]): ![Exception, T] = except(jsonExtractor.cast(json))
 
     /** Assumes the Json object is wrapping a List, and returns the length */
     def length = json.asInstanceOf[List[Json]].length

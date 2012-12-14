@@ -31,7 +31,7 @@ trait Sockets { this: Io =>
     *
     * @usecase def listen(port: Int): Input[Byte]
     * @param port the port to listen to */
-  def listen[K](port: Int)(implicit ib: InputBuilder[InputStream, K]): ![Input[K]] = {
+  def listen[K](port: Int)(implicit ib: InputBuilder[InputStream, K]): ![Exception, Input[K]] = {
     val sock = new java.net.ServerSocket(port)
     except(ib.input(sock.accept().getInputStream))
   }
@@ -62,7 +62,7 @@ trait Sockets { this: Io =>
 
   /** Type class object for getting an `Output[Byte]` from a socket URL. */
   implicit object SocketStreamByteWriter extends StreamWriter[SocketUri, Byte] {
-    def output(url: SocketUri): ![Output[Byte]] =
+    def output(url: SocketUri): ![Exception, Output[Byte]] =
       except(new ByteOutput(new BufferedOutputStream(url.javaSocket.getOutputStream)))
   }
 }

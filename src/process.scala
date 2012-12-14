@@ -29,7 +29,7 @@ trait Processes { this: Io =>
 
   implicit class ExecStrings(sc: StringContext) extends {
     object sh {
-      def apply(exprs: String*): ![Proc] = {
+      def apply(exprs: String*): ![Exception, Proc] = {
         val sb = new StringBuilder
         val textParts = sc.parts.iterator
         val expressions = exprs.iterator
@@ -45,6 +45,6 @@ trait Processes { this: Io =>
   }
 
   implicit def procIsReadable(implicit enc: Encoding): StreamReader[Proc, Char] = new StreamReader[Proc, Char] {
-    def input(proc: Proc): ![Input[Char]] = except(inputStreamCharBuilder.input(proc.process.getInputStream))
+    def input(proc: Proc): ![Exception, Input[Char]] = except(inputStreamCharBuilder.input(proc.process.getInputStream))
   }
 }
