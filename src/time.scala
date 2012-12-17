@@ -84,7 +84,7 @@ trait Time {
       def unapply(n: Long) = {
         val c = Calendar.getInstance
         c.setTimeInMillis(n)
-        Some(Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DATE)))
+        Some(Date(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DATE)))
       }
     }
 
@@ -113,7 +113,7 @@ trait Time {
       def toLong = {
         val c = Calendar.getInstance
         c.set(Calendar.YEAR, year)
-        c.set(Calendar.MONTH, month)
+        c.set(Calendar.MONTH, month - 1)
         c.set(Calendar.DATE, day)
         c.getTimeInMillis
       }
@@ -157,7 +157,7 @@ trait Time {
         val c = Calendar.getInstance
         c.setTimeInMillis(0L)
         c.set(Calendar.YEAR, date.year)
-        c.set(Calendar.MONTH, date.month)
+        c.set(Calendar.MONTH, date.month - 1)
         c.set(Calendar.DATE, date.day)
         c.set(Calendar.HOUR, hour)
         c.set(Calendar.MINUTE, minute)

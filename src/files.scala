@@ -146,22 +146,22 @@ trait Files { this: Io =>
     def isFile: Boolean = javaFile.isFile()
     
     /** Returns true if the file or directory is hidden. */
-    def hidden: Boolean = javaFile.isHidden()
+    def hidden: Boolean = if(exists) javaFile.isHidden() else throw NotFound()
    
     /** Returns the date of the last modification to the file or directory. */
-    def lastModified: ![Exception, java.util.Date] = except(javaFile.lastModified() match {
-      case 0L => throw new IOException
+    def lastModified: ![NotFoundExceptions, java.util.Date] = except(javaFile.lastModified() match {
+      case 0L => throw NotFound()
       case d => new java.util.Date(d)
     })
     
     /** Returns the size of the file in bytes. */
-    def length: ![Exception, Long] = except(javaFile.length() match {
-      case 0L if !exists => throw new IOException
+    def length: ![NotFoundExceptions, Long] = except(javaFile.length() match {
+      case 0L if !exists => throw NotFound()
       case x => x
     })
     
     /** Returns the size of the file in bytes. */
-    def size: ![Exception, Long] = length
+    def size: ![NotFoundExceptions, Long] = length
     
     /** Creates a new instance of this type of URL. */
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): FileUrl =

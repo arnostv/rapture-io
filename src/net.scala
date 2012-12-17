@@ -123,7 +123,7 @@ trait Net { this: Io =>
       *        defaulting to no authentication.
       * @return the HTTP response from the remote host */
     def post[C: PostType](content: C, authenticate: Option[(String, String)] = None,
-        ignoreInvalidCertificates: Boolean = false, httpHeaders: Map[String, String] = Map()): HttpResponse = {
+        ignoreInvalidCertificates: Boolean = false, httpHeaders: Map[String, String] = Map()): ![HttpExceptions, HttpResponse] = except {
 
       val conn: URLConnection = new URL(toString).openConnection()
       conn match {

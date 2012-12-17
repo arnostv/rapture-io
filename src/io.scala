@@ -39,7 +39,7 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
     with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
     JsonExtraction with Encryption with Codecs with Digests with Encodings with Generation with Ips
     with Logging with Mime with Misc with Services with Time with Linking with Classpath with
-    Processes {
+    Processes with Exceptions {
 
   type ![_ <: Exception, _]
 
