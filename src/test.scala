@@ -81,12 +81,12 @@ object Tests extends TestingApplication {
   }
 
   val streams = new Suite("io.scala") {
-    /*val download = test {
-      val src = Http / "www.propensive.com" / "downloads" / "aa0d5d6739177b2bbb4c508a3014d8b0"
+    val download = test {
+      val src = Http / "rapture.io" / "download" / "aa0d5d6739177b2bbb4c508a3014d8b0"
       val dest = File / "tmp" / "aa0d5d6739177b2bbb4c508a3014d8b0"
       src > dest
       dest.md5Sum().toLowerCase
-    } yields "aa0d5d6739177b2bbb4c508a3014d8b0"*/
+    } yields "aa0d5d6739177b2bbb4c508a3014d8b0"
   }
 
   val base64 = new Suite("base64.scala") {
