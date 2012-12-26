@@ -68,8 +68,12 @@ trait JsonExtraction { this: Io =>
         var paths: List[SimplePath] = Nil
         def extract(struct: Any, path: SimplePath): Unit =
           struct match {
-            case d: Double => if(json.extract(path).get[Double](JsonExtractor.doubleJsonExtractor) != d) throw new Exception("Value doesn't match")
-            case s: String => if(json.extract(path).get[String](JsonExtractor.stringJsonExtractor) != s) throw new Exception("Value doesn't match")
+            case d: Double =>
+              if(json.extract(path).get[Double](JsonExtractor.doubleJsonExtractor) != d)
+                throw new Exception("Value doesn't match")
+            case s: String =>
+              if(json.extract(path).get[String](JsonExtractor.stringJsonExtractor) != s)
+                throw new Exception("Value doesn't match")
             case m: Map[_, _] => m foreach {
               case (k, v) =>
                 if(v == null) paths ::= (path / k.asInstanceOf[String])
@@ -111,8 +115,8 @@ trait JsonExtraction { this: Io =>
           List("[", a map { v => indent+" "+format(Some(v), ln + 1) } mkString(",\n"),
               indent+"]") mkString "\n"
         case Some(s: String) =>
-          "\""+s.replaceAll("\\\\", "\\\\\\\\").replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\"")+
-              "\""
+          "\""+s.replaceAll("\\\\", "\\\\\\\\").replaceAll("\n", "\\\\n").replaceAll("\"",
+              "\\\\\"")+"\""
         case Some(n: Int) => n.toString
         case Some(n: Number) => n.toString
         case Some(v: Boolean) => if(v) "true" else "false"
@@ -138,7 +142,8 @@ trait JsonExtraction { this: Io =>
       new JsonExtractor[List[T]](_.asInstanceOf[List[Any]].map(implicitly[JsonExtractor[T]].cast))
     
     implicit def mapJsonExtractor[T: JsonExtractor] =
-      new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, Any]].mapValues(implicitly[JsonExtractor[T]].cast))
+      new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, Any]].mapValues(
+          implicitly[JsonExtractor[T]].cast))
   }
 
   @annotation.implicitNotFound("Cannot extract type ${T} from JSON.")
@@ -162,10 +167,12 @@ trait JsonExtraction { this: Io =>
     
     /** Assumes the Json object wraps a `Map`, and extracts the element `key`. */
     def selectDynamic(key: String): Json =
-      new Json(if(json == null) null else json.asInstanceOf[Map[String, Any]].get(key).getOrElse(null))
+      new Json(if(json == null) null else json.asInstanceOf[Map[String, Any]].get(key).getOrElse(
+          null))
     
     /** Assumes the Json object is wrapping a `T`, and casts (intelligently) to that type. */
-    def get[T](implicit jsonExtractor: JsonExtractor[T]): ![Exception, T] = except(jsonExtractor.cast(json))
+    def get[T](implicit jsonExtractor: JsonExtractor[T]): ![Exception, T] =
+      except(jsonExtractor.cast(json))
 
     /** Assumes the Json object is wrapping a List, and returns the length */
     def length = json.asInstanceOf[List[Json]].length

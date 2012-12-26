@@ -84,8 +84,11 @@ trait Multipart { this: Io =>
         
         var cur = in.read()
         
-        if(buf != null && dataStart == 0 && (buf(count%65536) == 10 && cur == 13 || buf(count%65536) == 13 && cur == 10)) {
-        } else if(buf != null && dataStart == 0 && (cur == 10 || cur == 13 && buf(count%65536) == cur)) {
+        if(buf != null && dataStart == 0 && (buf(count%65536) == 10 && cur == 13 ||
+            buf(count%65536) == 13 && cur == 10)) {
+          // do nothing
+        } else if(buf != null && dataStart == 0 && (cur == 10 || cur == 13 &&
+            buf(count%65536) == cur)) {
           dataStart = count + 1
           val next = in.read().toByte
           if(next != 10 && next != 13) {

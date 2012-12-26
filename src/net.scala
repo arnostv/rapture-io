@@ -97,8 +97,12 @@ trait Net { this: Io =>
     private val trustAllCertificates = {
       Array[TrustManager](new X509TrustManager {
         override def getAcceptedIssuers(): Array[java.security.cert.X509Certificate] = null
-        def checkClientTrusted(certs: Array[java.security.cert.X509Certificate], authType: String): Unit = ()
-        def checkServerTrusted(certs: Array[java.security.cert.X509Certificate], authType: String): Unit = ()
+        
+        def checkClientTrusted(certs: Array[java.security.cert.X509Certificate], authType: String):
+            Unit = ()
+        
+        def checkServerTrusted(certs: Array[java.security.cert.X509Certificate], authType: String):
+            Unit = ()
       })
     }
     
@@ -123,7 +127,8 @@ trait Net { this: Io =>
       *        defaulting to no authentication.
       * @return the HTTP response from the remote host */
     def post[C: PostType](content: C, authenticate: Option[(String, String)] = None,
-        ignoreInvalidCertificates: Boolean = false, httpHeaders: Map[String, String] = Map()): ![HttpExceptions, HttpResponse] = except {
+        ignoreInvalidCertificates: Boolean = false, httpHeaders: Map[String, String] = Map()):
+        ![HttpExceptions, HttpResponse] = except {
 
       val conn: URLConnection = new URL(toString).openConnection()
       conn match {
@@ -180,8 +185,9 @@ trait Net { this: Io =>
   }
 
   /** Represets a URL with the http scheme */
-  class HttpUrl(val pathRoot: NetPathRoot[HttpUrl], elements: Seq[String], afterPath: AfterPath) extends
-      Url[HttpUrl](elements, afterPath) with NetUrl[HttpUrl] with PathUrl[HttpUrl] { thisHttpUrl =>
+  class HttpUrl(val pathRoot: NetPathRoot[HttpUrl], elements: Seq[String], afterPath: AfterPath)
+      extends Url[HttpUrl](elements, afterPath) with NetUrl[HttpUrl] with PathUrl[HttpUrl] {
+      thisHttpUrl =>
     
     def makePath(ascent: Int, xs: Seq[String], afterPath: AfterPath) =
       new HttpUrl(pathRoot, elements, afterPath)

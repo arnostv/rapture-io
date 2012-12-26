@@ -44,7 +44,9 @@ trait Processes { this: Io =>
     }
   }
 
-  implicit def procIsReadable(implicit enc: Encoding): StreamReader[Proc, Char] = new StreamReader[Proc, Char] {
-    def input(proc: Proc): ![Exception, Input[Char]] = except(inputStreamCharBuilder.input(proc.process.getInputStream))
-  }
+  implicit def procIsReadable(implicit enc: Encoding): StreamReader[Proc, Char] =
+    new StreamReader[Proc, Char] {
+      def input(proc: Proc): ![Exception, Input[Char]] =
+        except(inputStreamCharBuilder.input(proc.process.getInputStream))
+    }
 }

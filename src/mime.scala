@@ -49,8 +49,8 @@ trait Mime {
       types(name) = this
     }
 
-    val `text/plain` =
-      MimeType("text/plain", "asc", "conf", "def", "diff", "in", "list", "log", "pot", "text", "txt")
+    val `text/plain` = MimeType("text/plain", "asc", "conf", "def", "diff", "in", "list", "log",
+        "pot", "text", "txt")
     
     val `application/x-www-form-urlencoded` = MimeType("application/x-www-form-urlencoded")
     val `application/activemessage` = MimeType("application/activemessage")
@@ -143,14 +143,19 @@ trait Mime {
     
     val `application/mbms-reception-report+xml` = MimeType("application/mbms-reception-report+xml")
     val `application/mbms-register+xml` = MimeType("application/mbms-register+xml")
-    val `application/mbms-register-response+xml` = MimeType("application/mbms-register-response+xml")
+    
+    val `application/mbms-register-response+xml` =
+      MimeType("application/mbms-register-response+xml")
     
     val `application/mbms-user-service-description+xml` =
       MimeType("application/mbms-user-service-description+xml")
     
     val `application/mbox` = MimeType("application/mbox", "mbox")
     val `application/media_control+xml` = MimeType("application/media_control+xml")
-    val `application/mediaservercontrol+xml` = MimeType("application/mediaservercontrol+xml", "mscml")
+    
+    val `application/mediaservercontrol+xml` =
+      MimeType("application/mediaservercontrol+xml", "mscml")
+    
     val `application/mikey` = MimeType("application/mikey")
     val `application/moss-keys` = MimeType("application/moss-keys")
     val `application/moss-signature` = MimeType("application/moss-signature")
@@ -212,10 +217,16 @@ trait Mime {
     val `application/rar` = MimeType("application/rar", "rar")
     val `application/rdf+xml` = MimeType("application/rdf+xml", "rdf")
     val `application/reginfo+xml` = MimeType("application/reginfo+xml", "rif")
-    val `application/relax-ng-compact-syntax` = MimeType("application/relax-ng-compact-syntax", "rnc")
+    
+    val `application/relax-ng-compact-syntax` =
+      MimeType("application/relax-ng-compact-syntax", "rnc")
+    
     val `application/remote-printing` = MimeType("application/remote-printing")
     val `application/resource-lists+xml` = MimeType("application/resource-lists+xml", "rl")
-    val `application/resource-lists-diff+xml` = MimeType("application/resource-lists-diff+xml", "rld")
+    
+    val `application/resource-lists-diff+xml` =
+      MimeType("application/resource-lists-diff+xml", "rld")
+    
     val `application/riscos` = MimeType("application/riscos")
     val `application/rlmi+xml` = MimeType("application/rlmi+xml")
     val `application/rls-services+xml` = MimeType("application/rls-services+xml", "rs")
@@ -387,7 +398,10 @@ trait Mime {
     val `application/vnd.dpgraph` = MimeType("application/vnd.dpgraph", "dpg")
     val `application/vnd.dreamfactory` = MimeType("application/vnd.dreamfactory", "dfac")
     val `application/vnd.dvb.esgcontainer` = MimeType("application/vnd.dvb.esgcontainer")
-    val `application/vnd.dvb.ipdcdftnotifaccess` = MimeType("application/vnd.dvb.ipdcdftnotifaccess")
+    
+    val `application/vnd.dvb.ipdcdftnotifaccess` =
+      MimeType("application/vnd.dvb.ipdcdftnotifaccess")
+    
     val `application/vnd.dvb.ipdcesgaccess` = MimeType("application/vnd.dvb.ipdcesgaccess")
     val `application/vnd.dvb.ipdcroaming` = MimeType("application/vnd.dvb.ipdcroaming")
     val `application/vnd.dvb.iptv.alfec-base` = MimeType("application/vnd.dvb.iptv.alfec-base")
@@ -437,12 +451,18 @@ trait Mime {
     val `application/vnd.etsi.aoc+xml` = MimeType("application/vnd.etsi.aoc+xml")
     val `application/vnd.etsi.cug+xml` = MimeType("application/vnd.etsi.cug+xml")
     val `application/vnd.etsi.iptvcommand+xml` = MimeType("application/vnd.etsi.iptvcommand+xml")
-    val `application/vnd.etsi.iptvdiscovery+xml` = MimeType("application/vnd.etsi.iptvdiscovery+xml")
+    
+    val `application/vnd.etsi.iptvdiscovery+xml` =
+      MimeType("application/vnd.etsi.iptvdiscovery+xml")
+    
     val `application/vnd.etsi.iptvprofile+xml` = MimeType("application/vnd.etsi.iptvprofile+xml")
     val `application/vnd.etsi.iptvsad-bc+xml` = MimeType("application/vnd.etsi.iptvsad-bc+xml")
     val `application/vnd.etsi.iptvsad-cod+xml` = MimeType("application/vnd.etsi.iptvsad-cod+xml")
     val `application/vnd.etsi.iptvsad-npvr+xml` = MimeType("application/vnd.etsi.iptvsad-npvr+xml")
-    val `application/vnd.etsi.iptvueprofile+xml` = MimeType("application/vnd.etsi.iptvueprofile+xml")
+    
+    val `application/vnd.etsi.iptvueprofile+xml` =
+      MimeType("application/vnd.etsi.iptvueprofile+xml")
+    
     val `application/vnd.etsi.mcid+xml` = MimeType("application/vnd.etsi.mcid+xml")
     val `application/vnd.etsi.sci+xml` = MimeType("application/vnd.etsi.sci+xml")
     val `application/vnd.etsi.simservs+xml` = MimeType("application/vnd.etsi.simservs+xml")
@@ -473,7 +493,9 @@ trait Mime {
     val `application/vnd.fujixerox.art-ex` = MimeType("application/vnd.fujixerox.art-ex")
     val `application/vnd.fujixerox.art4` = MimeType("application/vnd.fujixerox.art4")
     val `application/vnd.fujixerox.ddd` = MimeType("application/vnd.fujixerox.ddd", "ddd")
-    val `application/vnd.fujixerox.docuworks` = MimeType("application/vnd.fujixerox.docuworks", "xdw")
+    
+    val `application/vnd.fujixerox.docuworks` =
+      MimeType("application/vnd.fujixerox.docuworks", "xdw")
     
     val `application/vnd.fujixerox.docuworks.binder` =
       MimeType("application/vnd.fujixerox.docuworks.binder", "xbd")
@@ -503,7 +525,9 @@ trait Mime {
       MimeType("application/vnd.groove-identity-message", "gim")
     
     val `application/vnd.groove-injector` = MimeType("application/vnd.groove-injector", "grv")
-    val `application/vnd.groove-tool-message` = MimeType("application/vnd.groove-tool-message", "gtm")
+    
+    val `application/vnd.groove-tool-message` =
+      MimeType("application/vnd.groove-tool-message", "gtm")
     
     val `application/vnd.groove-tool-template` =
       MimeType("application/vnd.groove-tool-template", "tpl")
@@ -604,7 +628,10 @@ trait Mime {
     val `application/vnd.jcp.javame.midlet-rms` =
       MimeType("application/vnd.jcp.javame.midlet-rms", "rms")
     val `application/vnd.jisp` = MimeType("application/vnd.jisp", "jisp")
-    val `application/vnd.joost.joda-archive` = MimeType("application/vnd.joost.joda-archive", "joda")
+    
+    val `application/vnd.joost.joda-archive` =
+      MimeType("application/vnd.joost.joda-archive", "joda")
+    
     val `application/vnd.kahootz` = MimeType("application/vnd.kahootz", "ktr", "ktz")
     val `application/vnd.kde.karbon` = MimeType("application/vnd.kde.karbon", "karbon")
     val `application/vnd.kde.kchart` = MimeType("application/vnd.kde.kchart", "chrt")
@@ -642,11 +669,16 @@ trait Mime {
     val `application/vnd.marlin.drm.conftoken+xml` =
       MimeType("application/vnd.marlin.drm.conftoken+xml")
     
-    val `application/vnd.marlin.drm.license+xml` = MimeType("application/vnd.marlin.drm.license+xml")
+    val `application/vnd.marlin.drm.license+xml` =
+      MimeType("application/vnd.marlin.drm.license+xml")
+    
     val `application/vnd.marlin.drm.mdcf` = MimeType("application/vnd.marlin.drm.mdcf")
     val `application/vnd.mcd` = MimeType("application/vnd.mcd", "mcd")
     val `application/vnd.medcalcdata` = MimeType("application/vnd.medcalcdata", "mc1")
-    val `application/vnd.mediastation.cdkey` = MimeType("application/vnd.mediastation.cdkey", "cdkey")
+    
+    val `application/vnd.mediastation.cdkey` =
+      MimeType("application/vnd.mediastation.cdkey", "cdkey")
+    
     val `application/vnd.meridian-slingshot` = MimeType("application/vnd.meridian-slingshot")
     val `application/vnd.mfer` = MimeType("application/vnd.mfer", "mwf")
     val `application/vnd.mfmp` = MimeType("application/vnd.mfmp", "mfm")
@@ -672,14 +704,21 @@ trait Mime {
     val `application/vnd.motorola.flexsuite.adsi` =
       MimeType("application/vnd.motorola.flexsuite.adsi")
     
-    val `application/vnd.motorola.flexsuite.fis` = MimeType("application/vnd.motorola.flexsuite.fis")
+    val `application/vnd.motorola.flexsuite.fis` =
+      MimeType("application/vnd.motorola.flexsuite.fis")
     
     val `application/vnd.motorola.flexsuite.gotap` =
       MimeType("application/vnd.motorola.flexsuite.gotap")
     
-    val `application/vnd.motorola.flexsuite.kmr` = MimeType("application/vnd.motorola.flexsuite.kmr")
-    val `application/vnd.motorola.flexsuite.ttc` = MimeType("application/vnd.motorola.flexsuite.ttc")
-    val `application/vnd.motorola.flexsuite.wem` = MimeType("application/vnd.motorola.flexsuite.wem")
+    val `application/vnd.motorola.flexsuite.kmr` =
+      MimeType("application/vnd.motorola.flexsuite.kmr")
+    
+    val `application/vnd.motorola.flexsuite.ttc` =
+      MimeType("application/vnd.motorola.flexsuite.ttc")
+    
+    val `application/vnd.motorola.flexsuite.wem` =
+      MimeType("application/vnd.motorola.flexsuite.wem")
+    
     val `application/vnd.motorola.iprm` = MimeType("application/vnd.motorola.iprm")
     val `application/vnd.mozilla.xul+xml` = MimeType("application/vnd.mozilla.xul+xml", "xul")
     val `application/vnd.ms-artgalry` = MimeType("application/vnd.ms-artgalry", "cil")
@@ -745,7 +784,9 @@ trait Mime {
     val `application/vnd.ms-word.template.macroenabled.12` =
       MimeType("application/vnd.ms-word.template.macroenabled.12", "dotm")
 
-    val `application/vnd.ms-works` = MimeType("application/vnd.ms-works", "wcm", "wdb", "wks", "wps")
+    val `application/vnd.ms-works` =
+      MimeType("application/vnd.ms-works", "wcm", "wdb", "wks", "wps")
+    
     val `application/vnd.ms-wpl` = MimeType("application/vnd.ms-wpl", "wpl")
     val `application/vnd.ms-xpsdocument` = MimeType("application/vnd.ms-xpsdocument", "xps")
     val `application/vnd.mseq` = MimeType("application/vnd.mseq", "mseq")
@@ -786,7 +827,9 @@ trait Mime {
     val `application/vnd.nokia.ncd` = MimeType("application/vnd.nokia.ncd")
     val `application/vnd.nokia.pcd+wbxml` = MimeType("application/vnd.nokia.pcd+wbxml")
     val `application/vnd.nokia.pcd+xml` = MimeType("application/vnd.nokia.pcd+xml")
-    val `application/vnd.nokia.radio-preset` = MimeType("application/vnd.nokia.radio-preset", "rpst")
+    
+    val `application/vnd.nokia.radio-preset` =
+      MimeType("application/vnd.nokia.radio-preset", "rpst")
     
     val `application/vnd.nokia.radio-presets` =
       MimeType("application/vnd.nokia.radio-presets", "rpss")
@@ -850,7 +893,9 @@ trait Mime {
     val `application/vnd.olpc-sugar` = MimeType("application/vnd.olpc-sugar", "xo")
     val `application/vnd.oma-scws-config` = MimeType("application/vnd.oma-scws-config")
     val `application/vnd.oma-scws-http-request` = MimeType("application/vnd.oma-scws-http-request")
-    val `application/vnd.oma-scws-http-response` = MimeType("application/vnd.oma-scws-http-response")
+    
+    val `application/vnd.oma-scws-http-response` =
+      MimeType("application/vnd.oma-scws-http-response")
     
     val `application/vnd.oma.bcast.associated-procedure-parameter+xml` =
       MimeType("application/vnd.oma.bcast.associated-procedure-parameter+xml")
@@ -901,7 +946,9 @@ trait Mime {
     val `application/vnd.oma.poc.optimized-progress-report+xml` =
       MimeType("application/vnd.oma.poc.optimized-progress-report+xml")
     
-    val `application/vnd.oma.xcap-directory+xml` = MimeType("application/vnd.oma.xcap-directory+xml")
+    val `application/vnd.oma.xcap-directory+xml` =
+      MimeType("application/vnd.oma.xcap-directory+xml")
+    
     val `application/vnd.omads-email+xml` = MimeType("application/vnd.omads-email+xml")
     val `application/vnd.omads-file+xml` = MimeType("application/vnd.omads-file+xml")
     val `application/vnd.omads-folder+xml` = MimeType("application/vnd.omads-folder+xml")
@@ -1088,12 +1135,19 @@ trait Mime {
     val `application/vnd.sus-calendar` = MimeType("application/vnd.sus-calendar", "sus", "susp")
     val `application/vnd.svd` = MimeType("application/vnd.svd", "svd")
     val `application/vnd.swiftview-ics` = MimeType("application/vnd.swiftview-ics")
-    val `application/vnd.symbian.install` = MimeType("application/vnd.symbian.install", "sis", "sisx")
+    
+    val `application/vnd.symbian.install` =
+      MimeType("application/vnd.symbian.install", "sis", "sisx")
+    
     val `application/vnd.syncml+xml` = MimeType("application/vnd.syncml+xml", "xsm")
     val `application/vnd.syncml.dm+wbxml` = MimeType("application/vnd.syncml.dm+wbxml", "bdm")
     val `application/vnd.syncml.dm+xml` = MimeType("application/vnd.syncml.dm+xml", "xdm")
-    val `application/vnd.syncml.dm.notification` = MimeType("application/vnd.syncml.dm.notification")
-    val `application/vnd.syncml.ds.notification` = MimeType("application/vnd.syncml.ds.notification")
+    
+    val `application/vnd.syncml.dm.notification` =
+      MimeType("application/vnd.syncml.dm.notification")
+    
+    val `application/vnd.syncml.ds.notification` =
+      MimeType("application/vnd.syncml.ds.notification")
 
     val `application/vnd.tao.intent-module-archive` =
       MimeType("application/vnd.tao.intent-module-archive", "tao")
@@ -1219,7 +1273,10 @@ trait Mime {
     val `application/x-dtbresource+xml` = MimeType("application/x-dtbresource+xml", "res")
     val `application/x-dvi` = MimeType("application/x-dvi", "dvi")
     val `application/x-flac` = MimeType("application/x-flac", "flac")
-    val `application/x-font` = MimeType("application/x-font", "gsf", "pcf", "pcf", ".Z", "pfa", "pfb")
+    
+    val `application/x-font` =
+      MimeType("application/x-font", "gsf", "pcf", "pcf", ".Z", "pfa", "pfb")
+    
     val `application/x-font-bdf` = MimeType("application/x-font-bdf", "bdf")
     val `application/x-font-dos` = MimeType("application/x-font-dos")
     val `application/x-font-framemaker` = MimeType("application/x-font-framemaker")
@@ -1232,7 +1289,10 @@ trait Mime {
     val `application/x-font-speedo` = MimeType("application/x-font-speedo")
     val `application/x-font-sunos-news` = MimeType("application/x-font-sunos-news")
     val `application/x-font-ttf` = MimeType("application/x-font-ttf", "ttc", "ttf")
-    val `application/x-font-type1` = MimeType("application/x-font-type1", "afm", "pfa", "pfb", "pfm")
+    
+    val `application/x-font-type1` =
+      MimeType("application/x-font-type1", "afm", "pfa", "pfb", "pfm")
+    
     val `application/x-font-vfont` = MimeType("application/x-font-vfont")
     val `application/x-freemind` = MimeType("application/x-freemind", "mm")
     val `application/x-futuresplash` = MimeType("application/x-futuresplash", "spl")
@@ -1350,7 +1410,10 @@ trait Mime {
     val `application/xhtml-voice+xml` = MimeType("application/xhtml-voice+xml")
     val `application/xml` = MimeType("application/xml", "xml", "xsl")
     val `application/xml-dtd` = MimeType("application/xml-dtd", "dtd")
-    val `application/xml-external-parsed-entity` = MimeType("application/xml-external-parsed-entity")
+    
+    val `application/xml-external-parsed-entity` =
+      MimeType("application/xml-external-parsed-entity")
+    
     val `application/xmpp+xml` = MimeType("application/xmpp+xml")
     val `application/xop+xml` = MimeType("application/xop+xml", "xop")
     val `application/xslt+xml` = MimeType("application/xslt+xml", "xslt")
@@ -1803,7 +1866,10 @@ trait Mime {
     val `video/vnd.motorola.videop` = MimeType("video/vnd.motorola.videop")
     val `video/vnd.mpegurl` = MimeType("video/vnd.mpegurl", "m4u", "mxu")
     val `video/vnd.ms-playready.media.pyv` = MimeType("video/vnd.ms-playready.media.pyv", "pyv")
-    val `video/vnd.nokia.interleaved-multimedia` = MimeType("video/vnd.nokia.interleaved-multimedia")
+    
+    val `video/vnd.nokia.interleaved-multimedia` =
+      MimeType("video/vnd.nokia.interleaved-multimedia")
+    
     val `video/vnd.nokia.videovoip` = MimeType("video/vnd.nokia.videovoip")
     val `video/vnd.objectvideo` = MimeType("video/vnd.objectvideo")
     val `video/vnd.sealed.mpeg1` = MimeType("video/vnd.sealed.mpeg1")

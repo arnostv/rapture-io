@@ -23,8 +23,9 @@ package rapture
 
 trait Logging { this: Io =>
 
-  /** Basic logging functionality, introducing the concept of logging zones. Note that this is almost
-    * certainly not as efficient as it ought to be, so use log4j if efficiency matters to you. */
+  /** Basic logging functionality, introducing the concept of logging zones. Note that this is
+    * almost certainly not as efficient as it ought to be, so use log4j if efficiency matters to
+    * you. */
 
   case class Zone(name: String)
 
@@ -82,7 +83,8 @@ trait Logging { this: Io =>
     @inline def exception(e: => Throwable)(implicit zone: Zone) =
       log(Error, zone, e.toString+"\n    "+e.getStackTrace.mkString("\n    "))
 
-    private def log(level: Level, zone: Zone, msg: String, time: Long = System.currentTimeMillis) = {
+    private def log(level: Level, zone: Zone, msg: String) = {
+      val time: Long = System.currentTimeMillis
       // Ensures the date is only formatted when it changes
       if(time != dateCreated) {
         dateString = df.format(time)
@@ -90,8 +92,12 @@ trait Logging { this: Io =>
       }
       val m = if(msg == null) "null" else msg
       for(ln <- m.split("\n")) {
-        val formattedMsg = "%1$-23s %2$-5s %3$-8s %4$s\n".format(dateString, level.name, zone.name, ln)
-        for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level) lgr.log(formattedMsg)
+        
+        val formattedMsg = "%1$-23s %2$-5s %3$-8s %4$s\n".format(dateString, level.name, zone.name,
+            ln)
+        
+        for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level)
+          lgr.log(formattedMsg)
       }
     }
   }

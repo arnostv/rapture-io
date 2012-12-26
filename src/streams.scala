@@ -154,13 +154,13 @@ trait Streams { this: Io =>
       * @tparam Data The units of data being slurped
       * @return The accumulated data */
     def slurp[Data]()(implicit sr: StreamReader[UrlType, Data], accumulatorBuilder:
-        AccumulatorBuilder[Data], mf: ClassTag[Data]): ![Exception, accumulatorBuilder.Out] = except {
+        AccumulatorBuilder[Data], mf: ClassTag[Data]): ![Exception, accumulatorBuilder.Out] =
+      except {
+        val c = accumulatorBuilder.make()
+        input[Data] > c
 
-      val c = accumulatorBuilder.make()
-      input[Data] > c
-
-      c.buffer
-    }
+        c.buffer
+      }
   }
 
   /** Provides methods for URLs which can be written to as streams, most importantly for getting an
@@ -172,7 +172,8 @@ trait Streams { this: Io =>
     /** Gets the output stream directly
       *
       * @tparam Data The type of data to be carried by the `Output` */
-    def output[Data](implicit sw: StreamWriter[UrlType, Data]): ![Exception, Output[Data]] = except(sw.output(url))
+    def output[Data](implicit sw: StreamWriter[UrlType, Data]): ![Exception, Output[Data]] =
+      except(sw.output(url))
     
     /** Carefully handles writing to the output stream, ensuring that it is closed following
       * data being written.
@@ -221,8 +222,8 @@ trait Streams { this: Io =>
   /** Type class object for getting an Input[Char] from an HttpUrl */
   implicit object HttpStreamCharReader extends StreamReader[HttpUrl, Char] {
     def input(url: HttpUrl): ![Exception, Input[Char]] =
-      except(new CharInput(new BufferedReader(new InputStreamReader(url.javaConnection.getInputStream,
-          extractEncoding(url.javaConnection)))))
+      except(new CharInput(new BufferedReader(new InputStreamReader(
+          url.javaConnection.getInputStream, extractEncoding(url.javaConnection)))))
   }
 
   implicit object HttpResponseCharReader extends StreamReader[HttpResponse, Char] {

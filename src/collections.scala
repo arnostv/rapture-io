@@ -43,7 +43,8 @@ trait CollectionExtras {
     
     /** Inserts an element between each of the elements of the sequence, and additionally prepends
       * and affixes the sequence with `before` and `after`. */
-    def intersperse[B >: A, That](before: B, between: B, after: B)(implicit bf: CanBuildFrom[C[A], B, That]): That = {
+    def intersperse[B >: A, That](before: B, between: B, after: B)
+        (implicit bf: CanBuildFrom[C[A], B, That]): That = {
       val b = bf(xs)
       b += before
       xs.init foreach { x =>

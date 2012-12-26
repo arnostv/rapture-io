@@ -41,7 +41,8 @@ trait Ips {
   case class Ip4(b1: Int, b2: Int, b3: Int, b4: Int) {
     
     if(b1 > 255 || b2 > 255 || b3 > 255 || b4 > 255 || b1 < 0 || b2 < 0 || b3 < 0 || b4 < 0)
-      throw new InstantiationException("The components of the IP address must be in the range 0-255")
+      throw new InstantiationException(
+          "The components of the IP address must be in the range 0-255")
 
     def asLong = (b1.toLong<<24) + (b2<<16) + (b3<<8) + b4
     def /(i: Int): Subnet = new Subnet(this, i)

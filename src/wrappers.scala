@@ -45,7 +45,8 @@ trait LowPriorityWrappers { this: Io =>
   }
 
   implicit val ProcIsReadable: StreamReader[Proc, Byte] = new StreamReader[Proc, Byte] {
-    def input(proc: Proc): ![Exception, Input[Byte]] = except(InputStreamBuilder.input(proc.process.getInputStream))
+    def input(proc: Proc): ![Exception, Input[Byte]] =
+      except(InputStreamBuilder.input(proc.process.getInputStream))
   }
 }
 
@@ -204,13 +205,16 @@ trait Wrappers extends LowPriorityWrappers { this: Io =>
     * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
   implicit def outputStreamCharBuilder(implicit encoding: Encoding) =
     new OutputBuilder[OutputStream, Char] {
-      def output(s: OutputStream): ![Exception, Output[Char]] = except(new CharOutput(new OutputStreamWriter(s, encoding.name)))
+      def output(s: OutputStream): ![Exception, Output[Char]] =
+        except(new CharOutput(new OutputStreamWriter(s, encoding.name)))
     }
 
   /** Type class definition for creating an Input[Char] from a Java InputStream, taking an
     * [[Encoding]] implicitly for converting between `Byte`s and `Char`s */
-  implicit def inputStreamCharBuilder(implicit encoding: Encoding): InputBuilder[InputStream, Char] =
+  implicit def inputStreamCharBuilder(implicit encoding: Encoding):
+      InputBuilder[InputStream, Char] =
     new InputBuilder[InputStream, Char] {
-      def input(s: InputStream): ![Exception, Input[Char]] = except(new CharInput(new InputStreamReader(s, encoding.name)))
+      def input(s: InputStream): ![Exception, Input[Char]] =
+        except(new CharInput(new InputStreamReader(s, encoding.name)))
     }
 }

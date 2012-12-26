@@ -35,11 +35,11 @@ import java.net._
   * of stream over another without explicitly specifying a type parameter.  Specifically,
   * `FileUrl`s should be read and written and  `HttpUrl`s should be read as
   * byte-streams */
-abstract class Io extends Paths with Streams with Urls with Files with Net with Sockets with Extractors
-    with Accumulators with Wrappers with Uris with Mail with CollectionExtras with Multipart with
-    JsonExtraction with Encryption with Codecs with Digests with Encodings with Generation with Ips
-    with Logging with Mime with Misc with Services with Time with Linking with Classpath with
-    Processes with Exceptions {
+abstract class Io extends Paths with Streams with Urls with Files with Net with Sockets with
+    Extractors with Accumulators with Wrappers with Uris with Mail with CollectionExtras with
+    Multipart with JsonExtraction with Encryption with Codecs with Digests with Encodings with
+    Generation with Ips with Logging with Mime with Misc with Services with Time with Linking with
+    Classpath with Processes with Exceptions {
 
   type ![_ <: Exception, _]
 
@@ -52,7 +52,8 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
   /** Type class object for reading `Byte`s from `FileUrl`s */
   implicit object FileStreamByteReader extends StreamReader[FileUrl, Byte] {
     def input(url: FileUrl): ![Exception, Input[Byte]] =
-      except[Exception, Input[Byte]](new ByteInput(new BufferedInputStream(new FileInputStream(url.javaFile))))
+      except[Exception, Input[Byte]](new ByteInput(new BufferedInputStream(
+          new FileInputStream(url.javaFile))))
   }
 
   /** Type class object for writing `Byte`s to `FileUrl`s */
@@ -74,17 +75,20 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
 
   implicit def stdoutWriter[Data] = new StreamWriter[Stdout[Data], Data] {
     override def doNotClose = true
-    def output(stdout: Stdout[Data]): ![Exception, Output[Data]] = except[Exception, Output[Data]](stdout.output)
+    def output(stdout: Stdout[Data]): ![Exception, Output[Data]] =
+      except[Exception, Output[Data]](stdout.output)
   }
 
   implicit def stderrWriter[Data] = new StreamWriter[Stderr[Data], Data] {
     override def doNotClose = true
-    def output(stderr: Stderr[Data]): ![Exception, Output[Data]] = except[Exception, Output[Data]](stderr.output)
+    def output(stderr: Stderr[Data]): ![Exception, Output[Data]] =
+      except[Exception, Output[Data]](stderr.output)
   }
 
   implicit def stdin[Data] = new StreamReader[Stdin[Data], Data] {
     override def doNotClose = true
-    def input(stdin: Stdin[Data]): ![Exception, Input[Data]] = except[Exception, Input[Data]](stdin.input)
+    def input(stdin: Stdin[Data]): ![Exception, Input[Data]] =
+      except[Exception, Input[Data]](stdin.input)
   }
 
   implicit class urlCodec(s: String) {

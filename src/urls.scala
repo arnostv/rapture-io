@@ -41,7 +41,8 @@ trait Urls { this: Io =>
     def schemeName = scheme.toString
 
     /** Constructs a new URL by appending the given path element to the path. */
-    override def /(element: String) = pathRoot.makePath(0, thisPath.elements ++ Array(element), afterPath)
+    override def /(element: String) =
+      pathRoot.makePath(0, thisPath.elements ++ Array(element), afterPath)
     
     /** Constructs a new URL by calculating the destination URL by following the given
       * `Path` from this URL */

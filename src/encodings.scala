@@ -25,11 +25,12 @@ trait Encodings { this: Io =>
 
   type Encoding = Encodings.Encoding
 
-  /** Provides references to standard character encodings provided by Java. Encodings are represented
-    * by instances of the Encoding case class, which is a simple wrapper over a String of the
-    * encoding's name. Several standard encodings are provided and identified by the encoding's
-    * canonical name for the avoidance of ambiguity. These instances will typically require escaping
-    * with backticks in order to be referenced, however type safety will be ensured. */
+  /** Provides references to standard character encodings provided by Java. Encodings are
+    * represented by instances of the Encoding case class, which is a simple wrapper over a String
+    * of the encoding's name. Several standard encodings are provided and identified by the
+    * encoding's canonical name for the avoidance of ambiguity. These instances will typically
+    * require escaping with backticks in order to be referenced, however type safety will be
+    * ensured. */
   object Encodings extends Lookup[String] {
     
     type Item = Encoding

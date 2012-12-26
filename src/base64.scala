@@ -68,8 +68,8 @@ trait Codecs { this: Io =>
         var blockCount = 0
         
         while(inPos < evenLen) {
-          
-          val block = (in(inPos) & 0xFF) << 16 | (in(inPos + 1) & 0xFF) << 8 | (in(inPos + 2) & 0xFF)
+          val block = (in(inPos) & 0xFF) << 16 | (in(inPos + 1) & 0xFF) << 8 | (in(inPos + 2) &
+              0xFF)
           
           inPos += 3
           

@@ -84,9 +84,10 @@ trait Files { this: Io =>
     
     /** If this represents a directory, returns an iterator over all its descendants,
       * otherwise returns the empty iterator. */
-    def descendants(url: UrlType): ![Exception, Iterator[UrlType]] = except(children(url).iterator.flatMap { c =>
-      if(isDirectory(c)) Iterator(c) ++ descendants(c) else Iterator(c)
-    })
+    def descendants(url: UrlType): ![Exception, Iterator[UrlType]] =
+      except(children(url).iterator.flatMap { c =>
+        if(isDirectory(c)) Iterator(c) ++ descendants(c) else Iterator(c)
+      })
   }
 
   implicit def navigableExtras[UrlType: Navigable](url: UrlType) = new {
@@ -98,7 +99,8 @@ trait Files { this: Io =>
     def isDirectory: ![Exception, Boolean] = implicitly[Navigable[UrlType]].isDirectory(url)
 
     /** Return an iterator of all descendants of this URL. */
-    def descendants: ![Exception, Iterator[UrlType]] = implicitly[Navigable[UrlType]].descendants(url)
+    def descendants: ![Exception, Iterator[UrlType]] =
+      implicitly[Navigable[UrlType]].descendants(url)
   }
 
   /** Specifies how file: URLs should be navigable. */
@@ -111,8 +113,8 @@ trait Files { this: Io =>
 
   /** Defines a URL for the file: scheme, and provides standard filesystem operations on the file
     * represented by the URL. */
-  class FileUrl(val pathRoot: PathRoot[FileUrl], elements: Seq[String]) extends Url[FileUrl](elements, Map())
-      with PathUrl[FileUrl] {
+  class FileUrl(val pathRoot: PathRoot[FileUrl], elements: Seq[String])
+      extends Url[FileUrl](elements, Map()) with PathUrl[FileUrl] {
 
     /** The java.io.File corresponding to this FileUrl. */
     lazy val javaFile: java.io.File = new java.io.File(pathString)
@@ -182,7 +184,8 @@ trait Files { this: Io =>
     
     /** Moves this file to a new location specified by the dest parameter. This will first attempt
       * to move the file by renaming it, but will attempt copying and deletion if renaming fails. */
-    def moveTo(dest: FileUrl): ![Exception, Boolean] = except(renameTo(dest) || copyTo(dest) && delete())
+    def moveTo(dest: FileUrl): ![Exception, Boolean] =
+      except(renameTo(dest) || copyTo(dest) && delete())
 
     /** Update the last-modified time of this file to the current time. */
     def touch() = lastModified = new java.util.Date
@@ -203,7 +206,9 @@ trait Files { this: Io =>
       except(File(java.io.File.createTempFile(prefix, suffix, javaFile)))
     
     private def deleteRecursively(): Boolean = {
-      if(NavigableFile.isDirectory(this)) NavigableFile.children(this).foreach(_.deleteRecursively())
+      if(NavigableFile.isDirectory(this))
+        NavigableFile.children(this).foreach(_.deleteRecursively())
+      
       delete()
     }
   }

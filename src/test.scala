@@ -44,9 +44,13 @@ object Tests extends TestingApplication {
   }
 
   val mime = new Suite("mime.scala") {
-    val getMimeType = test { MimeTypes.fromString("text/plain") } yields Some(MimeTypes.`text/plain`)
+    val getMimeType =
+      test { MimeTypes.fromString("text/plain") } yields Some(MimeTypes.`text/plain`)
+    
     val getExtensions = test { MimeTypes.`application/xml`.extensions } satisfies (_ contains "xml")
-    val lookupFromExtension = test { MimeTypes.extension("xsl") } satisfies (_ contains MimeTypes.`application/xml`)
+    
+    val lookupFromExtension =
+      test { MimeTypes.extension("xsl") } satisfies (_ contains MimeTypes.`application/xml`)
   }
 
   val paths = new Suite("path.scala") {
@@ -106,15 +110,22 @@ object Tests extends TestingApplication {
     val link11 = test { (^ / "baz" / "quux" link ^ / "foo" / "bar").toString } yields "../foo/bar"
     val link12 = test { (^ / "bar" link ^ / "foo" / "bar").toString } yields "foo/bar"
     val link13 = test { (^ / "baz" / "quux" link ^ / "quux").toString } yields "../quux"
-    val link14 = test { (^ / "foo" / "baz" / "quux" link ^ / "foo" / "quux").toString } yields "../quux"
+    
+    val link14 =
+      test { (^ / "foo" / "baz" / "quux" link ^ / "foo" / "quux").toString } yields "../quux"
   }
 
   val strings = new Suite("strings") {
     val httpUrl = test { (Http / "rapture.io").toString } yields "http://rapture.io/"
     val httpsUrl = test { (Https / "rapture.io").toString } yields "https://rapture.io/"
     val httpUrl2 = test { (Http / "rapture.io" / $).toString } yields "http://rapture.io/"
-    val httpUrl3 = test { (Http / "rapture.io" / "foo" / "bar").toString } yields "http://rapture.io/foo/bar"
-    val httpUrl4 = test { (Http./("rapture.io", 999) / "foo").toString } yields "http://rapture.io:999/foo"
+    
+    val httpUrl3 =
+      test { (Http / "rapture.io" / "foo" / "bar").toString } yields "http://rapture.io/foo/bar"
+    
+    val httpUrl4 =
+      test { (Http./("rapture.io", 999) / "foo").toString } yields "http://rapture.io:999/foo"
+    
     val fileUrl = test { (File / "foo" / "bar").toString } yields "file:///foo/bar"
     val fileRoot = test { (File / $).toString } yields "file:///"
     val path = test { ^.toString } yields "/"
