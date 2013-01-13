@@ -92,7 +92,7 @@ trait Time {
       def unapply(n: Long) = {
         val Date(date) = n
         val c = Calendar.getInstance
-        c.setTimeInMillis(c)
+        c.setTimeInMillis(n)
         Some(DateTime(date, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)))
       }
     }
