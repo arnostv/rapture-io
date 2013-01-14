@@ -46,7 +46,7 @@ trait Time {
 
     val HmsTimeFormat = TimeFormat("HH:mm:ss")
     val HmTimeFormat = TimeFormat("HH:mm")
-    val alternativeTimeFormat = TimeFormat("H.mma")
+    val alternativeTimeFormat = TimeFormat("h.mma")
 
     @inline implicit class IntExtras(i: Int) {
       def seconds = i*1000
@@ -104,7 +104,7 @@ trait Time {
         val Date(date) = n
         val c = Calendar.getInstance
         c.setTimeInMillis(n)
-        Some(DateTime(date, c.get(Calendar.HOUR), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)))
+        Some(DateTime(date, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)))
       }
     }
 
