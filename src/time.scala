@@ -6,7 +6,7 @@ The primary distribution site is
 
   http://www.propensive.com/
 
-Copyright 2010-2012 Propensive Ltd.
+Copyright 2010-2013 Propensive Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
@@ -26,6 +26,17 @@ import java.text.SimpleDateFormat
 
 trait Time {
 
+  // FIXME: Lots of work to be done making this useful
+  def decimalFormat(dp: Int) = new DecimalFormat("#."+"#"*dp)
+
+  class DecimalFormat(spec: String) {
+    def format(d: Double) = new java.text.DecimalFormat(spec).format(d)
+  }
+
+  implicit class DoubleExtras(double: Double) {
+    def format(implicit df: DecimalFormat) = df.format(double)
+  }
+  
   object Time {
 
     val shortUsDateFormat = DateFormat("MM/dd/yy")

@@ -6,7 +6,7 @@ The primary distribution site is
 
   http://www.propensive.com/
 
-Copyright 2010-2012 Propensive Ltd.
+Copyright 2010-2013 Propensive Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
 compliance with the License. You may obtain a copy of the License at
@@ -39,7 +39,7 @@ abstract class Io extends Paths with Streams with Urls with Files with Net with 
     Extractors with Accumulators with Wrappers with Uris with Mail with CollectionExtras with
     Multipart with JsonExtraction with Encryption with Codecs with Digests with Encodings with
     Generation with Ips with Logging with Mime with Misc with Services with Time with Linking with
-    Classpath with Processes with Exceptions {
+    Classpath with Processes with CommandLine with Tabulation with Exceptions {
 
   type ![_ <: Exception, _]
 
