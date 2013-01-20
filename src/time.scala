@@ -27,7 +27,7 @@ import java.text.SimpleDateFormat
 trait Time {
 
   // FIXME: Lots of work to be done making this useful
-  def decimalFormat(dp: Int) = new DecimalFormat("#."+"#"*dp)
+  def decimalFormat(dp: Int) = new DecimalFormat("0."+"0"*dp)
 
   class DecimalFormat(spec: String) {
     def format(d: Double) = new java.text.DecimalFormat(spec).format(d)
@@ -150,6 +150,7 @@ trait Time {
 
       def +(n: Int) = DateTime.unapply(n + toLong).get
       def -(n: Int) = DateTime.unapply(toLong - n).get
+      def -(d: DateTime): Long = toLong - d.toLong
 
       override def toString() =
         date.toString+" "+pad(hour)+":"+pad(minute)+":"+pad(second)
