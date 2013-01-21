@@ -185,16 +185,15 @@ trait Net { this: Io =>
   }
 
   /** Represets a URL with the http scheme */
-  class HttpUrl(val pathRoot: NetPathRoot[HttpUrl], elements: Seq[String], afterPath: AfterPath)
-      extends Url[HttpUrl](elements, afterPath) with NetUrl[HttpUrl] with PathUrl[HttpUrl] {
-      thisHttpUrl =>
+  class HttpUrl(val pathRoot: NetPathRoot[HttpUrl], elements: Seq[String], afterPath: AfterPath,
+      val ssl: Boolean) extends Url[HttpUrl](elements, afterPath) with NetUrl[HttpUrl] with
+      PathUrl[HttpUrl] { thisHttpUrl =>
     
     def makePath(ascent: Int, xs: Seq[String], afterPath: AfterPath) =
-      new HttpUrl(pathRoot, elements, afterPath)
+      new HttpUrl(pathRoot, elements, afterPath, ssl)
     
     def hostname = pathRoot.hostname
     def port = pathRoot.port
-    def ssl = false
     def canonicalPort = if(ssl) 443 else 80
   }
 
@@ -207,7 +206,7 @@ trait Net { this: Io =>
       NetPathRoot[HttpUrl] with Uri { thisPathRoot =>
     
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath): HttpUrl =
-      new HttpUrl(thisPathRoot, elements, Map())
+      new HttpUrl(thisPathRoot, elements, Map(), ssl)
 
     def scheme = if(ssl) Https else Http
     def canonicalPort = if(ssl) 443 else 80
@@ -235,13 +234,12 @@ trait Net { this: Io =>
     private val UrlRegex = """(https?):\/\/([\.\-a-z0-9]+)(:[1-9][0-9]*)?\/?(.*)""".r
 
     /** Parses a URL string into an HttpUrl */
-    def parse(s: String): Option[NetUrl[U forSome { type U <: Url[U] }]] = s match {
+    def parse(s: String): Option[HttpUrl] = s match {
       case UrlRegex(scheme, server, port, path) =>
         val rp = new SimplePath(path.split("/"), Map())
-        val p = if(port == null) 80 else port.substring(1).toInt
         Some(scheme match {
-          case "http" => Http./(server, p) / rp
-          case "https" => Https./(server, p) / rp
+          case "http" => Http./(server, if(port == null) 80 else port.substring(1).toInt) / rp
+          case "https" => Https./(server, if(port == null) 443 else port.substring(1).toInt) / rp
         })
       case _ => None
     }
