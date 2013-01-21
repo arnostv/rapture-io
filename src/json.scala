@@ -137,6 +137,7 @@ trait JsonExtraction { this: Io =>
     implicit val intJsonExtractor = new JsonExtractor[Int](_.asInstanceOf[Double].toInt)
     implicit val longJsonExtractor = new JsonExtractor[Long](_.asInstanceOf[Double].toLong)
     implicit val booleanJsonExtractor = new JsonExtractor[Boolean](_.asInstanceOf[Boolean])
+    implicit val anyJsonExtractor = new JsonExtractor[Any](identity)
     
     implicit def listJsonExtractor[T: JsonExtractor] =
       new JsonExtractor[List[T]](_.asInstanceOf[List[Any]].map(implicitly[JsonExtractor[T]].cast))
