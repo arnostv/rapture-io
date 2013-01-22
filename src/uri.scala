@@ -28,6 +28,11 @@ trait Uris { this: Io =>
       def absolute = false
       override def toString() = "."
     }
+  
+    def apply(s: String) = new Link {
+      def absolute = true
+      override def toString = s
+    }
   }
 
   trait Link { def absolute: Boolean }
