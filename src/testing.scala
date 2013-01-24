@@ -19,36 +19,38 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-package rapture.test
+package rapture
 
-object Ansi {
-  val Esc = 27.toChar
-  val Normal = Esc+"[0m"
-  val Bold = Esc+"[1m"
-  val Underline = Esc+"[4m"
-  val Blink = Esc+"[5m"
-  val Reverse = Esc+"[7m"
-  val Nondisplayed = Esc+"[8m"
-  val Black = Esc+"[30m"
-  val Red = Esc+"[31m"
-  val Green = Esc+"[32m"
-  val Yellow = Esc+"[33m"
-  val Blue = Esc+"[34m"
-  val Magenta = Esc+"[35m"
-  val Cyan = Esc+"[36m"
-  val White = Esc+"[37m"
-  val BgBlack = Esc+"[30m"
-  val BgRed = Esc+"[31m"
-  val BgGreen = Esc+"[32m"
-  val BgYellow = Esc+"[33m"
-  val BgBlue = Esc+"[34m"
-  val BgMagenta = Esc+"[35m"
-  val BgCyan = Esc+"[36m"
-  val BgWhite = Esc+"[37m"
-  def cursor(row : Int, col : Int) = Esc+"["+row+";"+col+"H"
-  def up(n : Int) = Esc+"["+n+"A"
-  def down(n : Int) = Esc+"["+n+"B"
-  def right(n : Int) = Esc+"["+n+"C"
-  def left(n : Int) = Esc+"["+n+"D"
+trait AnsiCodes {
+
+  object Ansi {
+    val Esc = 27.toChar
+    val Normal = Esc+"[0m"
+    val Bold = Esc+"[1m"
+    val Underline = Esc+"[4m"
+    val Blink = Esc+"[5m"
+    val Reverse = Esc+"[7m"
+    val Nondisplayed = Esc+"[8m"
+    val Black = Esc+"[30m"
+    val Red = Esc+"[31m"
+    val Green = Esc+"[32m"
+    val Yellow = Esc+"[33m"
+    val Blue = Esc+"[34m"
+    val Magenta = Esc+"[35m"
+    val Cyan = Esc+"[36m"
+    val White = Esc+"[37m"
+    val BgBlack = Esc+"[30m"
+    val BgRed = Esc+"[31m"
+    val BgGreen = Esc+"[32m"
+    val BgYellow = Esc+"[33m"
+    val BgBlue = Esc+"[34m"
+    val BgMagenta = Esc+"[35m"
+    val BgCyan = Esc+"[36m"
+    val BgWhite = Esc+"[37m"
+    def cursor(row : Int, col : Int) = Esc+"["+row+";"+col+"H"
+    def up(n : Int) = Esc+"["+n+"A"
+    def down(n : Int) = Esc+"["+n+"B"
+    def right(n : Int) = Esc+"["+n+"C"
+    def left(n : Int) = Esc+"["+n+"D"
+  }
 }
-
