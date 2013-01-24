@@ -38,7 +38,7 @@ transparency.
 Low-tech Compilation
 --------------------
 
-Using Scala 2.10.0-RC2 (or later), compile Rapture I/O as follows:
+Using Scala 2.10.0 (or later), compile Rapture I/O as follows:
 
         mkdir rapture
         cd rapture
