@@ -25,7 +25,7 @@ import java.io._
 import java.net._
 
 /** Defines some extractors for retrieving data from character streams */
-trait Extractors { this: Io =>
+trait Extractors { this: BaseIo =>
 
   /** Defines extractors for getting Scala XML from a String or Input[Char]. The stream extractor
     * simply collects the input into a String, then parses the String, so more efficient

@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Mail { this: Io =>
+trait Mail { this: BaseIo =>
 
   object Mailto extends Scheme[MailtoUri] {
     def schemeName = "mailto"

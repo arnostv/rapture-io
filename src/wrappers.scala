@@ -28,7 +28,7 @@ import java.net._
 
 import annotation.implicitNotFound
 
-trait LowPriorityWrappers { this: Io =>
+trait LowPriorityWrappers { this: BaseIo =>
   
   /** Type class object for creating an Input[Byte] from a Java InputStream */
   implicit object InputStreamBuilder extends InputBuilder[InputStream, Byte] {
@@ -53,7 +53,7 @@ trait LowPriorityWrappers { this: Io =>
 /** Provides wrappers around Java's standard stream classes: `InputStream`, `OutputStream`, `Reader`
   * `Writer`, generalising them into `Input`s and `Output`s parameterised by the type of data they
   * carry. */
-trait Wrappers extends LowPriorityWrappers { this: Io =>
+trait Wrappers extends LowPriorityWrappers { this: BaseIo =>
 
   /** Wraps a `java.io.Reader` as an `Input[Char]` */
   class CharInput(in: Reader) extends Input[Char] {

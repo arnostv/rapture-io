@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Logging { this: Io =>
+trait Logging { this: BaseIo =>
 
   /** Basic logging functionality, introducing the concept of logging zones. Note that this is
     * almost certainly not as efficient as it ought to be, so use log4j if efficiency matters to

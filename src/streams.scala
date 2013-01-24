@@ -29,7 +29,7 @@ import scala.reflect._
 
 import annotation.implicitNotFound
 
-trait Streams { this: Io =>
+trait Streams { this: BaseIo =>
 
   /** Safely closes a stream after processing */
   def ensuring[Result, Stream](create: Stream)(body: Stream => Result)(close: Stream => Unit) = {

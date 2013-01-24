@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Encodings { this: Io =>
+trait Encodings { this: BaseIo =>
 
   type Encoding = Encodings.Encoding
 

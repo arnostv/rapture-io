@@ -23,7 +23,7 @@ package rapture
 
 import java.security._
 
-trait Digests { this: Io =>
+trait Digests { this: BaseIo =>
 
   abstract class Digester {
     

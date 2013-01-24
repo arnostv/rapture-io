@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Codecs { this: Io =>
+trait Codecs { this: BaseIo =>
 
   /** Standard Base64 codec. */
   object Base64 extends Base64Codec

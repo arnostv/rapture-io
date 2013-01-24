@@ -23,7 +23,7 @@ package rapture
 
 import scala.collection.mutable._
 
-trait Tabulation { this: Io =>
+trait Tabulation { this: BaseIo =>
   
   implicit class StringExtras(string: String) {
     private def doWrap(text: String, width: Int, handle: ((String, Int) => List[String])) =

@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Linking { this: Io =>
+trait Linking { this: BaseIo =>
 
   /** Calculates the relative link between this path and the specified destination path
     *

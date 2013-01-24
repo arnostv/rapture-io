@@ -29,7 +29,7 @@ import java.net._
 /** Provides support for accessing the file system through FileUrls. This is a wrapper for Java's
   * file handling facilities, and provides roughly the same functionality within the general URL
   * framework. */
-trait Files { this: Io =>
+trait Files { this: BaseIo =>
 
   /** Type class object for writing `FileUrl`s as `Output[Stream]`s */
   implicit object FileStreamCharWriter extends StreamWriter[FileUrl, Char] {

@@ -24,7 +24,7 @@ package rapture
 import language.dynamics
 
 /** Some useful JSON shortcuts */
-trait JsonExtraction { this: Io =>
+trait JsonExtraction { this: BaseIo =>
 
   /** Represents a JSON parser implementation which is used throughout this library */
   trait JsonParser {

@@ -25,7 +25,7 @@ import java.io._
 import java.net._
 
 /** Provides classes for creating and listening on sockets.  This code is largely incomplete. */
-trait Sockets { this: Io =>
+trait Sockets { this: BaseIo =>
 
   /** Listens for incoming connections on the specified port
     *

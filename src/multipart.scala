@@ -23,7 +23,7 @@ package rapture
 
 import scala.collection.mutable.{HashMap, ListBuffer}
 
-trait Multipart { this: Io =>
+trait Multipart { this: BaseIo =>
 
   case class Multipart(data: Array[Byte], headers: Map[String, String]) {
     def contentType: Option[MimeTypes.MimeType] =

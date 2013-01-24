@@ -27,7 +27,7 @@ import java.io._
 import java.net._
 
 /** Provides functionality for handling internet URLs, namely HTTP and HTTPS schemes. */
-trait Net { this: Io =>
+trait Net { this: BaseIo =>
 
   object HttpMethods {
     

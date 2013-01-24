@@ -24,7 +24,7 @@ package rapture
 import scala.collection.immutable.{Queue, ListMap}
 import scala.collection.mutable.HashMap
 
-trait CommandLine { this: Io =>
+trait CommandLine { this: BaseIo =>
 
   trait CliMessages {
 

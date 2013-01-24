@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Processes { this: Io =>
+trait Processes { this: BaseIo =>
 
   private val runtime = Runtime.getRuntime
 

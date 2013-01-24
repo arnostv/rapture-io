@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Classpath { this: Io =>
+trait Classpath { this: BaseIo =>
 
   class ClasspathUrl(elements: Seq[String]) extends Url[ClasspathUrl](elements, Map()) {
     def makePath(ascent: Int, elements: Seq[String], afterPath: AfterPath) =

@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Uris { this: Io =>
+trait Uris { this: BaseIo =>
 
   object Link {
     val self = new Link {

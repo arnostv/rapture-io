@@ -25,7 +25,7 @@ import java.io._
 import java.net._
 
 /** Provides framework classes and traits for handling general URLs. */
-trait Urls { this: Io =>
+trait Urls { this: BaseIo =>
 
   /** Represents a generic URL */
   abstract class Url[+UrlType <: Url[UrlType]](elements: Seq[String], afterPath: AfterPath) extends

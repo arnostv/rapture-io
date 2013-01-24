@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Generation { this: Io =>
+trait Generation { this: BaseIo =>
 
   object Generator {
 

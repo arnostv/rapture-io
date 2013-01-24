@@ -26,7 +26,7 @@ import java.io._
 /** Defines the framework for accumulating streams into objects of other types, e.g. `Char`s into
   * `String`s.  This provides the infrastructure needed for the slurp method.  Three type class
   * objects are provided for accumulating streams of Bytes, `Char`s and `String`s. */
-trait Accumulators { this: Io =>
+trait Accumulators { this: BaseIo =>
 
   /** Interface for an accumulator which is a special kind of output which collects and stores all
     * input in a buffer which can be retrieved afterwards.  No guarantees are made about input

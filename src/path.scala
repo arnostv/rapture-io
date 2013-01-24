@@ -30,7 +30,7 @@ import java.net._
 
 /** Defines generalised classes for handling hierarchical path structures and linking between them.
   * This forms the basis for hierarchical URLs. */
-trait Paths { this: Io =>
+trait Paths { this: BaseIo =>
 
   val $ = ""
 

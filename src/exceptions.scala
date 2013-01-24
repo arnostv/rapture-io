@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Exceptions { this: Io =>
+trait Exceptions { this: BaseIo =>
   sealed trait IoException extends Exception
 
   sealed trait GeneralIoExceptions extends IoException

@@ -23,7 +23,7 @@ package rapture
 
 import scala.collection.mutable._
 
-trait Misc { this: Io =>
+trait Misc { this: BaseIo =>
 
   /** Provides a simple class mixin for creating a list of items from which items can be looked up.
     *

@@ -21,7 +21,7 @@ License.
 
 package rapture
 
-trait Services { this: Io =>
+trait Services { this: BaseIo =>
 
   type TcpService = Services.Tcp.Item
   
