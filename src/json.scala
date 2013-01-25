@@ -142,6 +142,10 @@ trait JsonExtraction { this: BaseIo =>
     implicit def listJsonExtractor[T: JsonExtractor] =
       new JsonExtractor[List[T]](_.asInstanceOf[List[Any]].map(implicitly[JsonExtractor[T]].cast))
     
+    implicit def optionJsonExtractor[T: JsonExtractor] =
+      new JsonExtractor[Option[T]](x => if(x == null) None else Some(x.asInstanceOf[Any]).map(
+          implicitly[JsonExtractor[T]].cast))
+    
     implicit def mapJsonExtractor[T: JsonExtractor] =
       new JsonExtractor[Map[String, T]](_.asInstanceOf[Map[String, Any]].mapValues(
           implicitly[JsonExtractor[T]].cast))
