@@ -29,20 +29,20 @@ trait Finance { this: BaseIo =>
   implicit object NzdCurrency extends Currency[Nzd]("NZD", "New Zealand Dollars", 2, "$")
   implicit object RubCurrency extends Currency[Rub]("RUB", "Russian Rubles", 2, "р")
 
-  trait MoneyFactory[T] { def apply(d: Double) = new Money[T](d) }
+  trait MoneyFactory[T] { def apply(d: Double)(implicit currency: Currency[T]) = new Money[T](d) }
 
   object Usd extends MoneyFactory[Usd]
   object Gbp extends MoneyFactory[Gbp]
   object Eur extends MoneyFactory[Eur]
   object Chf extends MoneyFactory[Chf]
-  trait Cad extends MoneyFactory[Cad]
-  trait Cny extends MoneyFactory[Cny]
-  trait Dkk extends MoneyFactory[Dkk]
-  trait Inr extends MoneyFactory[Inr]
-  trait Jpy extends MoneyFactory[Jpy]
-  trait Nok extends MoneyFactory[Nok]
-  trait Nzd extends MoneyFactory[Nzd]
-  trait Rub extends MoneyFactory[Rub]
+  object Cad extends MoneyFactory[Cad]
+  object Cny extends MoneyFactory[Cny]
+  object Dkk extends MoneyFactory[Dkk]
+  object Inr extends MoneyFactory[Inr]
+  object Jpy extends MoneyFactory[Jpy]
+  object Nok extends MoneyFactory[Nok]
+  object Nzd extends MoneyFactory[Nzd]
+  object Rub extends MoneyFactory[Rub]
 
   case class Money[T: Currency](major: Int, minor: Int) {
 
@@ -54,7 +54,8 @@ trait Finance { this: BaseIo =>
 
     def pad(x: Int) = ("0"*(implicitly[Currency[T]].dp - x.toString.length))+x
 
-    override def toString = implicitly[Currency[T]].prefix+(if(major < 0) "-"+(-major - 1)+"."+pad(div - minor) else major+"."+pad(minor))
+    override def toString = implicitly[Currency[T]].prefix+amountString
+    def amountString = (if(major < 0) "-"+(-major - 1)+"."+pad(div - minor) else major+"."+pad(minor))
 
     def +(m: Money[T]): Money[T] =
       Money[T](major + m.major + (minor + m.minor)/div, (minor + m.minor)%div)
