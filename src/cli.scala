@@ -26,6 +26,11 @@ import scala.collection.mutable.HashMap
 
 trait CommandLine { this: BaseIo =>
 
+  def sigWinch(action: sun.misc.Signal => Unit) =
+    sun.misc.Signal.handle(new sun.misc.Signal("WINCH"), new sun.misc.SignalHandler {
+      def handle(sig: sun.misc.Signal): Unit = action(sig)
+    })
+
   trait CliMessages {
 
     def unparsableMsg(format: String, string: String) =
