@@ -56,7 +56,10 @@ trait Files { this: BaseIo =>
     /** Provides a FileUrl for the current working directory, as determined by the user.dir
       * environment variable. */
     def currentDir = makePath(0, System.getProperty("user.dir").split("/").filter(_ != ""), Map())
-    
+   
+    /** Get the user's home directory. */
+    def home = makePath(0, System.getenv("HOME").split("/").filter(_ != ""), Map())
+
     /** Method for creating a new instance of this type of URL.
       *
       * @param elements The elements of the path for the new FileUrl to create */
