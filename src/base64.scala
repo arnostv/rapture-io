@@ -53,11 +53,11 @@ trait Codecs { this: BaseIo =>
       * that the data be padded to a multiple of 4 chars, but we do these things
       * optionally. */
     def encode(in: Array[Byte], lineBreaks: Boolean = false,
-        endPadding: Boolean = false): Array[Char] = {
+        endPadding: Boolean = false): String = {
       
       var inLen = in.length
       
-      if(inLen == 0) new Array[Char](0) else {
+      if(inLen == 0) "" else {
         val evenLen = (inLen / 3) * 3
         val outDataLen = if(endPadding) ((inLen - 1)/3 + 1) << 2 else ((inLen << 2) + 2 )/3
         val outLen = if(lineBreaks) outDataLen + (outDataLen - 1)/76 << 1 else outDataLen
@@ -109,7 +109,7 @@ trait Codecs { this: BaseIo =>
           if(endPadding) out(outPos + 3) = padChar
         }
         
-        out
+        new String(out)
       }
     }
 
@@ -117,8 +117,10 @@ trait Codecs { this: BaseIo =>
       * does not tolerate any other illegal characters, including line breaks at
       * positions other than 76-char boundaries, in which case the result will
       * be garbage. */
-    def decode(in: Array[Char]): Array[Byte] = {
+    def decode(data: String): Array[Byte] = {
       
+      val in = data.toCharArray()
+
       val inLen = in.length
       
       if(inLen == 0) new Array[Byte](0) else {
@@ -172,13 +174,10 @@ trait Codecs { this: BaseIo =>
       }
     }
 
-    /** Convenience method for decoding a Base64 string */
-    def decode(in: String): Array[Byte] = decode(in.toCharArray())
-    
     /** Encodes the input byte array as an array of characters */
-    def apply(in: Array[Byte]): Array[Char] = encode(in)
+    def apply(in: Array[Byte]): String = encode(in)
     
     /** Decodes the input character array into an array of bytes. */
-    def unapply(in: Array[Char]): Option[Array[Byte]] = Some(decode(in))
+    def unapply(in: String): Option[Array[Byte]] = Some(decode(in))
   }
 }

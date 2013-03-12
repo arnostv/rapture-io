@@ -37,11 +37,12 @@ trait Encryption { this: BaseIo =>
 
     private val keySpec = new SecretKeySpec(secretKey, "AES")
 
-    def encrypt(clearText: Array[Byte]): Array[Byte] = {
+    def encrypt(clearText: Array[Byte], iv: Array[Byte] = null): Array[Byte] = {
       
       val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
       
-      cipher.init(Cipher.ENCRYPT_MODE, keySpec)
+      if(iv == null) cipher.init(Cipher.ENCRYPT_MODE, keySpec)
+      else cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(iv))
       
       val digest = Sha256.digest(clearText)
       val paddedLength = (clearText.length >> 4) + 1 << 4
@@ -54,14 +55,14 @@ trait Encryption { this: BaseIo =>
       cipherText
     }
 
-    def decrypt(cipherText: Array[Byte]): Option[Array[Byte]] =
+    def decrypt(cipherText: Array[Byte], iv: Array[Byte] = null): Option[Array[Byte]] =
       if(cipherText.length < 48) None
       else {
         
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        val iv = new IvParameterSpec(cipherText, 0, 16)
+        val ips = if(iv == null) new IvParameterSpec(cipherText, 0, 16) else new IvParameterSpec(iv)
         
-        cipher.init(Cipher.DECRYPT_MODE, keySpec, iv)
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ips)
         
         val digest1 = cipher.update(cipherText, 16, 48)
         val clearText = cipher.doFinal(cipherText, 64, cipherText.length - 64)
@@ -150,7 +151,7 @@ trait Encryption { this: BaseIo =>
 
     protected def decryptLong(cipherText: String): Option[Long] =
       if(cipherText.length == 22) {
-        val in = Base64.decode(cipherText.toCharArray)
+        val in = Base64.decode(cipherText)
         val cipher = Cipher.getInstance("AES/ECB/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, keySpec)
         val out = cipher.doFinal(in)

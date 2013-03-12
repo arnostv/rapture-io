@@ -21,11 +21,12 @@ License.
 
 package rapture
 
-trait Logging { this: BaseIo =>
+// Rewrite using actors
+trait Logging { logging: BaseIo =>
 
   /** Basic logging functionality, introducing the concept of logging zones. Note that this is
-    * almost certainly not as efficient as it ought to be, so use log4j if efficiency matters to
-    * you. */
+    * almost certainly not as efficient as it ought to be, so use something else if efficiency
+    * matters to you. */
 
   case class Zone(name: String)
 
@@ -37,14 +38,14 @@ trait Logging { this: BaseIo =>
   object Error extends Level(2, "error")
   object Fatal extends Level(1, "fatal")
 
-  trait Logger { def log(msg: String) }
+  trait Logger { def log(msg: String, level: Level, zone: Zone) }
 
   case class FileLogger(file: FileUrl) extends Logger {
-    def log(msg: String) = msg >> file
+    def log(msg: String, level: Level, zone: Zone) = (msg+"\n") >> file
   }
 
   case object StdoutLogger extends Logger {
-    def log(msg: String) = println(msg)
+    def log(msg: String, level: Level, zone: Zone) = println(msg)
   }
 
   object log {
@@ -60,6 +61,10 @@ trait Logging { this: BaseIo =>
     def listen(logger: Logger, level: Level = Info, spec: Map[Zone, Level] = Map()): Unit = {
       info("Registering listener")
       listeners = (logger, level, spec) :: listeners
+    }
+
+    def unlisten(logger: Logger) = {
+      listeners = listeners.filter(_._1 != logger)
     }
 
     @inline def trace(msg: => String)(implicit zone: Zone) =
@@ -80,10 +85,12 @@ trait Logging { this: BaseIo =>
     @inline def fatal(msg: => String)(implicit zone: Zone) =
       log(Fatal, zone, msg)
     
-    @inline def exception(e: => Throwable)(implicit zone: Zone) =
-      log(Error, zone, e.toString+"\n    "+e.getStackTrace.mkString("\n    "))
+    @inline def exception(e: => Throwable)(implicit zone: Zone) = {
+      log(Error, zone, e.toString)
+      log(Debug, zone, "    "+e.getStackTrace.mkString("\n    "))
+    }
 
-    private def log(level: Level, zone: Zone, msg: String) = {
+    private def log(level: Level, zone: Zone, msg: String): Unit = {
       val time: Long = System.currentTimeMillis
       // Ensures the date is only formatted when it changes
       if(time != dateCreated) {
@@ -91,13 +98,49 @@ trait Logging { this: BaseIo =>
         dateCreated = time
       }
       val m = if(msg == null) "null" else msg
-      for(ln <- m.split("\n")) {
-        
-        val formattedMsg = "%1$-23s %2$-5s %3$-8s %4$s\n".format(dateString, level.name, zone.name,
-            ln)
-        
-        for((lgr, level, spec) <- listeners if spec.getOrElse(zone, level).level >= level.level)
-          lgr.log(formattedMsg)
+      val ln = m.replaceAll("\n", "\n                                       ")
+      val formattedMsg = "%1$-23s %2$-5s %3$-8s %4$s".format(dateString, level.name, zone.name, ln)
+      
+      for((lgr, lvl, spec) <- listeners if spec.getOrElse(zone, lvl).level >= level.level) {
+        try lgr.log(formattedMsg, level, zone) catch {
+          case e: Exception =>
+        }
+      }
+    }
+  }
+
+  class TcpLogServer(port: Int) {
+
+    implicit val enc = Encodings.`UTF-8`
+
+    private def readLevel(s: String) = s match {
+      case "debug" => Debug
+      case "info" => Info
+      case "warn" => Warn
+      case "error" => Error
+      case "fatal" => Fatal
+      case _ => Trace
+    }
+
+    def await(): Unit = {
+      tcpHandle[String](port) { case (in, out) =>
+        val logger = new Logger {
+          def log(msg: String, level: Level, zone: Zone) = {
+            out.write(level.level+msg)
+            out.flush()
+          }
+        }
+        val spec = in.read().get
+        val level = readLevel(spec.split("&")(0))
+        val zs = (spec.split("&").tail map { x =>
+          val q = x.split("=")
+          Zone(q(0)) -> readLevel(q(1))
+        }).toMap
+        log.listen(logger, level, zs)
+        try in.slurp() catch {
+          case e: Exception => ()
+        }
+        log.unlisten(logger)
       }
     }
   }

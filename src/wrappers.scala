@@ -158,6 +158,18 @@ trait Wrappers extends LowPriorityWrappers { this: BaseIo =>
     override def toString() = "<string output>"
   }
 
+  implicit def stringInputBuilder(implicit encoding: Encoding): InputBuilder[InputStream, String] =
+    new InputBuilder[InputStream, String] {
+      def input(s: InputStream): ![Exception, Input[String]] =
+        except(new LineInput(new InputStreamReader(s, encoding.name)))
+    }
+
+  implicit def stringOutputBuilder(implicit encoding: Encoding): OutputBuilder[OutputStream, String] =
+    new OutputBuilder[OutputStream, String] {
+      def output(s: OutputStream): ![Exception, Output[String]] =
+        except(new LineOutput(new OutputStreamWriter(s, encoding.name)))
+    }
+
   /** Views an `Input[Byte]` as a `java.io.InputStream` */
   implicit def inputStreamUnwrapper(is: Input[Byte]) =
     new InputStream { def read() = is.read().map(_.toInt).getOrElse(-1) }

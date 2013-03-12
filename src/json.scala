@@ -120,6 +120,7 @@ trait JsonExtraction { this: BaseIo =>
         case Some(n: Int) => n.toString
         case Some(n: Number) => n.toString
         case Some(v: Boolean) => if(v) "true" else "false"
+        case Some(j: Json) => format(Some(j.json), ln)
         case None => "null"
         case _ => "undefined"
       }

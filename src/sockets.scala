@@ -31,9 +31,18 @@ trait Sockets { this: BaseIo =>
     *
     * @usecase def listen(port: Int): Input[Byte]
     * @param port the port to listen to */
-  def listen[K](port: Int)(implicit ib: InputBuilder[InputStream, K]): ![Exception, Input[K]] = {
+  def listen[K](port: Int)(implicit ib: InputBuilder[InputStream, K], ob: OutputBuilder[OutputStream, K]): ![Exception, (Input[K], Output[K])] = {
     val sock = new java.net.ServerSocket(port)
-    except(ib.input(sock.accept().getInputStream))
+    val sock2 = sock.accept()
+    except((ib.input(sock2.getInputStream), ob.output(sock2.getOutputStream)))
+  }
+
+  def tcpHandle[K](port: Int)(action: (Input[K], Output[K]) => Unit)(implicit ib: InputBuilder[InputStream, K], ob: OutputBuilder[OutputStream, K]): Unit = {
+    val sock = new java.net.ServerSocket(port)
+    while(true) {
+      val sock2 = sock.accept()
+      fork { action(ib.input(sock2.getInputStream), ob.output(sock2.getOutputStream)) }
+    }
   }
 
   /*def listen(port: Int, local: Boolean = true, timeout: Int = 2000) = {
@@ -46,12 +55,12 @@ trait Sockets { this: BaseIo =>
   class SocketUri(val hostname: String, val port: Int) extends Uri {
     
     def scheme = Socket
-    lazy val javaSocket = new java.net.Socket(hostname, port)
+    lazy val javaSocket: java.net.Socket = new java.net.Socket(hostname, port)
     
     def schemeSpecificPart = "//"+hostname+":"+port
     
     def absolute = true
-  
+ 
   }
 
   object Socket extends Scheme[SocketUri] {
@@ -64,5 +73,30 @@ trait Sockets { this: BaseIo =>
   implicit object SocketStreamByteWriter extends StreamWriter[SocketUri, Byte] {
     def output(url: SocketUri): ![Exception, Output[Byte]] =
       except(new ByteOutput(new BufferedOutputStream(url.javaSocket.getOutputStream)))
+  }
+
+  implicit object SocketStreamByteReader extends StreamReader[SocketUri, Byte] {
+    def input(uri: SocketUri): ![Exception, Input[Byte]] =
+      except(new ByteInput(new BufferedInputStream(uri.javaSocket.getInputStream)))
+  }
+  
+  implicit def socketStreamCharWriter(implicit enc: Encoding) = new StreamWriter[SocketUri, Char] {
+    def output(url: SocketUri): ![Exception, Output[Char]] =
+      except(new CharOutput(new OutputStreamWriter(url.javaSocket.getOutputStream, enc.name)))
+  }
+
+  implicit def socketStreamCharReader(implicit enc: Encoding) = new StreamReader[SocketUri, Char] {
+    def input(url: SocketUri): ![Exception, Input[Char]] =
+      except(new CharInput(new InputStreamReader(url.javaSocket.getInputStream, enc.name)))
+  }
+  
+  implicit def socketStreamStringWriter(implicit enc: Encoding) = new StreamWriter[SocketUri, String] {
+    def output(url: SocketUri): ![Exception, Output[String]] =
+      except(new LineOutput(new OutputStreamWriter(url.javaSocket.getOutputStream, enc.name)))
+  }
+
+  implicit def socketStreamStringReader(implicit enc: Encoding) = new StreamReader[SocketUri, String] {
+    def input(url: SocketUri): ![Exception, Input[String]] =
+      except(new LineInput(new InputStreamReader(url.javaSocket.getInputStream, enc.name)))
   }
 }

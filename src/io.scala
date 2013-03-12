@@ -25,6 +25,8 @@ import language.implicitConversions
 import language.higherKinds
 
 import scala.reflect.ClassTag
+import scala.concurrent._
+import scala.concurrent.duration._
 
 import java.io._
 import java.net._
@@ -40,7 +42,7 @@ abstract class BaseIo extends Paths with Streams with Urls with Files with Net w
     Multipart with JsonExtraction with Encryption with Codecs with Digests with Encodings with
     Generation with Ips with Logging with Mime with Misc with Services with Time with Linking with
     Classpath with Processes with CommandLine with Tabulation with Exceptions with AnsiCodes with
-    Finance {
+    Finance with Hex {
 
   type ![_ <: Exception, _]
 
@@ -133,3 +135,13 @@ object iox extends BaseIo {
     t.right.getOrElse(throw t.left.get)
 }
 
+class Iof(implicit ec: ExecutionContext) extends BaseIo {
+
+
+  type ![E <: Exception, T] = Future[T]
+  @inline protected def except[E <: Exception, T](t: => T)(implicit mf: ClassTag[E]): Future[T] =
+    Future { t }
+  
+  @inline protected def unexcept[E <: Exception, T](t: => Future[T]): T =
+    Await.result(t, Duration.Inf)
+}

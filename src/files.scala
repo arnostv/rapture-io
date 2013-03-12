@@ -72,6 +72,9 @@ trait Files { this: BaseIo =>
     /** Reference to the scheme for this type of URL */
     def scheme: Scheme[FileUrl] = File
    
+    /** Pares a path to a file */
+    def parse(s: String) = apply(new java.io.File(s))
+
     /** Creates a new FileUrl of the specified resource in the filesystem root.
       *
       * @param resource the resource beneath the filesystem root to create. */

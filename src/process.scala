@@ -49,4 +49,16 @@ trait Processes { this: BaseIo =>
       def input(proc: Proc): ![Exception, Input[Char]] =
         except(inputStreamCharBuilder.input(proc.process.getInputStream))
     }
+
+  /** Convenience method for forking a block of code to a new thread */
+  def fork(blk: => Unit): Thread = {
+    val th = new Thread {
+      override def run() = {
+        blk
+        join()
+      }
+    }
+    th.start()
+    th
+  }
 }

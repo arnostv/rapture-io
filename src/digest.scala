@@ -92,7 +92,7 @@ trait Digests { this: BaseIo =>
 
     /** Checks that the given key matches the salted hash. */
     def checkPassword(key: Array[Char], hash: String): Boolean = {
-      val salt = Base64.decode(hash.toCharArray)
+      val salt = Base64.decode(hash)
       val newCode = buildPass(key, salt)
       hash == newCode
     }
@@ -136,4 +136,21 @@ trait Digests { this: BaseIo =>
       md.digest(msg)
     }
   }
+
+  object HmacSha256 {
+
+    import javax.crypto._
+
+    def signer(key: Array[Byte]): Digester = new Digester {
+      
+      def digest(msg: Array[Byte]): Array[Byte] = {
+        val mac = Mac.getInstance("HmacSHA256")
+        val secretKey = new spec.SecretKeySpec(key, "HmacSHA256")
+        mac.init(secretKey)
+        mac.doFinal(msg)
+      }
+    }
+
+  }
+
 }
