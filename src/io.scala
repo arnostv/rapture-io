@@ -114,6 +114,31 @@ abstract class BaseIo extends Paths with Streams with Urls with Files with Net w
     def write(t: T) = ()
   }
 
+  object JavaResources {
+    type StructuralReadable = { def getInputStream(): InputStream }
+    type StructuralWritable = { def getOutputStream(): OutputStream }
+    
+    implicit val structuralReader = new StreamReader[StructuralReadable, Byte] {
+      def input(res: StructuralReadable): ![Exception, Input[Byte]] =
+        except(new ByteInput(res.getInputStream()))
+    }
+    
+    implicit val structuralWriter = new StreamWriter[StructuralWritable, Byte] {
+      def output(res: StructuralWritable): ![Exception, Output[Byte]] =
+        except(new ByteOutput(res.getOutputStream()))
+    }
+    
+    implicit def structuralCharReader(implicit enc: Encoding) = new StreamReader[StructuralReadable, Char] {
+      def input(res: StructuralReadable): ![Exception, Input[Char]] =
+        except(new CharInput(new InputStreamReader(res.getInputStream())))
+    }
+    
+    implicit def structuralCharWriter(implicit enc: Encoding) = new StreamWriter[StructuralWritable, Char] {
+      def output(res: StructuralWritable): ![Exception, Output[Char]] =
+        except(new CharOutput(new OutputStreamWriter(res.getOutputStream())))
+    }
+  }
+
 }
 
 object io extends BaseIo {

@@ -71,6 +71,13 @@ trait Digests { this: BaseIo =>
       new String(Base64.encode(digest(msg), false, false))
   }
 
+  object Sha1 extends Digester {
+    def digest(msg: Array[Byte]): Array[Byte] = {
+      val md = MessageDigest.getInstance("SHA-1")
+      md.digest(msg)
+    }
+  }
+
   /** SHA-256 digester, with additional methods for secure password encoding. */
   object Sha256 extends Digester {
     
