@@ -19,7 +19,7 @@ implied. See the License for the specific language governing permissions and lim
 License.
 ***************************************************************************************************/
 
-/*package tests.rapture.io
+package tests.rapture.io
 
 import rapture.test._
 import rapture.io._
@@ -214,4 +214,4 @@ object Tests extends TestingApplication {
     }).throws[Exception]
   }
 
-}*/
+}
